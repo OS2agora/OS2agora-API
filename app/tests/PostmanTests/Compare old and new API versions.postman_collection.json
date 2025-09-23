@@ -1,0 +1,310 @@
+{
+	"info": {
+		"_postman_id": "fa664d1e-2b5f-4c12-aeca-455a694ee5d2",
+		"name": "Compare old and new API versions",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29680060",
+		"_collection_link": "https://lunar-crescent-897892.postman.co/workspace/Hoeringsportal~c188688d-983a-4ff5-aea1-45c54da91fb1/collection/29680060-fa664d1e-2b5f-4c12-aeca-455a694ee5d2?action=share&source=collection_link&creator=29680060"
+	},
+	"item": [
+		{
+			"name": "1 Generate old API response results",
+			"item": [
+				{
+					"name": "Clear global",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.globals.unset(oldResultName);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlOld}}/version",
+							"host": [
+								"{{baseUrlOld}}"
+							],
+							"path": [
+								"version"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/hearing",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"sharedFunctions.addResponseToResult(pm, oldResultName);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{apiKey}}"
+							},
+							{
+								"key": "Cookie",
+								"value": "{{sessionCookieOld}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrlOld}}/hearing",
+							"host": [
+								"{{baseUrlOld}}"
+							],
+							"path": [
+								"hearing"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "2 Generate new API response results",
+			"item": [
+				{
+					"name": "Clear global",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.globals.unset(newResultName);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlNew}}/version",
+							"host": [
+								"{{baseUrlNew}}"
+							],
+							"path": [
+								"version"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/hearing",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"sharedFunctions.addResponseToResult(pm, newResultName);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{apiKey}}"
+							},
+							{
+								"key": "Cookie",
+								"value": "{{sessionCookieNew}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrlNew}}/hearing",
+							"host": [
+								"{{baseUrlNew}}"
+							],
+							"path": [
+								"hearing"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "3 Compare",
+			"item": [
+				{
+					"name": "Compare",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const oldResult = JSON.parse(pm.globals.get(oldResultName));\r",
+									"const newResult = JSON.parse(pm.globals.get(newResultName));\r",
+									"\r",
+									"sharedFunctions.compareResults(oldResult, newResult);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlNew}}/version",
+							"host": [
+								"{{baseUrlNew}}"
+							],
+							"path": [
+								"version"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"const groupBy = (array, keySelector) => array.reduce((accumulator, currentValue) => { ",
+					"    (accumulator[keySelector(currentValue)] = accumulator[keySelector(currentValue)] || []).push(currentValue);",
+					"     return accumulator; }, {});",
+					"",
+					"const bodyToEntities = (body) => body.data.concat(body.included).map(entity => ({ id: entity.id, type: entity.type }));",
+					"",
+					"const addEntitiesToResult = (entities, result) => {",
+					"    const resultCopy = { ...result };",
+					"    const groups = groupBy(entities, entity => entity.type);",
+					"",
+					"    Object.keys(groups).forEach(type => {",
+					"        const newEntityIds = groups[type].map(entity => entity.id);",
+					"        if (resultCopy[type]) {",
+					"            resultCopy[type] = resultCopy[type].concat(newEntityIds);",
+					"        } else {",
+					"            resultCopy[type] = newEntityIds;",
+					"        }",
+					"    })",
+					"",
+					"    return resultCopy;",
+					"}",
+					"",
+					"const addResponseToResult = (pm, resultName) => {",
+					"    console.log(`Add response to \"${resultName}\".`)",
+					"",
+					"    const previousResultString = pm.globals.get(resultName);",
+					"    previousResult = previousResultString ? JSON.parse(previousResultString) : {};",
+					"    console.log(\"previousResult\", previousResult);",
+					"",
+					"    const entities = bodyToEntities(pm.response.json());",
+					"    console.log(\"entities\", entities);",
+					"",
+					"    const newResult = addEntitiesToResult(entities, previousResult);",
+					"    console.log(\"New Result\", newResult);",
+					"",
+					"    pm.globals.set(resultName, JSON.stringify(newResult));",
+					"}",
+					"",
+					"const compareResults = (oldResult, newResult) => {",
+					"    console.log(\"Comparing results\");",
+					"    console.log(\"Old result\", oldResult);",
+					"    console.log(\"New result\", newResult);",
+					"",
+					"    Object.keys(oldResult).forEach(key => {",
+					"        pm.test(`New result contains all entities of type \"${key}\" from old result`, () => {",
+					"            pm.expect(oldResult[key].every(id => (newResult[key] || []).includes(id))).to.be.true;",
+					"        });",
+					"    });",
+					"",
+					"    Object.keys(newResult).forEach(key => {",
+					"        pm.test(`New result contains less or equal entities of type \"${key}\" than old result`, () => {",
+					"            pm.expect(newResult[key].length <= (oldResult[key] || []).length).to.be.true;",
+					"        });",
+					"    });",
+					"}",
+					"",
+					"oldResultName = \"OldApiResult\";",
+					"newResultName = \"NewApiResult\";",
+					"",
+					"sharedFunctions = {",
+					"    addResponseToResult,",
+					"    compareResults,",
+					"};",
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

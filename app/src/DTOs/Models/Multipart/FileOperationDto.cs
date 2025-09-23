@@ -1,0 +1,12 @@
+﻿using BallerupKommune.DTOs.Enums;
+using Microsoft.AspNetCore.Http;
+
+namespace BallerupKommune.DTOs.Models.Multipart
+{
+    public class FileOperationDto
+    {
+        public IFormFile File { get; set; }
+        public int ContentId { get; set; } // Is included in a DELETE operation and reference the Content to delete
+        public FileOperationEnum Operation { get; set; }
+    }
+}
