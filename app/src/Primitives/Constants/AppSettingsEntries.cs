@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BallerupKommune.Primitives.Constants
+﻿namespace Agora.Primitives.Constants
 {
     public static class AppSettingsEntries
     {

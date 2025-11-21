@@ -1,13 +1,13 @@
-﻿using BallerupKommune.Operations.Models.UserHearingRoles.Commands.DeleteUserHearingRole;
+﻿using Agora.Operations.Models.UserHearingRoles.Commands.DeleteUserHearingRole;
 using FluentAssertions;
 using MediatR;
 using Moq;
 using NUnit.Framework;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Operations.Common.Exceptions;
+using Agora.Operations.Common.Exceptions;
 
-namespace BallerupKommune.Operations.UnitTests.Models.UserHearingRoles.Commands
+namespace Agora.Operations.UnitTests.Models.UserHearingRoles.Commands
 {
     public class DeleteUserHearingRoleTests : ModelsTestBase<DeleteUserHearingRoleCommand, Unit>
     {

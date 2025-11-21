@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BallerupKommune.Api.Models.JsonApi.Interfaces
+namespace Agora.Api.Models.JsonApi.Interfaces
 {
     /// <summary>
     /// See http://jsonapi.org/format/#document-resource-objects for reference

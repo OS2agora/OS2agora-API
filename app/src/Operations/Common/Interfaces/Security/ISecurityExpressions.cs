@@ -1,7 +1,7 @@
-﻿using BallerupKommune.Models.Models;
-using HearingRole = BallerupKommune.Models.Enums.HearingRole;
+﻿using Agora.Models.Models;
+using HearingRole = Agora.Models.Enums.HearingRole;
 
-namespace BallerupKommune.Operations.Common.Interfaces.Security
+namespace Agora.Operations.Common.Interfaces.Security
 {
     public interface ISecurityExpressions
     {
@@ -16,6 +16,7 @@ namespace BallerupKommune.Operations.Common.Interfaces.Security
         bool IsHearingPublished(Hearing hearing);
         bool IsInternalHearing(Hearing hearing);
         public bool CanSeeSubjectArea(SubjectArea subjectArea);
+        public bool CanSeeCityArea(CityArea cityArea);
         bool IsCommentOwner(Comment comment);
         bool IsCommentFromMyCompany(Comment comment);
         bool IsCommentOwnerByCommentId(int commentId);
@@ -24,5 +25,6 @@ namespace BallerupKommune.Operations.Common.Interfaces.Security
         bool IsCommentApproved(Comment comment);
         bool IsCommentResponseReply(Comment comment);
         public bool CanHearingShowComments(int hearingId);
+        bool IsCommentReview(Comment comment);
     }
 }

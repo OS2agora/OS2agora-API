@@ -1,11 +1,11 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Models.Models.Multiparts;
+﻿using Agora.Models.Models;
+using Agora.Models.Models.Multiparts;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Models.Files;
-using HearingStatus = BallerupKommune.Models.Enums.HearingStatus;
+using Agora.Models.Models.Files;
+using HearingStatus = Agora.Models.Enums.HearingStatus;
 
-namespace BallerupKommune.Operations.Common.Interfaces.Plugins
+namespace Agora.Operations.Common.Interfaces.Plugins
 {
     public interface IPluginService
     {
@@ -42,6 +42,7 @@ namespace BallerupKommune.Operations.Common.Interfaces.Plugins
         Task NotifyAfterHearingResponseDecline(int hearingId, int userId, int commentId);
         Task NotifyAfterConclusionPublished(int hearingId);
         Task NotifyAfterHearingChanged(int hearingId);
+
         Task NotifyAfterAddedAsReviewer(int hearingId, int userId);
         Task NotifyAfterChangeHearingOwner(int hearingId);
         Task NotifyAfterChangeHearingStatus(int hearingId);

@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace BallerupKommune.Operations.Models.HearingTypes.Commands.CreateHearingType
+namespace Agora.Operations.Models.HearingTypes.Commands.CreateHearingType
 {
     public class CreateHearingTypeCommandValidator : AbstractValidator<CreateHearingTypeCommand>
     {

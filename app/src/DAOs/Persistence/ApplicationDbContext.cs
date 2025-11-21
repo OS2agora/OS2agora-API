@@ -1,15 +1,15 @@
-﻿using BallerupKommune.DAOs.Identity;
-using BallerupKommune.DAOs.Persistence.Configurations;
-using BallerupKommune.DAOs.Persistence.Configurations.Utility;
-using BallerupKommune.Entities.Common;
-using BallerupKommune.Entities.Entities;
-using BallerupKommune.Operations.Common.Interfaces;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Agora.DAOs.Identity;
+using Agora.DAOs.Persistence.Configurations;
+using Agora.Entities.Common;
+using Agora.Entities.Entities;
+using Agora.Operations.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using System.Threading.Tasks;
+using Agora.DAOs.Persistence.Configurations.Utility;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
-namespace BallerupKommune.DAOs.Persistence
+namespace Agora.DAOs.Persistence
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplicationDbContext
     {
@@ -19,25 +19,25 @@ namespace BallerupKommune.DAOs.Persistence
         private readonly ICurrentUserService _currentUserService;
         private readonly IDateTime _dateTimeService;
 
-        public ApplicationDbContext(
-            DbContextOptions options,
-            IEncryptionValueConverterFactory encryptionValueConverterFactory,
-            ICurrentUserService currentUserService,
-            IDateTime dateTimeService)
-            : base(options)
+        public ApplicationDbContext(DbContextOptions options,
+            IEncryptionValueConverterFactory encryptionValueConverterFactory, ICurrentUserService currentUserService,
+            IDateTime dateTimeService) :base(options)
         {
             _encryptionValueConverterFactory = encryptionValueConverterFactory;
             _currentUserService = currentUserService;
             _dateTimeService = dateTimeService;
         }
 
-        public DbSet<CommentEntity> Comments { get; set; }
+        public DbSet<CityAreaEntity> CityAreas { get; set; }
         public DbSet<CommentDeclineInfoEntity> CommentDeclineInfos { get; set; }
+        public DbSet<CommentEntity> Comments { get; set; }
         public DbSet<CommentStatusEntity> CommentStatuses { get; set; }
         public DbSet<CommentTypeEntity> CommentTypes { get; set; }
         public DbSet<ConsentEntity> Consents { get; set; }
         public DbSet<ContentEntity> Contents { get; set; }
         public DbSet<ContentTypeEntity> ContentTypes { get; set; }
+        public DbSet<EventEntity> Events { get; set; }
+        public DbSet<EventMappingEntity> EventMappings { get; set; }
         public DbSet<FieldEntity> Fields { get; set; }
         public DbSet<FieldTemplateEntity> FieldTemplates { get; set; }
         public DbSet<FieldTypeEntity> FieldTypes { get; set; }
@@ -49,10 +49,18 @@ namespace BallerupKommune.DAOs.Persistence
         public DbSet<HearingStatusEntity> HearingStatus { get; set; }
         public DbSet<HearingTemplateEntity> HearingTemplates { get; set; }
         public DbSet<HearingTypeEntity> HearingTypes { get; set; }
+        public DbSet<InvitationGroupEntity> InvitationGroups { get; set; }
+        public DbSet<InvitationGroupMappingEntity> InvitationGroupMappings { get; set; }
+        public DbSet<InvitationKeyEntity> InvitationKeys { get; set; }
+        public DbSet<InvitationSourceEntity> InvitationSources { get; set; }
+        public DbSet<InvitationSourceMappingEntity> InvitationSourceMappings { get; set; }
         public DbSet<JournalizedStatusEntity> JournalizedStatuses { get; set; }
         public DbSet<KleHierarchyEntity> KleHierarchies { get; set; }
         public DbSet<KleMappingEntity> KleMappings { get; set; }
+        public DbSet<NotificationContentSpecificationEntity> NotificationContentSpecifications { get; set; }
+        public DbSet<NotificationContentTypeEntity> NotificationContentTypes { get; set; }
         public DbSet<NotificationEntity> Notifications { get; set; }
+        public DbSet<NotificationContentEntity> NotificationContents { get; set; }
         public DbSet<NotificationQueueEntity> NotificationQueues { get; set; }
         public DbSet<NotificationTemplateEntity> NotificationTemplates { get; set; }
         public DbSet<NotificationTypeEntity> NotificationTypes { get; set; }
@@ -100,7 +108,7 @@ namespace BallerupKommune.DAOs.Persistence
             builder.ApplyConfiguration(new UserConfiguration(_encryptionValueConverterFactory));
             builder.ApplyConfiguration(new CompanyConfiguration(_encryptionValueConverterFactory));
             builder.ApplyConfiguration(new CommentDeclineInfoConfiguration(_encryptionValueConverterFactory));
-
+            
             base.OnModelCreating(builder);
 
             // changes to applicationUser must be applied after base-configurations

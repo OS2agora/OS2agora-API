@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.DAOs.Persistence.DefaultData
+namespace Agora.DAOs.Persistence.DefaultData
 {
     public abstract class DefaultDataSeeder<TEntity> where TEntity : class
     {
@@ -33,7 +33,7 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
                 await _context.SaveChangesAsync();
             }
 
-            var entitiesToUpdate = FetchEntitiesToUpdate(existingEntities, _defaultEntities);
+            var entitiesToUpdate = GetUpdatedEntities(existingEntities, _defaultEntities);
             if (entitiesToUpdate.Any() && existingEntities.Any())
             {
                 _dbSet.UpdateRange(entitiesToUpdate);
@@ -48,6 +48,6 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
                 .ToList();
         }
 
-        public abstract List<TEntity> FetchEntitiesToUpdate(List<TEntity> existingEntities, List<TEntity> defaultEntities);
+        public abstract List<TEntity> GetUpdatedEntities(List<TEntity> existingEntities, List<TEntity> defaultEntities);
     }
 }

@@ -1,9 +1,9 @@
-﻿using BallerupKommune.DAOs.Identity;
-using BallerupKommune.DAOs.Persistence.Configurations.Utility;
+﻿using Agora.DAOs.Identity;
+using Agora.DAOs.Persistence.Configurations.Utility;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BallerupKommune.DAOs.Persistence.Configurations
+namespace Agora.DAOs.Persistence.Configurations
 {
     public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
     {

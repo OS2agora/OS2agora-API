@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace BallerupKommune.Operations.Models.GlobalContents.Queries.GetLatestGlobalContent
+namespace Agora.Operations.Models.GlobalContents.Queries.GetLatestGlobalContent
 {
     public class GetLatestGlobalContentQueryValidator : AbstractValidator<GetLatestGlobalContentQuery>
     {

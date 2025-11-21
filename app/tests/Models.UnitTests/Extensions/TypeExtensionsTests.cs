@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Extensions;
-using BallerupKommune.Models.Models;
+using Agora.Models.Common;
+using Agora.Models.Extensions;
+using Agora.Models.Models;
 using NUnit.Framework;
 
-namespace BallerupKommune.Models.UnitTests.Extensions
+namespace Agora.Models.UnitTests.Extensions
 {
     public class TypeExtensionsTests
     {

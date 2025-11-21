@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using BallerupKommune.DAOs.Utility;
-using BallerupKommune.Entities.Attributes;
-using BallerupKommune.Entities.Common;
-using BallerupKommune.Models.Common;
+using Agora.DAOs.Utility;
+using Agora.Entities.Attributes;
+using Agora.Entities.Common;
+using Agora.Models.Common;
 using NUnit.Framework;
-using InvalidOperationException = BallerupKommune.Operations.Common.Exceptions.InvalidOperationException;
+using InvalidOperationException = Agora.Operations.Common.Exceptions.InvalidOperationException;
 
-namespace BallerupKommune.DAOs.UnitTests.Utility
+namespace Agora.DAOs.UnitTests.Utility
 {
     public class IncludePropertiesExtensionsTests
     {

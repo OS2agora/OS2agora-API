@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using BallerupKommune.Api.Models.JsonApi;
-using BallerupKommune.Api.Models.JsonApi.Converters;
-using BallerupKommune.Api.Models.JsonApi.Interfaces;
-using BallerupKommune.Models.Extensions;
+using Agora.Api.Models.JsonApi;
+using Agora.Api.Models.JsonApi.Converters;
+using Agora.Api.Models.JsonApi.Interfaces;
+using Agora.Models.Extensions;
 using Newtonsoft.Json;
 
-namespace BallerupKommune.Api.Models.Common
+namespace Agora.Api.Models.Common
 {
     public abstract class BaseModifyControlDto<T>
     {

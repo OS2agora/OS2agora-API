@@ -1,18 +1,28 @@
-﻿using AutoMapper;
-using BallerupKommune.DAOs.Identity;
-using BallerupKommune.Entities.Entities;
-using BallerupKommune.Entities.Enums;
-using BallerupKommune.Operations.Common.Constants;
-using BallerupKommune.Operations.Common.Interfaces;
+﻿using Agora.DAOs.Identity;
+using Agora.DAOs.Persistence.DefaultData;
+using Agora.DAOs.Persistence.DefaultData.Ballerup;
+using Agora.DAOs.Persistence.DefaultData.Copenhagen;
+using Agora.Entities.Entities;
+using Agora.Entities.Enums;
+using Agora.Operations.Common.Constants;
+using Agora.Operations.Common.Interfaces;
+using Agora.Primitives.Logic;
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BallerupKommune.DAOs.Persistence.DefaultData;
+using CommentStatus = Agora.Entities.Enums.CommentStatus;
+using CommentType = Agora.Entities.Enums.CommentType;
+using ContentType = Agora.Entities.Enums.ContentType;
+using FieldType = Agora.Entities.Enums.FieldType;
+using HearingRole = Agora.Entities.Enums.HearingRole;
+using HearingStatus = Agora.Entities.Enums.HearingStatus;
+using UserCapacity = Agora.Entities.Enums.UserCapacity;
 
-namespace BallerupKommune.DAOs.Persistence
+namespace Agora.DAOs.Persistence
 {
     public static class ApplicationDbContextSeed
     {
@@ -76,45 +86,19 @@ namespace BallerupKommune.DAOs.Persistence
                 await context.SaveChangesAsync();
             }
 
-            if (!context.GlobalContentTypes.Any())
+            if (!context.CityAreas.Any())
             {
-                await context.GlobalContentTypes.AddAsync(new GlobalContentTypeEntity
+                await context.CityAreas.AddRangeAsync(new List<CityAreaEntity>
                 {
-                    Name = "Vilkår og betingelser",
-                    Type = GlobalContentType.TERMS_AND_CONDITIONS
-                });
-                await context.SaveChangesAsync();
-            }
-
-            if (!context.GlobalContents.Any())
-            {
-                var globalContentType = await context.GlobalContentTypes.SingleAsync();
-
-                await context.GlobalContents.AddAsync(new GlobalContentEntity
-                {
-                    Content =
-                        "Ved afgivelse af høringssvar accepterer du at svaret vil blive brugt i forbindelse med konklusionen på høringen",
-                    Version = 1,
-                    GlobalContentType = globalContentType,
-                });
-                await context.SaveChangesAsync();
-            }
-
-            if (!context.UserCapacities.Any())
-            {
-                await context.UserCapacities.AddRangeAsync(new List<UserCapacityEntity>
-                {
-                    new UserCapacityEntity
+                    new CityAreaEntity
                     {
-                        Capacity = UserCapacity.CITIZEN
+                        Name = "Hele byen",
+                        IsActive = true
                     },
-                    new UserCapacityEntity
+                    new CityAreaEntity
                     {
-                        Capacity = UserCapacity.EMPLOYEE
-                    },
-                    new UserCapacityEntity
-                    {
-                        Capacity = UserCapacity.COMPANY
+                        Name = "Strandvejen",
+                        IsActive = false
                     }
                 });
                 await context.SaveChangesAsync();
@@ -127,7 +111,13 @@ namespace BallerupKommune.DAOs.Persistence
                     new CompanyEntity
                     {
                         Cvr = companyCvr,
-                        Name = "Novataris"
+                        Name = "Novataris",
+                        PostalCode = "1051",
+                        City = "København K",
+                        Address = "Nyhavn 43",
+                        Country = "Danmark",
+                        Municipality = "Københavns Kommune",
+                        StreetName = "Nyhavn"
                     }
                 });
                 await context.SaveChangesAsync();
@@ -178,7 +168,13 @@ namespace BallerupKommune.DAOs.Persistence
                         Name = "Citizen one",
                         PersonalIdentifier = "0306874438",
                         Cpr = "0306874438",
-                        UserCapacityId = citizenCapacity.Id
+                        UserCapacityId = citizenCapacity.Id,
+                        PostalCode = "6400",
+                        City = "Sønderbronx",
+                        Address = "Dybbølgade 1864",
+                        Municipality = "Sønderbronx Kommune",
+                        Country = "Danmark",
+                        StreetName = "Dybbølgade"
                     },
                     new UserEntity
                     {
@@ -208,178 +204,6 @@ namespace BallerupKommune.DAOs.Persistence
                         Email = "rev@novataris.com",
                         PersonalIdentifier = "rev@novataris.com",
                         UserCapacityId = employeeCapacity.Id
-                    }
-                });
-                await context.SaveChangesAsync();
-            }
-
-            if (!context.HearingRoles.Any())
-            {
-                await context.HearingRoles.AddRangeAsync(new List<HearingRoleEntity>
-                {
-                    new HearingRoleEntity
-                    {
-                        Name = "Høringsejer",
-                        Role = HearingRole.HEARING_OWNER
-                    },
-                    new HearingRoleEntity
-                    {
-                        Name = "Inviteret",
-                        Role = HearingRole.HEARING_INVITEE
-                    },
-                    new HearingRoleEntity
-                    {
-                        Name = "Reviewer",
-                        Role = HearingRole.HEARING_REVIEWER
-                    },
-                    new HearingRoleEntity
-                    {
-                        Name = "Besvarer",
-                        Role = HearingRole.HEARING_RESPONDER
-                    }
-                });
-                await context.SaveChangesAsync();
-            }
-
-            if (!context.HearingStatus.Any())
-            {
-                await context.HearingStatus.AddRangeAsync(new List<HearingStatusEntity>
-                {
-                    new HearingStatusEntity
-                    {
-                        Name = "Oprettet",
-                        Status = HearingStatus.CREATED
-                    },
-                    new HearingStatusEntity
-                    {
-                        Name = "Kladde",
-                        Status = HearingStatus.DRAFT
-                    },
-                    new HearingStatusEntity
-                    {
-                        Name = "Afventer startdato",
-                        Status = HearingStatus.AWAITING_STARTDATE
-                    },
-                    new HearingStatusEntity
-                    {
-                        Name = "Aktiv",
-                        Status = HearingStatus.ACTIVE
-                    },
-                    new HearingStatusEntity
-                    {
-                        Name = "Afventer konklusion",
-                        Status = HearingStatus.AWAITING_CONCLUSION
-                    },
-                    new HearingStatusEntity
-                    {
-                        Name = "Konkluderet",
-                        Status = HearingStatus.CONCLUDED
-                    }
-                });
-                await context.SaveChangesAsync();
-            }
-
-            if (!context.FieldTypes.Any())
-            {
-                await context.FieldTypes.AddRangeAsync(new List<FieldTypeEntity>
-                {
-                    new FieldTypeEntity
-                    {
-                        Type = FieldType.TITLE
-                    },
-                    new FieldTypeEntity
-                    {
-                        Type = FieldType.ESDH_TITLE
-                    },
-                    new FieldTypeEntity
-                    {
-                        Type = FieldType.IMAGE
-                    },
-                    new FieldTypeEntity
-                    {
-                        Type = FieldType.SUMMARY
-                    },
-                    new FieldTypeEntity
-                    {
-                        Type = FieldType.BODYINFORMATION
-                    },
-                    new FieldTypeEntity
-                    {
-                        Type = FieldType.CONCLUSION
-                    }
-                });
-                await context.SaveChangesAsync();
-            }
-
-            if (!context.ContentTypes.Any())
-            {
-                await context.ContentTypes.AddRangeAsync(new List<ContentTypeEntity>
-                {
-                    new ContentTypeEntity
-                    {
-                        Type = ContentType.TEXT
-                    },
-                    new ContentTypeEntity
-                    {
-                        Type = ContentType.FILE
-                    }
-                });
-                await context.SaveChangesAsync();
-            }
-
-            if (!context.FieldTypeSpecifications.Any())
-            {
-                var fieldTypes = await context.FieldTypes.ToListAsync();
-                var contentTypes = await context.ContentTypes.ToListAsync();
-
-                await context.AddRangeAsync(new List<FieldTypeSpecificationEntity>
-                {
-                    new FieldTypeSpecificationEntity
-                    {
-                        FieldType = fieldTypes.First(fieldType => fieldType.Type == FieldType.TITLE),
-                        ContentType = contentTypes.First(contentType => contentType.Type == ContentType.TEXT)
-                    },
-                    new FieldTypeSpecificationEntity
-                    {
-                        FieldType = fieldTypes.First(fieldType => fieldType.Type == FieldType.IMAGE),
-                        ContentType = contentTypes.First(contentType => contentType.Type == ContentType.FILE)
-                    },
-                    new FieldTypeSpecificationEntity
-                    {
-                        FieldType = fieldTypes.First(fieldType => fieldType.Type == FieldType.IMAGE),
-                        ContentType = contentTypes.First(contentType => contentType.Type == ContentType.TEXT)
-                    },
-                    new FieldTypeSpecificationEntity
-                    {
-                        FieldType = fieldTypes.First(fieldType => fieldType.Type == FieldType.SUMMARY),
-                        ContentType = contentTypes.First(contentType => contentType.Type == ContentType.TEXT)
-                    },
-                    new FieldTypeSpecificationEntity
-                    {
-                        FieldType = fieldTypes.First(fieldType => fieldType.Type == FieldType.BODYINFORMATION),
-                        ContentType = contentTypes.First(contentType => contentType.Type == ContentType.TEXT)
-                    },
-                    new FieldTypeSpecificationEntity
-                    {
-                        FieldType = fieldTypes.First(fieldType => fieldType.Type == FieldType.BODYINFORMATION),
-                        ContentType = contentTypes.First(contentType => contentType.Type == ContentType.FILE)
-                    },
-                    new FieldTypeSpecificationEntity
-                    {
-                        FieldType = fieldTypes.First(fieldType => fieldType.Type == FieldType.CONCLUSION),
-                        ContentType = contentTypes.First(contentType => contentType.Type == ContentType.TEXT)
-                    }
-                });
-                await context.SaveChangesAsync();
-            }
-
-            if (!context.HearingTemplates.Any())
-            {
-                await context.HearingTemplates.AddRangeAsync(new List<HearingTemplateEntity>
-                {
-                    new HearingTemplateEntity
-                    {
-                        Name = "Standard høringsskabelon"
                     }
                 });
                 await context.SaveChangesAsync();
@@ -423,255 +247,85 @@ namespace BallerupKommune.DAOs.Persistence
                 await context.SaveChangesAsync();
             }
 
-            if (!context.ValidationRules.Any())
+            if (!context.FieldTemplates.Any())
             {
-                await context.AddRangeAsync(new List<ValidationRuleEntity>
-                { 
-                    // Titel
-                    new ValidationRuleEntity
-                    {
-                        CanBeEmpty = false,
-                        MaxLength = 60,
-                        FieldType = FieldType.TITLE,
-                    },
-                    // Esdh Titel
-                    new ValidationRuleEntity
-                    {
-                        CanBeEmpty = false,
-                        MaxLength = 110,
-                        FieldType = FieldType.ESDH_TITLE,
-                    },
-                    // Billede
-                    new ValidationRuleEntity
-                    {
-                        AllowedFileTypes = new[]
-                        {
-                            "image/jpeg",
-                            "image/png",
-                            "image/svg"
-                        },
-                        MaxFileSize = 1000000,
-                        CanBeEmpty = true,
-                        FieldType = FieldType.IMAGE,
-                    },
-                    // Resumé
-                    new ValidationRuleEntity
-                    {
-                        MaxLength = 500,
-                        FieldType = FieldType.SUMMARY,
-                    },
-                    // Brød tekst
-                    new ValidationRuleEntity
-                    {
-                        MaxFileSize = 100000000,
-                        FieldType = FieldType.BODYINFORMATION,
-                    },
-                    new ValidationRuleEntity
-                    {
-                        MaxLength = 1000,
-                        CanBeEmpty = false,
-                        FieldType = Entities.Enums.FieldType.CONCLUSION,
-                    }
-                });
-                await context.SaveChangesAsync();
-            }
-
-            if (!context.Fields.Any())
-            {
-                var titleFieldType = await context.FieldTypes.FirstOrDefaultAsync(x => x.Type == FieldType.TITLE);
-                var esdhTitleFieldType =
-                    await context.FieldTypes.FirstOrDefaultAsync(x => x.Type == FieldType.ESDH_TITLE);
-                var imageFieldType = await context.FieldTypes.FirstOrDefaultAsync(x => x.Type == FieldType.IMAGE);
-                var summaryFieldType = await context.FieldTypes.FirstOrDefaultAsync(x => x.Type == FieldType.SUMMARY);
-                var bodyinformationFieldType =
-                    await context.FieldTypes.FirstOrDefaultAsync(x => x.Type == FieldType.BODYINFORMATION);
-                var conclusionFieldType =
-                    await context.FieldTypes.FirstOrDefaultAsync(x => x.Type == FieldType.CONCLUSION);
-
-                var textFieldTemplate = await context.HearingTemplates.SingleAsync();
                 var hearingType = await context.HearingTypes.FirstOrDefaultAsync(x => x.IsActive);
 
-                var titleValidationRule = await context.ValidationRules.FirstOrDefaultAsync(x => x.FieldType == FieldType.TITLE);
-                var esdhTitleValidationRule = await context.ValidationRules.FirstOrDefaultAsync(x => x.FieldType == FieldType.ESDH_TITLE);
-                var imageValidationRule = await context.ValidationRules.FirstOrDefaultAsync(x => x.FieldType == FieldType.IMAGE);
-                var summaryValidationRule = await context.ValidationRules.FirstOrDefaultAsync(x => x.FieldType == FieldType.SUMMARY);
-                var bodyInformationValidationRule = await context.ValidationRules.FirstOrDefaultAsync(x => x.FieldType == FieldType.BODYINFORMATION);
-                var conclusionValidationRule = await context.ValidationRules.FirstOrDefaultAsync(x => x.FieldType == FieldType.CONCLUSION);
+                var titleField = await context.Fields.FirstOrDefaultAsync(x => x.FieldType.Type == FieldType.TITLE);
+                var esdhTitleField =
+                    await context.Fields.FirstOrDefaultAsync(x => x.FieldType.Type == FieldType.ESDH_TITLE);
+                var bodyinformationField =
+                    await context.Fields.FirstOrDefaultAsync(x => x.FieldType.Type == FieldType.BODYINFORMATION);
+                var conclusionField =
+                    await context.Fields.FirstOrDefaultAsync(x => x.FieldType.Type == FieldType.CONCLUSION);
 
-                await context.Fields.AddRangeAsync(new List<FieldEntity>
+                titleField.FieldTemplates = new List<FieldTemplateEntity>
                 {
-                    new FieldEntity
+                    new FieldTemplateEntity
                     {
-                        Name = "Titel",
-                        AllowTemplates = true,
-                        DisplayOrder = 100,
-                        FieldType = titleFieldType,
-                        HearingTemplate = textFieldTemplate,
-                        FieldTemplates = new List<FieldTemplateEntity>
-                        {
-                            new FieldTemplateEntity
-                            {
-                                Name = "En god høringstitel",
-                                Text = "Høringer om virkeligt gode ting",
-                                HearingType = hearingType
-                            },
-                            new FieldTemplateEntity
-                            {
-                                Name = "Høringer om svømmehallen",
-                                Text = "Der mangler endnu engang vand i svømmehallen [indsæt dato]",
-                                HearingType = hearingType
-                            }
-                        },
-                        ValidationRule = titleValidationRule,
+                        Name = "En god høringstitel",
+                        Text = "Høringer om virkeligt gode ting",
+                        HearingType = hearingType
                     },
-                    new FieldEntity
+                    new FieldTemplateEntity
                     {
-                        Name = "ESDH Titel",
-                        AllowTemplates = true,
-                        DisplayOrder = 200,
-                        FieldType = esdhTitleFieldType,
-                        HearingTemplate = textFieldTemplate,
-                        FieldTemplates = new List<FieldTemplateEntity>
-                        {
-                            new FieldTemplateEntity
-                            {
-                                Name = "Normal ESDH titel",
-                                Text = "Sag for høring",
-                                HearingType = hearingType
-                            },
-                            new FieldTemplateEntity
-                            {
-                                Name = "Ekstraordiner ESDH titel",
-                                Text = "Super spændende sag for høring",
-                                HearingType = hearingType
-                            }
-                        },
-                        ValidationRule = esdhTitleValidationRule,
-                    },
-                    new FieldEntity
-                    {
-                        Name = "Billede",
-                        AllowTemplates = false,
-                        DisplayOrder = 300,
-                        FieldType = imageFieldType,
-                        HearingTemplate = textFieldTemplate,
-                        ValidationRule = imageValidationRule,
-                    },
-                    new FieldEntity
-                    {
-                        Name = "Resumé",
-                        AllowTemplates = false,
-                        DisplayOrder = 400,
-                        FieldType = summaryFieldType,
-                        HearingTemplate = textFieldTemplate,
-                        ValidationRule = summaryValidationRule
-                    },
-                    new FieldEntity
-                    {
-                        Name = "Brød tekst",
-                        AllowTemplates = true,
-                        DisplayOrder = 600,
-                        FieldType = bodyinformationFieldType,
-                        HearingTemplate = textFieldTemplate,
-                        FieldTemplates = new List<FieldTemplateEntity>
-                        {
-                            new FieldTemplateEntity
-                            {
-                                Name = "En god høringstekst",
-                                Text =
-                                    "Dette er en høringstekst, og du kan vælge at rette i denne vejledning som du ønsker",
-                                HearingType = hearingType
-                            },
-                            new FieldTemplateEntity
-                            {
-                                Name = "Høringer om svømmehallen",
-                                Text =
-                                    "Svømmehallen på [indsæt vej] mangler igen vand, fordi nogen tørstige dådyr har drukket det hele. Løsningen er potentielt [indsæt løsning]",
-                                HearingType = hearingType
-                            }
-                        },
-                        ValidationRule = bodyInformationValidationRule
-                    },
-                    new FieldEntity
-                    {
-                        Name = "Konklusion",
-                        AllowTemplates = true,
-                        DisplayOrder = 500,
-                        FieldType = conclusionFieldType,
-                        HearingTemplate = textFieldTemplate,
-                        FieldTemplates = new List<FieldTemplateEntity>
-                        {
-                            new FieldTemplateEntity
-                            {
-                                Name = "En god konklusion",
-                                Text = "Denne konklusion er et godt udgangspunkt. [indsæt tekst]",
-                                HearingType = hearingType
-                            }
-                        },
-                        ValidationRule = conclusionValidationRule,
+                        Name = "Høringer om svømmehallen",
+                        Text = "Der mangler endnu engang vand i svømmehallen [indsæt dato]",
+                        HearingType = hearingType
                     }
-                });
-                await context.SaveChangesAsync();
-            }
+                };
 
-            if (!context.CommentTypes.Any())
-            {
-                await context.CommentTypes.AddRangeAsync(new List<CommentTypeEntity>
+                esdhTitleField.FieldTemplates = new List<FieldTemplateEntity>
                 {
-                    new CommentTypeEntity
+                    new FieldTemplateEntity
                     {
-                        Type = CommentType.HEARING_RESPONSE
+                        Name = "Normal ESDH titel",
+                        Text = "Sag for høring",
+                        HearingType = hearingType
                     },
-                    new CommentTypeEntity
+                    new FieldTemplateEntity
                     {
-                        Type = CommentType.HEARING_REVIEW
-                    },
-                    new CommentTypeEntity
-                    {
-                        Type = CommentType.HEARING_RESPONSE_REPLY
+                        Name = "Ekstraordiner ESDH titel",
+                        Text = "Super spændende sag for høring",
+                        HearingType = hearingType
                     }
-                });
-                await context.SaveChangesAsync();
-            }
+                };
 
-            if (!context.CommentStatuses.Any())
-            {
-                var hearingResponseCommentType =
-                    await context.CommentTypes.FirstOrDefaultAsync(x => x.Type == CommentType.HEARING_RESPONSE);
-                var hearingReviewCommentType =
-                    await context.CommentTypes.FirstOrDefaultAsync(x => x.Type == CommentType.HEARING_REVIEW);
-                var hearingResponseReplyCommentType =
-                    await context.CommentTypes.FirstOrDefaultAsync(x => x.Type == CommentType.HEARING_RESPONSE_REPLY);
-
-                await context.CommentStatuses.AddRangeAsync(new List<CommentStatusEntity>
+                bodyinformationField.FieldTemplates = new List<FieldTemplateEntity>
                 {
-                    new CommentStatusEntity
+                    new FieldTemplateEntity
                     {
-                        CommentType = hearingResponseCommentType,
-                        Status = CommentStatus.AWAITING_APPROVAL
+                        Name = "En god høringstekst",
+                        Text =
+                            "Dette er en høringstekst, og du kan vælge at rette i denne vejledning som du ønsker",
+                        HearingType = hearingType
                     },
-                    new CommentStatusEntity
+                    new FieldTemplateEntity
                     {
-                        CommentType = hearingResponseCommentType,
-                        Status = CommentStatus.APPROVED
-                    },
-                    new CommentStatusEntity
-                    {
-                        CommentType = hearingResponseCommentType,
-                        Status = CommentStatus.NOT_APPROVED
-                    },
-                    new CommentStatusEntity
-                    {
-                        CommentType = hearingReviewCommentType,
-                        Status = CommentStatus.NONE
-                    },
-                    new CommentStatusEntity
-                    {
-                        CommentType = hearingResponseReplyCommentType,
-                        Status = CommentStatus.NONE
+                        Name = "Høringer om svømmehallen",
+                        Text =
+                            "Svømmehallen på [indsæt vej] mangler igen vand, fordi nogen tørstige dådyr har drukket det hele. Løsningen er potentielt [indsæt løsning]",
+                        HearingType = hearingType
                     }
+                };
+
+                conclusionField.FieldTemplates = new List<FieldTemplateEntity>
+                {
+                    new FieldTemplateEntity
+                    {
+                        Name = "En god konklusion",
+                        Text = "Denne konklusion er et godt udgangspunkt. [indsæt tekst]",
+                        HearingType = hearingType
+                    }
+                };
+
+                context.Fields.UpdateRange(new List<FieldEntity>
+                {
+                    titleField,
+                    esdhTitleField,
+                    bodyinformationField,
+                    conclusionField
                 });
-                await context.SaveChangesAsync();
             }
 
             if (!context.Hearings.Any())
@@ -687,11 +341,20 @@ namespace BallerupKommune.DAOs.Persistence
                 var concludedHearingStatus =
                     await context.HearingStatus.FirstOrDefaultAsync(x => x.Status == HearingStatus.CONCLUDED);
 
+                var journalized =
+                    await context.JournalizedStatuses.FirstOrDefaultAsync(status =>
+                        status.Status == JournalizedStatus.JOURNALIZED);
+
                 var internalHearingType = await context.HearingTypes.FirstOrDefaultAsync(x => x.IsInternalHearing);
                 var publicHearingType = await context.HearingTypes.FirstOrDefaultAsync(x => !x.IsInternalHearing);
 
                 var activeSubjectArea = await context.SubjectAreas.FirstOrDefaultAsync(x => x.IsActive);
                 var closedSubjectArea = await context.SubjectAreas.FirstOrDefaultAsync(x => !x.IsActive);
+
+                var activeCityArea = await context.CityAreas.FirstOrDefaultAsync(x => x.IsActive);
+                var closedCityArea = await context.CityAreas.FirstOrDefaultAsync(x => !x.IsActive);
+
+                var kleHierarchies = await context.KleHierarchies.ToListAsync();
 
                 await context.Hearings.AddRangeAsync(new List<HearingEntity>
                 {
@@ -709,7 +372,9 @@ namespace BallerupKommune.DAOs.Persistence
                         EsdhNumber = "K01-10.10.10-2020.19",
                         HearingType = publicHearingType,
                         SubjectArea = activeSubjectArea,
-                        ShowComments = true
+                        CityArea = activeCityArea,
+                        ShowComments = true,
+                        KleHierarchyId = kleHierarchies.ElementAt(0).Id
                     },
                     new HearingEntity
                     {
@@ -725,7 +390,9 @@ namespace BallerupKommune.DAOs.Persistence
                         EsdhNumber = "K03-10.10.10-2020.19",
                         HearingType = publicHearingType,
                         SubjectArea = activeSubjectArea,
-                        ShowComments = false
+                        CityArea = activeCityArea,
+                        ShowComments = false,
+                        KleHierarchyId = kleHierarchies.ElementAt(1).Id
                     },
                     new HearingEntity
                     {
@@ -741,7 +408,9 @@ namespace BallerupKommune.DAOs.Persistence
                         EsdhNumber = "K04-10.10.10-2020.19",
                         HearingType = internalHearingType,
                         SubjectArea = activeSubjectArea,
-                        ShowComments = true
+                        CityArea = activeCityArea,
+                        ShowComments = true,
+                        KleHierarchyId = kleHierarchies.ElementAt(2).Id
                     },
                     new HearingEntity
                     {
@@ -757,7 +426,9 @@ namespace BallerupKommune.DAOs.Persistence
                         EsdhNumber = "K05-10.10.10-2020.19",
                         HearingType = publicHearingType,
                         SubjectArea = activeSubjectArea,
-                        ShowComments = true
+                        CityArea = activeCityArea,
+                        ShowComments = true,
+                        KleHierarchyId = kleHierarchies.ElementAt(0).Id
                     },
                     new HearingEntity
                     {
@@ -773,7 +444,9 @@ namespace BallerupKommune.DAOs.Persistence
                         EsdhNumber = "K06-10.10.10-2020.19",
                         HearingType = internalHearingType,
                         SubjectArea = activeSubjectArea,
-                        ShowComments = true
+                        CityArea = activeCityArea,
+                        ShowComments = true,
+                        KleHierarchyId = kleHierarchies.ElementAt(1).Id
                     },
                     new HearingEntity
                     {
@@ -789,7 +462,9 @@ namespace BallerupKommune.DAOs.Persistence
                         EsdhNumber = "K07-10.10.10-2020.19",
                         HearingType = publicHearingType,
                         SubjectArea = closedSubjectArea,
-                        ShowComments = false
+                        CityArea = closedCityArea,
+                        ShowComments = false,
+                        KleHierarchyId = kleHierarchies.ElementAt(2).Id
                     },
                     new HearingEntity
                     {
@@ -805,7 +480,9 @@ namespace BallerupKommune.DAOs.Persistence
                         EsdhNumber = "K08-10.10.10-2020.19",
                         HearingType = internalHearingType,
                         SubjectArea = activeSubjectArea,
-                        ShowComments = true
+                        CityArea = activeCityArea,
+                        ShowComments = true,
+                        KleHierarchyId = kleHierarchies.ElementAt(0).Id
                     },
                     new HearingEntity
                     {
@@ -817,11 +494,35 @@ namespace BallerupKommune.DAOs.Persistence
                         ContactPersonPhoneNumber = "31435831",
                         Deadline = DateTime.Now.AddDays(-4),
                         StartDate = DateTime.Now.AddDays(-12),
+                        ConcludedDate = DateTime.Now.AddDays(-1),
                         EsdhTitle = "Høring 8",
                         EsdhNumber = "K09-10.10.10-2020.19",
                         HearingType = publicHearingType,
                         SubjectArea = closedSubjectArea,
-                        ShowComments = false
+                        CityArea = closedCityArea,
+                        ShowComments = false,
+                        KleHierarchyId = kleHierarchies.ElementAt(1).Id
+                    },
+                    new HearingEntity
+                    {
+                        HearingStatus = concludedHearingStatus,
+                        ClosedHearing = true,
+                        ContactPersonDepartmentName = "Afdeling B",
+                        ContactPersonName = "Bent Børgesen",
+                        ContactPersonEmail = "bentthere.donethat@b.dk",
+                        ContactPersonPhoneNumber = "31435114",
+                        Deadline = DateTime.Now.AddDays(-800),
+                        StartDate = DateTime.Now.AddDays(-820),
+                        ConcludedDate = DateTime.Now.AddDays(-750),
+                        EsdhTitle = "Høring 9",
+                        EsdhNumber = "K10-10.10.10-2020.19",
+                        HearingType = publicHearingType,
+                        SubjectArea = closedSubjectArea,
+                        CityArea = closedCityArea,
+                        ShowComments = true,
+                        JournalizedStatus = journalized,
+                        JournalizedStatusId = journalized.Id,
+                        KleHierarchyId = kleHierarchies.ElementAt(2).Id
                     }
                 });
                 await context.SaveChangesAsync();
@@ -858,6 +559,7 @@ namespace BallerupKommune.DAOs.Persistence
                 var awaitingConclusionHearing =
                     await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 7");
                 var concludedHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 8");
+                var concludedOldHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 9");
 
                 await context.Comments.AddRangeAsync(new List<CommentEntity>
                 {
@@ -882,7 +584,7 @@ namespace BallerupKommune.DAOs.Persistence
                     new CommentEntity
                     {
                         CommentStatus = notApprovedCommentStatus,
-                        CommentDeclineInfo = new CommentDeclineInfoEntity(){
+                        CommentDeclineInfo = new CommentDeclineInfoEntity {
                             DeclineReason = "This comment contains sensitive information",
                             DeclinerInitials = "TDTB"
                         },
@@ -913,7 +615,7 @@ namespace BallerupKommune.DAOs.Persistence
                     new CommentEntity
                     {
                         CommentStatus = notApprovedCommentStatus,
-                        CommentDeclineInfo = new CommentDeclineInfoEntity(){
+                        CommentDeclineInfo = new CommentDeclineInfoEntity {
                             DeclineReason = "This comment contains sensitive information",
                             DeclinerInitials = "TBDB"
                         },
@@ -953,9 +655,9 @@ namespace BallerupKommune.DAOs.Persistence
                     new CommentEntity
                     {
                         CommentStatus = notApprovedCommentStatus,
-                        CommentDeclineInfo = new CommentDeclineInfoEntity() { 
-                            DeclineReason = "This comment contains sensitive information", 
-                            DeclinerInitials = "TDTB" 
+                        CommentDeclineInfo = new CommentDeclineInfoEntity {
+                            DeclineReason = "This comment contains sensitive information",
+                            DeclinerInitials = "TDTB"
                         },
                         CommentType = responseCommentType,
                         User = companyUser,
@@ -966,9 +668,9 @@ namespace BallerupKommune.DAOs.Persistence
                     new CommentEntity
                     {
                         CommentStatus = notApprovedCommentStatus,
-                        CommentDeclineInfo = new CommentDeclineInfoEntity() { 
-                            DeclineReason = "This comment contains sensitive information", 
-                            DeclinerInitials = "TDTB" 
+                        CommentDeclineInfo = new CommentDeclineInfoEntity {
+                            DeclineReason = "This comment contains sensitive information",
+                            DeclinerInitials = "TDTB"
                         },
                         CommentType = responseCommentType,
                         User = companyUser,
@@ -999,6 +701,19 @@ namespace BallerupKommune.DAOs.Persistence
                         User = revUser,
                         Hearing = awaitingStartDatePublicHearing,
                     },
+                    new CommentEntity
+                    {
+                        CommentStatus = notApprovedCommentStatus,
+                        CommentDeclineInfo = new CommentDeclineInfoEntity {
+                            DeclineReason = "This comment contains sensitive information",
+                            DeclinerInitials = "XXYY"
+                        },
+                        CommentType = responseCommentType,
+                        User = empTwoUser,
+                        IsDeleted = false,
+                        ContainsSensitiveInformation = true,
+                        Hearing = concludedOldHearing,
+                    },
                 });
                 await context.SaveChangesAsync();
             }
@@ -1026,6 +741,7 @@ namespace BallerupKommune.DAOs.Persistence
                 var awaitingConclusionHearing =
                     await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 7");
                 var concludedHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 8");
+                var concludedOldHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 9");
 
                 var devUser = await context.UsersDb.FirstOrDefaultAsync(x => x.Identifier == devIdentifier);
                 var empOneUser = await context.UsersDb.FirstOrDefaultAsync(x => x.Identifier == empOneIdentifier);
@@ -1179,6 +895,12 @@ namespace BallerupKommune.DAOs.Persistence
                         HearingRole = hearingResponderRole,
                         Hearing = concludedHearing,
                         User = companyUser
+                    },
+                    new UserHearingRoleEntity
+                    {
+                        HearingRole = hearingResponderRole,
+                        Hearing = concludedOldHearing,
+                        User = companyUser
                     }
                 });
                 await context.SaveChangesAsync();
@@ -1192,6 +914,7 @@ namespace BallerupKommune.DAOs.Persistence
                 var activePublicHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 4");
                 var activeClosedSubjectHearing =
                     await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 6");
+                var concludedOldHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 9");
 
                 var hearingInviteeRole =
                     await context.HearingRoles.FirstOrDefaultAsync(x => x.Role == HearingRole.HEARING_INVITEE);
@@ -1212,6 +935,12 @@ namespace BallerupKommune.DAOs.Persistence
                         Hearing = activePublicHearing,
                         Company = companyOne
                     },
+                    new CompanyHearingRoleEntity
+                    {
+                        HearingRole = hearingInviteeRole,
+                        Hearing = concludedOldHearing,
+                        Company = companyOne
+                    },
                 });
 
                 await context.SaveChangesAsync();
@@ -1221,6 +950,8 @@ namespace BallerupKommune.DAOs.Persistence
             if (!context.Consents.Any())
             {
                 var globalContent = await context.GlobalContents.FirstOrDefaultAsync();
+
+                var concludedOldHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 9");
 
                 var awaitingApprovalActiveInternalComment = await context.Comments.FirstOrDefaultAsync(x =>
                     x.CommentStatus.Status == CommentStatus.AWAITING_APPROVAL &&
@@ -1258,6 +989,9 @@ namespace BallerupKommune.DAOs.Persistence
                 var approvedConcludedComment = await context.Comments.FirstOrDefaultAsync(x =>
                     x.CommentStatus.Status == CommentStatus.APPROVED &&
                     x.Hearing.HearingStatus.Status == HearingStatus.CONCLUDED);
+                var oldConcludedHearingComment =
+                    await context.Comments.FirstOrDefaultAsync(
+                        x => x.Hearing.Id == concludedOldHearing.Id);
 
                 await context.Consents.AddRangeAsync(new List<ConsentEntity>
                 {
@@ -1320,6 +1054,11 @@ namespace BallerupKommune.DAOs.Persistence
                     {
                         GlobalContent = globalContent,
                         Comment = approvedConcludedComment
+                    },
+                    new ConsentEntity
+                    {
+                        GlobalContent = globalContent,
+                        Comment = oldConcludedHearingComment
                     }
                 });
                 await context.SaveChangesAsync();
@@ -1339,6 +1078,7 @@ namespace BallerupKommune.DAOs.Persistence
                 var awaitingConclusionHearing =
                     await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 7");
                 var concludedHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 8");
+                var concludedOldHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 9");
 
                 var awaitingApprovalActiveInternalComment = await context.Comments.FirstOrDefaultAsync(x =>
                     x.CommentStatus.Status == CommentStatus.AWAITING_APPROVAL &&
@@ -1382,6 +1122,9 @@ namespace BallerupKommune.DAOs.Persistence
                 var reviewPublicComment = await context.Comments.FirstOrDefaultAsync(x =>
                     x.CommentStatus.Status == CommentStatus.NONE &&
                     !x.Hearing.HearingType.IsInternalHearing);
+                var oldConcludedHearingComment =
+                    await context.Comments.FirstOrDefaultAsync(
+                        x => x.Hearing.Id == concludedOldHearing.Id);
 
                 var fields = await context.Fields.Include(nameof(FieldEntity.FieldType)).ToListAsync();
                 var contentTypes = await context.ContentTypes.ToListAsync();
@@ -1637,6 +1380,42 @@ namespace BallerupKommune.DAOs.Persistence
                     },
                     new ContentEntity
                     {
+                        TextContent = "En høringstitel for en konkluderet og gammel høring",
+                        Field = fields.FirstOrDefault(f => f.FieldType.Type == FieldType.TITLE),
+                        ContentType = contentTypes.FirstOrDefault(c => c.Type == ContentType.TEXT),
+                        Hearing = concludedOldHearing
+                    },
+                    new ContentEntity
+                    {
+                        FileName = "front_image9.png",
+                        Field = fields.FirstOrDefault(f => f.FieldType.Type == FieldType.IMAGE),
+                        ContentType = contentTypes.FirstOrDefault(c => c.Type == ContentType.FILE),
+                        Hearing = concludedOldHearing
+                    },
+                    new ContentEntity
+                    {
+                        TextContent =
+                            "Dette er en opsummering vedrørerende handlingsforløbet af denne høring, der er konkluderet for længe siden.",
+                        Field = fields.FirstOrDefault(f => f.FieldType.Type == FieldType.SUMMARY),
+                        ContentType = contentTypes.FirstOrDefault(c => c.Type == ContentType.TEXT),
+                        Hearing = concludedOldHearing
+                    },
+                    new ContentEntity
+                    {
+                        TextContent = "Dette er en høringstekst i dens helhed til en konkluderet og gammel høring",
+                        Field = fields.FirstOrDefault(f => f.FieldType.Type == FieldType.BODYINFORMATION),
+                        ContentType = contentTypes.FirstOrDefault(c => c.Type == ContentType.TEXT),
+                        Hearing = concludedOldHearing
+                    },
+                    new ContentEntity
+                    {
+                        TextContent = "En præcis konklusion til en konkluderet og gammel høring",
+                        Field = fields.FirstOrDefault(f => f.FieldType.Type == FieldType.CONCLUSION),
+                        ContentType = contentTypes.FirstOrDefault(c => c.Type == ContentType.TEXT),
+                        Hearing = concludedOldHearing
+                    },
+                    new ContentEntity
+                    {
                         ContentType = contentTypes.FirstOrDefault(c => c.Type == ContentType.TEXT),
                         TextContent = "A comment to an active internal hearing awaiting approval",
                         Comment = awaitingApprovalActiveInternalComment,
@@ -1732,18 +1511,24 @@ namespace BallerupKommune.DAOs.Persistence
                         TextContent = "A comment to an public hearing awaiting its start date",
                         Comment = reviewPublicComment,
                         Hearing = awaitingStartDatePublicHearing
-                    }
+                    },
+                    new ContentEntity
+                    {
+                        ContentType = contentTypes.FirstOrDefault(c => c.Type == ContentType.TEXT),
+                        TextContent = "A comment to an old concluded hearing",
+                        Comment = oldConcludedHearingComment,
+                        Hearing = concludedOldHearing,
+                    },
+                    new ContentEntity
+                    {
+                        FileName = "front_image3.png",
+                        FileContentType = "image/png",
+                        FilePath = string.Empty,
+                        Field = fields.FirstOrDefault(f => f.FieldType.Type == FieldType.IMAGE),
+                        ContentType = contentTypes.FirstOrDefault(c => c.Type == ContentType.FILE),
+                        Hearing = concludedOldHearing
+                    },
                 });
-                await context.SaveChangesAsync();
-            }
-
-            if (!context.KleHierarchies.Any())
-            {
-                var kleHierarchiesModels = await kleService.GetKleHierarchies();
-
-                var kleHierarchiesEntities = kleHierarchiesModels.Select(x => mapper.Map<KleHierarchyEntity>(x));
-
-                await context.KleHierarchies.AddRangeAsync(kleHierarchiesEntities);
                 await context.SaveChangesAsync();
             }
 
@@ -1780,192 +1565,340 @@ namespace BallerupKommune.DAOs.Persistence
                 }
             }
 
-            if (!context.JournalizedStatuses.Any())
+            if (!context.NotificationContentSpecifications.Any())
             {
-                await context.JournalizedStatuses.AddRangeAsync(new List<JournalizedStatusEntity>
-                {
-                    new JournalizedStatusEntity
-                    {
-                        Status = JournalizedStatus.NOT_JOURNALIZED
-                    },
-                    new JournalizedStatusEntity
-                    {
-                        Status = JournalizedStatus.JOURNALIZED
-                    },
-                    new JournalizedStatusEntity
-                    {
-                        Status = JournalizedStatus.JOURNALIZED_WITH_ERROR
-                    }
-                });
+                var draftHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 1");
+                var awaitingStartDatePublicHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 2");
+                var awaitingStartDateInternalHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 3");
+                var activePublicHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 4");
+                var activeInternalHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 5");
+                var activeClosedSubjectHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 6");
+                var awaitingConclusionHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 7");
+                var concludedHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 8");
+                var concludedOldHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 9");
 
-                await context.SaveChangesAsync();
-            }
+                var subjectNotificationContentType = await context.NotificationContentTypes.FirstOrDefaultAsync(x => x.Type == NotificationContentType.SUBJECT);
+                var headerNotificationContentType = await context.NotificationContentTypes.FirstOrDefaultAsync(x => x.Type == NotificationContentType.HEADER);
+                var bodyNotificationContentType = await context.NotificationContentTypes.FirstOrDefaultAsync(x => x.Type == NotificationContentType.BODY);
+                var footerNotificationContentType = await context.NotificationContentTypes.FirstOrDefaultAsync(x => x.Type == NotificationContentType.FOOTER);
 
-            if (!context.NotificationTemplates.Any())
-            {
-                await context.NotificationTemplates.AddRangeAsync(new List<NotificationTemplateEntity>
-                {
-                    new NotificationTemplateEntity {
-                        NotificationTemplateText =
-                                @"<li>Reviewer: Der er tilføjet følgende reviewere: <ul><li>{{Reviewers}}</li></ul></li>",
-                        SubjectTemplate = "Tilføjet reviewers"
-                    },
-                    new NotificationTemplateEntity
-                    {
-                        NotificationTemplateText =
-                                @"<li>Høringsejer: Høringen har fået en ny høringsejer: <strong>{{HearingOwner}}.</strong></li>",
-                        SubjectTemplate = "Ny høringsejer"
-                    },
-                    new NotificationTemplateEntity
-                    {
-                        NotificationTemplateText =
-                                @"<li>Statusskifte: Høringen har skiftet status til: <strong>{{HearingStatus}}.</strong></li>",
-                        SubjectTemplate = "Høringen har skiftet status"
-                    },
-                    new NotificationTemplateEntity
-                    {
-                        NotificationTemplateText =
-                                @"<li>Høringssvar: Der er modtaget <strong>{{HearingResponseCount}}</strong> høringssvar.</li>",
-                        SubjectTemplate = "Nye høringssvar"
-                    },
-                    new NotificationTemplateEntity
-                    {
-                        NotificationTemplateText =
-                                @"<li>Høringskommentarer: Der er modtaget <strong>{{HearingReviewCount}}</strong> høringskommentarer.</li>",
-                        SubjectTemplate = "Nye høringskommentarer"
-                    },
-                    new NotificationTemplateEntity
-                    {
-                        NotificationTemplateText =
-                                @"{{HearingTitle}}{{NewLine}}{{NewLine}}Vi inviterer dig til at deltage i denne høring.{{NewLine}}Du kan se detaljerne om høringen og indsende dit høringssvar på dette link: {{LinkToHearing}}{{NewLine}}Vær opmærksom på at du skal logge ind med MitId.{{NewLine}}{{NewLine}}{{TermsAndConditions}}{{NewLine}}{{NewLine}}Med venlig hilsen{{NewLine}}Ballerup Kommune",
-                        SubjectTemplate = "Offentlig høring"
-                    },
-                    new NotificationTemplateEntity
-                    {
-                        NotificationTemplateText =
-                                @"Dit høringssvar{{CompanyResponder}} er blevet afvist på høringen: {{HearingTitle}}.{{NewLine}}{{NewLine}}Dette kan være sket fordi dit svar enten vurderes til ikke at høre til den aktuelle høring, eller at det indeholdt informationer og/eller persondata som vurderes ikke at være lovlige at offentliggøre i en høringssammenhæng.{{NewLine}}{{NewLine}}Nedenstående er høringsadministratorens begrundelse for afvisning af høringssvar {{CommentNumber}}:{{CommentDeclinedReason}}{{NewLine}}{{NewLine}}Det fulde svar indgår dog i den videre behandling.{{NewLine}}{{NewLine}}{{TermsAndConditions}}{{NewLine}}{{NewLine}}Med venlig hilsen{{NewLine}}Ballerup Kommune",
-                        SubjectTemplate = "Høringssvar afvist"
-                    },
-                    new NotificationTemplateEntity
-                    {
-                        NotificationTemplateText =
-                                @"Der foreligger nu en konklusion på høringen: {{HearingTitle}}, som du har svaret på.{{NewLine}}{{NewLine}}Du kan se konklusionen på høringen her: {{LinkToHearing}}{{NewLine}}{{NewLine}}Med venlig hilsen{{NewLine}}Ballerup Kommune",
-                        SubjectTemplate = "Høring konkluderet"
-                    },
-                    new NotificationTemplateEntity
-                    {
-                        NotificationTemplateText =
-                            @"Der er foretaget en ændring på høringen: {{HearingTitle}}, som du har svaret på.{{NewLine}}{{NewLine}}Der er tale om en mindre rettelse, men dette kan stadig have indflydelse på dit afgivne svar.{{NewLine}} Du kan se den opdaterede høringstekst samt rette dit svar her: {{LinkToHearing}}{{NewLine}}{{NewLine}}Med venlig hilsen{{NewLine}}Ballerup Kommune",
-                        SubjectTemplate = "Høring opdateret"
-                    },
-                    new NotificationTemplateEntity
-                    {
-                        NotificationTemplateText =
-                                @"Tak for dit høringssvar til høringen: {{HearingTitle}}.{{NewLine}}{{NewLine}}Svaret{{CompanyResponder}} indgår nu i det videre arbejde med høringen.{{NewLine}}Hvis dit svar indeholder følsomme personoplysninger, forbeholder vi os ret til ikke at publicere dit svar på høringsportalen.{{NewLine}}Det fulde svar indgår dog i den videre behandling.{{NewLine}}{{NewLine}}{{TermsAndConditions}}{{NewLine}}{{NewLine}}Med venlig hilsen{{NewLine}}Ballerup Kommune",
-                        SubjectTemplate = "Kvittering for dit høringssvar"
-                    }
-                });
+                var invitationNotificationType = await context.NotificationTypes.FirstOrDefaultAsync(x => x.Type == NotificationType.INVITED_TO_HEARING);
+                var conclusionNotificationType = await context.NotificationTypes.FirstOrDefaultAsync(x => x.Type == NotificationType.HEARING_CONCLUSION_PUBLISHED);
 
-                await context.SaveChangesAsync();
-            }
+                var invitationSubjectTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(x => x.Id == invitationNotificationType.SubjectTemplateId);
+                var invitationHeaderTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(x => x.Id == invitationNotificationType.HeaderTemplateId);
+                var invitationBodyTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(x => x.Id == invitationNotificationType.BodyTemplateId);
+                var invitationFooterTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(x => x.Id == invitationNotificationType.FooterTemplateId);
 
-            if (!context.NotificationTypes.Any())
-            {
-                string addedReviewersString = "Tilføjet reviewers";
-                string newHearingOwnerString = "Ny høringsejer";
-                string hearingStatusChangeString = "Høringen har skiftet status";
-                string newHearingAnswersString = "Nye høringssvar";
-                string newHearingCommentsString = "Nye høringskommentarer";
-                string publicHearingString = "Offentlig høring";
-                string hearingAnswerDeclinedString = "Høringssvar afvist";
-                string hearingAnswerConfirmationString = "Kvittering for dit høringssvar";
-                string hearingConcludedString = "Høring konkluderet";
-                string hearingUpdatedString = "Høring opdateret";
+                var conclusionSubjectTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(x => x.Id == conclusionNotificationType.SubjectTemplateId);
+                var conclusionHeaderTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(x => x.Id == conclusionNotificationType.HeaderTemplateId);
+                var conclusionBodyTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(x => x.Id == conclusionNotificationType.BodyTemplateId);
+                var conclusionFooterTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(x => x.Id == conclusionNotificationType.FooterTemplateId);
 
-                NotificationTemplateEntity addedReviewersTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(x => x.SubjectTemplate == addedReviewersString);
-                NotificationTemplateEntity newHearingOwnerTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(x => x.SubjectTemplate == newHearingOwnerString);
-                NotificationTemplateEntity hearingStatusChangeTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(x => x.SubjectTemplate == hearingStatusChangeString);
-                NotificationTemplateEntity newHearingAnswersTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(x => x.SubjectTemplate == newHearingAnswersString);
-                NotificationTemplateEntity newHearingCommentsTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(x => x.SubjectTemplate == newHearingCommentsString);
-                NotificationTemplateEntity publicHearingTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(x => x.SubjectTemplate == publicHearingString);
-                NotificationTemplateEntity hearingAnswerDeclinedTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(x => x.SubjectTemplate == hearingAnswerDeclinedString);
-                NotificationTemplateEntity hearingAnswerConfirmationTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(x => x.SubjectTemplate == hearingAnswerConfirmationString);
-                NotificationTemplateEntity hearingConcludedTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(x => x.SubjectTemplate == hearingConcludedString);
-                NotificationTemplateEntity hearingUpdatedTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(x => x.SubjectTemplate == hearingUpdatedString);
-
-                context.NotificationTypes.AddRange(new List<NotificationTypeEntity>
-                {
-                    new NotificationTypeEntity
+                await context.NotificationContentSpecifications.AddRangeAsync(
+                    new List<NotificationContentSpecificationEntity>
                     {
-                        Frequency = NotificationFrequency.DAILY,
-                        Name = "Tilføjet som reviewer",
-                        Type = NotificationType.ADDED_AS_REVIEWER,
-                        NotificationTemplate = addedReviewersTemplate
-                    },
-                    new NotificationTypeEntity
-                    {
-                        Frequency = NotificationFrequency.DAILY,
-                        Name = "Høringsejer skiftet",
-                        Type = NotificationType.CHANGED_HEARING_OWNER,
-                        NotificationTemplate = newHearingOwnerTemplate
-                    },
-                    new NotificationTypeEntity
-                    {
-                        Frequency = NotificationFrequency.DAILY,
-                        Name = "Høringstatus skiftet",
-                        Type = NotificationType.CHANGED_HEARING_STATUS,
-                        NotificationTemplate = hearingStatusChangeTemplate
-                    },
-                    new NotificationTypeEntity
-                    {
-                        Frequency = NotificationFrequency.DAILY,
-                        Name = "Høringssvar modtaget",
-                        Type = NotificationType.HEARING_RESPONSE_RECEIVED,
-                        NotificationTemplate = newHearingAnswersTemplate
-                    },
-                    new NotificationTypeEntity
-                    {
-                        Frequency = NotificationFrequency.DAILY,
-                        Name = "Høringskommentar modtaget",
-                        Type = NotificationType.HEARING_REVIEW_RECEIVED,
-                        NotificationTemplate = newHearingCommentsTemplate
-                    },
-                    new NotificationTypeEntity
-                    {
-                        Frequency = NotificationFrequency.INSTANT,
-                        Name = "Inviteret til høring",
-                        Type = NotificationType.INVITED_TO_HEARING,
-                        NotificationTemplate = publicHearingTemplate
-                    },
-                    new NotificationTypeEntity
-                    {
-                        Frequency = NotificationFrequency.INSTANT,
-                        Name = "Kvittering for høringssvar",
-                        Type = NotificationType.HEARING_ANSWER_RECEIPT,
-                        NotificationTemplate = hearingAnswerConfirmationTemplate
-                    },
-                    new NotificationTypeEntity
-                    {
-                        Frequency = NotificationFrequency.INSTANT,
-                        Name = "Høringskonklusion publiseret",
-                        Type = NotificationType.HEARING_CONCLUSION_PUBLISHED,
-                        NotificationTemplate = hearingConcludedTemplate
-                    },
-                    new NotificationTypeEntity
-                    {
-                        Frequency = NotificationFrequency.INSTANT,
-                        Name = "Høring ændret",
-                        Type = NotificationType.HEARING_CHANGED,
-                        NotificationTemplate = hearingUpdatedTemplate
-                    },
-                    new NotificationTypeEntity
-                    {
-                        Frequency = NotificationFrequency.INSTANT,
-                        Name = "Høringssvar afvist",
-                        Type = NotificationType.HEARING_RESPONSE_DECLINED,
-                        NotificationTemplate = hearingAnswerDeclinedTemplate
-                    }
-                });
+                        new NotificationContentSpecificationEntity
+                        {
+                            NotificationType = invitationNotificationType,
+                            Hearing = draftHearing,
+                            SubjectContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationSubjectTemplate.TextContent,
+                                NotificationContentType = subjectNotificationContentType
+                            },
+                            HeaderContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationHeaderTemplate.TextContent,
+                                NotificationContentType = headerNotificationContentType
+                            },
+                            BodyContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationBodyTemplate.TextContent,
+                                NotificationContentType = bodyNotificationContentType
+                            },
+                            FooterContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationFooterTemplate.TextContent,
+                                NotificationContentType = footerNotificationContentType
+                            }
+                        },
+                        new NotificationContentSpecificationEntity
+                        {
+                            NotificationType = invitationNotificationType,
+                            Hearing = awaitingStartDatePublicHearing,
+                            SubjectContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationSubjectTemplate.TextContent,
+                                NotificationContentType = subjectNotificationContentType
+                            },
+                            HeaderContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationHeaderTemplate.TextContent,
+                                NotificationContentType = headerNotificationContentType
+                            },
+                            BodyContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationBodyTemplate.TextContent,
+                                NotificationContentType = bodyNotificationContentType
+                            },
+                            FooterContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationFooterTemplate.TextContent,
+                                NotificationContentType = footerNotificationContentType
+                            }
+                        },
+                        new NotificationContentSpecificationEntity
+                        {
+                            NotificationType = invitationNotificationType,
+                            Hearing = awaitingStartDateInternalHearing,
+                            SubjectContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationSubjectTemplate.TextContent,
+                                NotificationContentType = subjectNotificationContentType
+                            },
+                            HeaderContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationHeaderTemplate.TextContent,
+                                NotificationContentType = headerNotificationContentType
+                            },
+                            BodyContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationBodyTemplate.TextContent,
+                                NotificationContentType = bodyNotificationContentType
+                            },
+                            FooterContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationFooterTemplate.TextContent,
+                                NotificationContentType = footerNotificationContentType
+                            }
+                        },
+                        new NotificationContentSpecificationEntity
+                        {
+                            NotificationType = invitationNotificationType,
+                            Hearing = activePublicHearing,
+                            SubjectContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationSubjectTemplate.TextContent,
+                                NotificationContentType = subjectNotificationContentType
+                            },
+                            HeaderContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationHeaderTemplate.TextContent,
+                                NotificationContentType = headerNotificationContentType
+                            },
+                            BodyContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationBodyTemplate.TextContent,
+                                NotificationContentType = bodyNotificationContentType
+                            },
+                            FooterContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationFooterTemplate.TextContent,
+                                NotificationContentType = footerNotificationContentType
+                            }
+                        },
+                        new NotificationContentSpecificationEntity
+                        {
+                            NotificationType = invitationNotificationType,
+                            Hearing = activeInternalHearing,
+                            SubjectContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationSubjectTemplate.TextContent,
+                                NotificationContentType = subjectNotificationContentType
+                            },
+                            HeaderContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationHeaderTemplate.TextContent,
+                                NotificationContentType = headerNotificationContentType
+                            },
+                            BodyContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationBodyTemplate.TextContent,
+                                NotificationContentType = bodyNotificationContentType
+                            },
+                            FooterContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationFooterTemplate.TextContent,
+                                NotificationContentType = footerNotificationContentType
+                            }
+                        },
+                        new NotificationContentSpecificationEntity
+                        {
+                            NotificationType = invitationNotificationType,
+                            Hearing = activeClosedSubjectHearing,
+                            SubjectContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationSubjectTemplate.TextContent,
+                                NotificationContentType = subjectNotificationContentType
+                            },
+                            HeaderContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationHeaderTemplate.TextContent,
+                                NotificationContentType = headerNotificationContentType
+                            },
+                            BodyContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationBodyTemplate.TextContent,
+                                NotificationContentType = bodyNotificationContentType
+                            },
+                            FooterContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationFooterTemplate.TextContent,
+                                NotificationContentType = footerNotificationContentType
+                            }
+                        },
+                        new NotificationContentSpecificationEntity
+                        {
+                            NotificationType = invitationNotificationType,
+                            Hearing = awaitingConclusionHearing,
+                            SubjectContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationSubjectTemplate.TextContent,
+                                NotificationContentType = subjectNotificationContentType
+                            },
+                            HeaderContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationHeaderTemplate.TextContent,
+                                NotificationContentType = headerNotificationContentType
+                            },
+                            BodyContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationBodyTemplate.TextContent,
+                                NotificationContentType = bodyNotificationContentType
+                            },
+                            FooterContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationFooterTemplate.TextContent,
+                                NotificationContentType = footerNotificationContentType
+                            }
+                        },
+                        new NotificationContentSpecificationEntity
+                        {
+                            NotificationType = invitationNotificationType,
+                            Hearing = concludedHearing,
+                            SubjectContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationSubjectTemplate.TextContent,
+                                NotificationContentType = subjectNotificationContentType
+                            },
+                            HeaderContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationHeaderTemplate.TextContent,
+                                NotificationContentType = headerNotificationContentType
+                            },
+                            BodyContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationBodyTemplate.TextContent,
+                                NotificationContentType = bodyNotificationContentType
+                            },
+                            FooterContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationFooterTemplate.TextContent,
+                                NotificationContentType = footerNotificationContentType
+                            }
+                        },
+                        new NotificationContentSpecificationEntity
+                        {
+                            NotificationType = invitationNotificationType,
+                            Hearing = concludedOldHearing,
+                            SubjectContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationSubjectTemplate.TextContent,
+                                NotificationContentType = subjectNotificationContentType
+                            },
+                            HeaderContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationHeaderTemplate.TextContent,
+                                NotificationContentType = headerNotificationContentType
+                            },
+                            BodyContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationBodyTemplate.TextContent,
+                                NotificationContentType = bodyNotificationContentType
+                            },
+                            FooterContent = new NotificationContentEntity
+                            {
+                                TextContent = invitationFooterTemplate.TextContent,
+                                NotificationContentType = footerNotificationContentType
+                            }
+                        },
+                        new NotificationContentSpecificationEntity
+                        {
+                            NotificationType = conclusionNotificationType,
+                            Hearing = awaitingConclusionHearing,
+                            SubjectContent = new NotificationContentEntity
+                            {
+                                TextContent = conclusionSubjectTemplate.TextContent,
+                                NotificationContentType = subjectNotificationContentType
+                            },
+                            HeaderContent = new NotificationContentEntity
+                            {
+                                TextContent = conclusionHeaderTemplate.TextContent,
+                                NotificationContentType = headerNotificationContentType
+                            },
+                            BodyContent = new NotificationContentEntity
+                            {
+                                TextContent = conclusionBodyTemplate.TextContent,
+                                NotificationContentType = bodyNotificationContentType
+                            },
+                            FooterContent = new NotificationContentEntity
+                            {
+                                TextContent = conclusionFooterTemplate.TextContent,
+                                NotificationContentType = footerNotificationContentType
+                            }
+                        },
+                        new NotificationContentSpecificationEntity
+                        {
+                            NotificationType = conclusionNotificationType,
+                            Hearing = concludedHearing,
+                            SubjectContent = new NotificationContentEntity
+                            {
+                                TextContent = conclusionSubjectTemplate.TextContent,
+                                NotificationContentType = subjectNotificationContentType
+                            },
+                            HeaderContent = new NotificationContentEntity
+                            {
+                                TextContent = conclusionHeaderTemplate.TextContent,
+                                NotificationContentType = headerNotificationContentType
+                            },
+                            BodyContent = new NotificationContentEntity
+                            {
+                                TextContent = conclusionBodyTemplate.TextContent,
+                                NotificationContentType = bodyNotificationContentType
+                            },
+                            FooterContent = new NotificationContentEntity
+                            {
+                                TextContent = conclusionFooterTemplate.TextContent,
+                                NotificationContentType = footerNotificationContentType
+                            }
+                        },
+                        new NotificationContentSpecificationEntity
+                        {
+                            NotificationType = conclusionNotificationType,
+                            Hearing = concludedOldHearing,
+                            SubjectContent = new NotificationContentEntity
+                            {
+                                TextContent = conclusionSubjectTemplate.TextContent,
+                                NotificationContentType = subjectNotificationContentType
+                            },
+                            HeaderContent = new NotificationContentEntity
+                            {
+                                TextContent = conclusionHeaderTemplate.TextContent,
+                                NotificationContentType = headerNotificationContentType
+                            },
+                            BodyContent = new NotificationContentEntity
+                            {
+                                TextContent = conclusionBodyTemplate.TextContent,
+                                NotificationContentType = bodyNotificationContentType
+                            },
+                            FooterContent = new NotificationContentEntity
+                            {
+                                TextContent = conclusionFooterTemplate.TextContent,
+                                NotificationContentType = footerNotificationContentType
+                            }
+                        },
+                    });
                 await context.SaveChangesAsync();
             }
 
@@ -1978,96 +1911,253 @@ namespace BallerupKommune.DAOs.Persistence
                 var empTwoUser = await context.UsersDb.FirstOrDefaultAsync(x => x.Identifier == empTwoIdentifier);
                 var citizen = await context.UsersDb.FirstOrDefaultAsync(x => x.Identifier == citIdentifier);
 
-                var addedAsReviewerNotificationType =
-                    await context.NotificationTypes.FirstAsync(x => x.Type == NotificationType.ADDED_AS_REVIEWER);
-                var changeHearingOwnerNotificationType =
-                    await context.NotificationTypes.FirstAsync(x => x.Type == NotificationType.CHANGED_HEARING_OWNER);
-                var changeHearingStatusNotificationType =
-                    await context.NotificationTypes.FirstAsync(x => x.Type == NotificationType.CHANGED_HEARING_STATUS);
-                var hearingResponseNotificationType =
-                    await context.NotificationTypes.FirstAsync(
-                        x => x.Type == NotificationType.HEARING_RESPONSE_RECEIVED);
-                var hearingReviewNotificationType =
-                    await context.NotificationTypes.FirstAsync(x => x.Type == NotificationType.HEARING_REVIEW_RECEIVED);
-
-                var invitedToHearingNotificationType =
-                    await context.NotificationTypes.FirstAsync(x => x.Type == NotificationType.INVITED_TO_HEARING);
-                var hearingAnswerReceiptNotificationType =
-                    await context.NotificationTypes.FirstAsync(x => x.Type == NotificationType.HEARING_ANSWER_RECEIPT);
-                var conclusionPublishedNotificationType =
-                    await context.NotificationTypes.FirstAsync(x =>
-                        x.Type == NotificationType.HEARING_CONCLUSION_PUBLISHED);
-                var hearingChangedNotificationType =
-                    await context.NotificationTypes.FirstAsync(x => x.Type == NotificationType.HEARING_CHANGED);
+                var addedAsReviewerNotificationType = await context.NotificationTypes.FirstAsync(x => x.Type == NotificationType.ADDED_AS_REVIEWER);
+                var invitedToHearingNotificationType = await context.NotificationTypes.FirstAsync(x => x.Type == NotificationType.INVITED_TO_HEARING);
+                var hearingAnswerReceiptNotificationType = await context.NotificationTypes.FirstAsync(x => x.Type == NotificationType.HEARING_ANSWER_RECEIPT);
+                var conclusionPublishedNotificationType = await context.NotificationTypes.FirstAsync(x => x.Type == NotificationType.HEARING_CONCLUSION_PUBLISHED);
+                var hearingChangedNotificationType = await context.NotificationTypes.FirstAsync(x => x.Type == NotificationType.HEARING_CHANGED);
 
                 await context.Notifications.AddRangeAsync(new List<NotificationEntity>
                 {
-                    new NotificationEntity
+                     new NotificationEntity
+                     {
+                         Hearing = draftHearing,
+                         User = empTwoUser,
+                         NotificationType = addedAsReviewerNotificationType
+                     },
+                     new NotificationEntity
+                     {
+                         Hearing = activePublicHearing,
+                         User = citizen,
+                         NotificationType = invitedToHearingNotificationType
+                     },
+                     new NotificationEntity
+                     {
+                         Hearing = activeInternalHearing,
+                         User = empTwoUser,
+                         NotificationType = hearingAnswerReceiptNotificationType
+                     },
+                     new NotificationEntity
+                     {
+                         Hearing = activeInternalHearing,
+                         User = empOneUser,
+                         NotificationType = hearingAnswerReceiptNotificationType
+                     },
+                     new NotificationEntity
+                     {
+                         Hearing = activePublicHearing,
+                         User = citizen,
+                         NotificationType = hearingAnswerReceiptNotificationType
+                     },
+                     new NotificationEntity
+                     {
+                         Hearing = activePublicHearing,
+                         User = citizen,
+                         NotificationType = conclusionPublishedNotificationType
+                     },
+                     new NotificationEntity
+                     {
+                         Hearing = activePublicHearing,
+                         User = citizen,
+                         NotificationType = hearingChangedNotificationType
+                     },
+                 });
+
+                await context.SaveChangesAsync();
+            }
+
+            if (!context.Events.Any())
+            {
+                var draftHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 1");
+                var empOneUser = await context.UsersDb.FirstOrDefaultAsync(x => x.Identifier == empOneIdentifier);
+
+                var dailyStatusNotificationType = await context.NotificationTypes.FirstAsync(x => x.Type == NotificationType.DAILY_STATUS);
+
+                await context.Events.AddRangeAsync(new List<EventEntity>
+                {
+                    new EventEntity
                     {
                         Hearing = draftHearing,
-                        User = empTwoUser,
-                        NotificationType = addedAsReviewerNotificationType
-                    },
-                    new NotificationEntity
-                    {
-                        Hearing = activePublicHearing,
-                        User = empTwoUser,
-                        NotificationType = changeHearingOwnerNotificationType
-                    },
-                    new NotificationEntity
-                    {
-                        Hearing = activePublicHearing,
-                        User = empTwoUser,
-                        NotificationType = changeHearingStatusNotificationType
-                    },
-                    new NotificationEntity
-                    {
-                        Hearing = activePublicHearing,
-                        User = empTwoUser,
-                        NotificationType = hearingResponseNotificationType
-                    },
-                    new NotificationEntity
-                    {
-                        Hearing = activePublicHearing,
-                        User = empTwoUser,
-                        NotificationType = hearingReviewNotificationType
-                    },
-                    new NotificationEntity
-                    {
-                        Hearing = activePublicHearing,
-                        User = citizen,
-                        NotificationType = invitedToHearingNotificationType
-                    },
-                    new NotificationEntity
-                    {
-                        Hearing = activeInternalHearing,
-                        User = empTwoUser,
-                        NotificationType = hearingAnswerReceiptNotificationType
-                    },
-                    new NotificationEntity
-                    {
-                        Hearing = activeInternalHearing,
+                        NotificationType = dailyStatusNotificationType,
                         User = empOneUser,
-                        NotificationType = hearingAnswerReceiptNotificationType
-                    },
-                    new NotificationEntity
+                        IsSentInNotification = false,
+                        Type = EventType.HEARING_OWNER_CHANGED
+                    }
+                 });
+
+                await context.SaveChangesAsync();
+            }
+
+            if (!context.InvitationGroups.Any())
+            {
+                await context.InvitationGroups.AddRangeAsync(new List<InvitationGroupEntity>
+                {
+                    new InvitationGroupEntity
                     {
-                        Hearing = activePublicHearing,
-                        User = citizen,
-                        NotificationType = hearingAnswerReceiptNotificationType
+                        Name = "Interne medarbejdere"
                     },
-                    new NotificationEntity
+                    new InvitationGroupEntity
                     {
-                        Hearing = activePublicHearing,
-                        User = citizen,
-                        NotificationType = conclusionPublishedNotificationType
+                        Name = "Bestyrelsen"
                     },
-                    new NotificationEntity
+                    new InvitationGroupEntity
                     {
-                        Hearing = activePublicHearing,
-                        User = citizen,
-                        NotificationType = hearingChangedNotificationType
+                        Name = "Husejere i lokalområde 21"
+                    }
+                });
+
+                await context.SaveChangesAsync();
+            }
+
+            if (!context.InvitationKeys.Any())
+            {
+                var invitationGroupInternalEmployees = await context.InvitationGroups.FirstOrDefaultAsync(x => x.Name == "Interne medarbejdere");
+                var invitationGroupBoardMembers = await context.InvitationGroups.FirstOrDefaultAsync(x => x.Name == "Bestyrelsen");
+                var invitationGroupLocalArea = await context.InvitationGroups.FirstOrDefaultAsync(x => x.Name == "Husejere i lokalområde 21");
+
+                await context.InvitationKeys.AddRangeAsync(new List<InvitationKeyEntity>
+                {
+                    new InvitationKeyEntity
+                    {
+                        InvitationGroup = invitationGroupInternalEmployees,
+                        Email = "empone@novataris.com"
                     },
+                    new InvitationKeyEntity
+                    {
+                        InvitationGroup = invitationGroupBoardMembers,
+                        Email = "dev@novataris.com"
+                    },
+                    new InvitationKeyEntity
+                    {
+                        InvitationGroup = invitationGroupBoardMembers,
+                        Cpr = "0306874438"
+                    },
+                    new InvitationKeyEntity
+                    {
+                        InvitationGroup = invitationGroupBoardMembers,
+                        Cvr = "24555372"
+                    },
+                    new InvitationKeyEntity
+                    {
+                        InvitationGroup = invitationGroupLocalArea,
+                        Cpr = "0306874438"
+                    },
+                    new InvitationKeyEntity
+                    {
+                        InvitationGroup = invitationGroupLocalArea,
+                        Cpr = "0306874438"
+                    }
+                });
+
+                await context.SaveChangesAsync();
+            }
+
+            if (!context.InvitationGroupMappings.Any())
+            {
+                var invitationGroupInternalEmployees = await context.InvitationGroups.FirstOrDefaultAsync(x => x.Name == "Interne medarbejdere");
+                var invitationGroupBoardMembers = await context.InvitationGroups.FirstOrDefaultAsync(x => x.Name == "Bestyrelsen");
+                var invitationGroupLocalArea = await context.InvitationGroups.FirstOrDefaultAsync(x => x.Name == "Husejere i lokalområde 21");
+
+                var hearingTypeInternalStandard = await context.HearingTypes.FirstOrDefaultAsync(x => x.Name == "Intern - Standard");
+                var hearingTypePublicStandard = await context.HearingTypes.FirstOrDefaultAsync(x => x.Name == "Offentlig - Standard");
+                var hearingTypePublicInactive = await context.HearingTypes.FirstOrDefaultAsync(x => x.Name == "Offentlig - Inaktiv");
+
+                await context.InvitationGroupMappings.AddRangeAsync(new List<InvitationGroupMappingEntity>
+                {
+                    new InvitationGroupMappingEntity
+                    {
+                        InvitationGroup = invitationGroupInternalEmployees,
+                        HearingType = hearingTypeInternalStandard
+                    },
+                    new InvitationGroupMappingEntity
+                    {
+                        InvitationGroup = invitationGroupBoardMembers,
+                        HearingType = hearingTypeInternalStandard
+                    },
+                    new InvitationGroupMappingEntity
+                    {
+                        InvitationGroup = invitationGroupBoardMembers,
+                        HearingType = hearingTypePublicInactive
+                    },
+                    new InvitationGroupMappingEntity
+                    {
+                        InvitationGroup = invitationGroupLocalArea,
+                        HearingType = hearingTypePublicStandard
+                    }
+                });
+
+                await context.SaveChangesAsync();
+            }
+
+            if (!context.InvitationSourceMappings.Any())
+            {
+                var personalInvitationSource = await context.InvitationSources.FirstOrDefaultAsync(x => x.InvitationSourceType == InvitationSourceType.PERSONAL);
+
+                var companies = await context.Companies.ToListAsync();
+                var companyOne = companies.FirstOrDefault(x => x.Cvr == companyCvr);
+
+                var activePublicHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 4");
+                var activeInternalHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 5");
+                var activeClosedSubjectHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 6");
+                var awaitingConclusionHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 7");
+                var concludedHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 8");
+                var concludedOldHearing = await context.Hearings.FirstOrDefaultAsync(x => x.EsdhTitle == "Høring 9");
+
+                var empOneUser = await context.UsersDb.FirstOrDefaultAsync(x => x.Identifier == empOneIdentifier);
+                var citOneUser = await context.UsersDb.FirstOrDefaultAsync(x => x.Identifier == citIdentifier);
+
+                var userHearingRoleActiveInternalHearingEmpOneUser = await context.UserHearingRoles.FirstOrDefaultAsync(x => x.HearingId == activeInternalHearing.Id && x.UserId == empOneUser.Id);
+                var userHearingRoleActiveClosedSubjectHearingCitOneUser = await context.UserHearingRoles.FirstOrDefaultAsync(x => x.HearingId == activeClosedSubjectHearing.Id && x.UserId == citOneUser.Id);
+                var userHearingRoleActivePublicHearingCitOneUser = await context.UserHearingRoles.FirstOrDefaultAsync(x => x.HearingId == activePublicHearing.Id && x.UserId == citOneUser.Id);
+                var userHearingRoleAwaitingConclusionHearingEmpOneUser = await context.UserHearingRoles.FirstOrDefaultAsync(x => x.HearingId == awaitingConclusionHearing.Id && x.UserId == empOneUser.Id);
+                var userHearingRoleConcludedHearingCitOneUser = await context.UserHearingRoles.FirstOrDefaultAsync(x => x.HearingId == concludedHearing.Id && x.UserId == citOneUser.Id);
+                var companyHearingRoleActivePublishedHearingCompanyOne = await context.CompanyHearingRoles.FirstOrDefaultAsync(x => x.HearingId == activePublicHearing.Id && x.CompanyId == companyOne.Id);
+                var companyHearingRoleConcludedOldHearingCompanyOne = await context.CompanyHearingRoles.FirstOrDefaultAsync(x => x.HearingId == concludedOldHearing.Id && x.CompanyId == companyOne.Id);
+
+                await context.InvitationSourceMappings.AddRangeAsync(new List<InvitationSourceMappingEntity>
+                {
+                    new InvitationSourceMappingEntity
+                    {
+                        SourceName = personalInvitationSource.Name,
+                        InvitationSourceId = personalInvitationSource.Id,
+                        UserHearingRoleId = userHearingRoleActiveInternalHearingEmpOneUser.Id
+                    },
+                    new InvitationSourceMappingEntity
+                    {
+                        SourceName = personalInvitationSource.Name,
+                        InvitationSourceId = personalInvitationSource.Id,
+                        UserHearingRoleId = userHearingRoleActiveClosedSubjectHearingCitOneUser.Id
+                    },
+                    new InvitationSourceMappingEntity
+                    {
+                        SourceName = personalInvitationSource.Name,
+                        InvitationSourceId = personalInvitationSource.Id,
+                        UserHearingRoleId = userHearingRoleActivePublicHearingCitOneUser.Id
+                    },
+                    new InvitationSourceMappingEntity
+                    {
+                        SourceName = personalInvitationSource.Name,
+                        InvitationSourceId = personalInvitationSource.Id,
+                        UserHearingRoleId = userHearingRoleAwaitingConclusionHearingEmpOneUser.Id
+                    },
+                    new InvitationSourceMappingEntity
+                    {
+                        SourceName = personalInvitationSource.Name,
+                        InvitationSourceId = personalInvitationSource.Id,
+                        UserHearingRoleId = userHearingRoleConcludedHearingCitOneUser.Id
+                    },
+                    new InvitationSourceMappingEntity
+                    {
+                        SourceName = personalInvitationSource.Name,
+                        InvitationSourceId = personalInvitationSource.Id,
+                        CompanyHearingRoleId = companyHearingRoleActivePublishedHearingCompanyOne.Id
+                    },
+                    new InvitationSourceMappingEntity
+                    {
+                        SourceName = personalInvitationSource.Name,
+                        InvitationSourceId = personalInvitationSource.Id,
+                        CompanyHearingRoleId = companyHearingRoleConcludedOldHearingCompanyOne.Id
+                    }
                 });
 
                 await context.SaveChangesAsync();
@@ -2091,8 +2181,22 @@ namespace BallerupKommune.DAOs.Persistence
             await DefaultCommentType.SeedData(context);
             await DefaultCommentStatus.SeedData(context);
             await DefaultJournalizedStatus.SeedData(context);
+            await DefaultNotificationContentType.SeedData(context);
             await DefaultNotificationTemplates.SeedData(context);
             await DefaultNotificationType.SeedData(context);
+            await DefaultInvitationSources.SeedData(context);
+
+            // Seed Municipality specific default data:
+            if (MunicipalityProfile.IsBallerupMunicipalityProfile())
+            {
+                await SeedBallerupDefaultDataAsync(context);
+            }
+
+            if (MunicipalityProfile.IsCopenhagenMunicipalityProfile())
+            {
+                await SeedCopenhagenDefaultDataAsync(context);
+            }
+
             if (!context.KleHierarchies.Any())
             {
                 var kleHierarchiesModels = await kleService.GetKleHierarchies();
@@ -2102,6 +2206,21 @@ namespace BallerupKommune.DAOs.Persistence
                 await context.KleHierarchies.AddRangeAsync(kleHierarchiesEntities);
                 await context.SaveChangesAsync();
             }
+        }
+
+        public static async Task SeedCopenhagenDefaultDataAsync(ApplicationDbContext context)
+        {
+            await DefaultValidationRules.SeedData(context, CopenhagenValidationRules.GetEntities());
+            await DefaultInvitationSources.SeedData(context, CopenhagenInvitationSources.GetEntities());
+        }
+
+        public static async Task SeedBallerupDefaultDataAsync(ApplicationDbContext context)
+        {
+            await DefaultValidationRules.SeedData(context, BallerupValidationRules.GetEntities());
+            var ballerupFields = await BallerupFields.GetEntities(context);
+            await DefaultFields.SeedData(context, ballerupFields);
+            var ballerupNotificationTemplates = await BallerupNotificationTemplates.GetEntities(context);
+            await DefaultNotificationTemplates.SeedData(context, ballerupNotificationTemplates);
         }
     }
 }

@@ -1,4 +1,4 @@
-namespace BallerupKommune.Primitives.Enums
+namespace Agora.Primitives.Enums
 {
     public enum Exceptions
     {

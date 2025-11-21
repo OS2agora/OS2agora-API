@@ -1,9 +1,9 @@
-﻿using BallerupKommune.DAOs.Persistence.Configurations.Utility;
-using BallerupKommune.Entities.Entities;
-using BallerupKommune.Operations.Models.FieldTemplates.Commands.Rules;
+﻿using Agora.DAOs.Persistence.Configurations.Utility;
+using Agora.Entities.Entities;
+using Agora.Operations.Models.FieldTemplates.Commands.Rules;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BallerupKommune.DAOs.Persistence.Configurations
+namespace Agora.DAOs.Persistence.Configurations
 {
     public class FieldTemplateConfiguration : AuditableEntityTypeConfiguration<FieldTemplateEntity>
     {

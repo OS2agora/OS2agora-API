@@ -1,4 +1,4 @@
-﻿namespace BallerupKommune.Entities.Common
+﻿namespace Agora.Entities.Common
 {
     public abstract class BaseEntity
     {

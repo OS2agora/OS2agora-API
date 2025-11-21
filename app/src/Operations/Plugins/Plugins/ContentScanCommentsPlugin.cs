@@ -1,23 +1,18 @@
-﻿using BallerupKommune.Models.Models.Multiparts;
-using BallerupKommune.Operations.ApplicationOptions;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
-using BallerupKommune.Operations.Common.Interfaces;
+﻿using Agora.Models.Models;
+using Agora.Operations.ApplicationOptions;
+using Agora.Operations.Common.Enums;
+using Agora.Operations.Common.Interfaces;
+using Agora.Operations.Common.Interfaces.DAOs;
+using Agora.Operations.Common.Interfaces.Files;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
-using BallerupKommune.Models.Models.Files;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Enums;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.Operations.Plugins.Plugins
+namespace Agora.Operations.Plugins.Plugins
 {
     public class ContentScanCommentsPlugin : PluginBase
     {
-        private readonly ILogger<FileOperation> _fileOperationLogger;
-        private readonly ILogger<File> _fileLogger;
         private readonly ICommentDao _commentDao;
         private readonly IContentDao _contentDao;
         private readonly IDataScanner _dataScanner;
@@ -25,8 +20,6 @@ namespace BallerupKommune.Operations.Plugins.Plugins
 
         public ContentScanCommentsPlugin(IServiceProvider serviceProvider, PluginConfiguration pluginConfiguration) : base(serviceProvider, pluginConfiguration)
         {
-            _fileOperationLogger = serviceProvider.GetService<ILogger<FileOperation>>();
-            _fileLogger = serviceProvider.GetService<ILogger<File>>();
             _commentDao = serviceProvider.GetService<ICommentDao>();
             _contentDao = serviceProvider.GetService<IContentDao>();
             _dataScanner = serviceProvider.GetService<IDataScanner>();

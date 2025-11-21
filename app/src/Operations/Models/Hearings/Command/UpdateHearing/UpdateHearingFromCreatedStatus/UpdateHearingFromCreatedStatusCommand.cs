@@ -1,13 +1,15 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Common;
+using Agora.Models.Models;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Common.Interfaces.DAOs;
+using Agora.Operations.Models.NotificationContentSpecifications.Commands;
 using MediatR;
-using HearingStatusEnum = BallerupKommune.Models.Enums.HearingStatus;
+using System.Threading;
+using System.Threading.Tasks;
+using HearingStatusEnum = Agora.Models.Enums.HearingStatus;
+using NotificationType = Agora.Models.Enums.NotificationType;
 
-namespace BallerupKommune.Operations.Models.Hearings.Command.UpdateHearing.UpdateHearingFromCreatedStatus
+namespace Agora.Operations.Models.Hearings.Command.UpdateHearing.UpdateHearingFromCreatedStatus
 {
     public class UpdateHearingFromCreatedStatusCommand : IRequest<Hearing>
     {
@@ -17,11 +19,13 @@ namespace BallerupKommune.Operations.Models.Hearings.Command.UpdateHearing.Updat
         {
             private readonly IHearingDao _hearingDao;
             private readonly IHearingStatusDao _hearingStatusDao;
+            private readonly ISender _mediator;
 
-            public UpdateHearingFromCreatedStatusCommandHandler(IHearingDao hearingDao, IHearingStatusDao hearingStatusDao)
+            public UpdateHearingFromCreatedStatusCommandHandler(IHearingDao hearingDao, IHearingStatusDao hearingStatusDao, ISender mediator)
             {
                 _hearingDao = hearingDao;
                 _hearingStatusDao = hearingStatusDao;
+                _mediator = mediator;
             }
 
             public async Task<Hearing> Handle(UpdateHearingFromCreatedStatusCommand request,
@@ -32,9 +36,16 @@ namespace BallerupKommune.Operations.Models.Hearings.Command.UpdateHearing.Updat
                 {
                     throw new InvalidOperationException($"HearingStatus with ID \"{status.Id}\" does not match the ID of the {nameof(HearingStatusEnum.DRAFT)} HearingStatus.");
                 }
-                
+
+                await _mediator.Send(new CreateNotificationContentSpecificationCommand
+                {
+                    HearingId = request.Hearing.Id,
+                    NotificationTypeEnum = NotificationType.INVITED_TO_HEARING
+                }, cancellationToken);
+
                 var includes = IncludeProperties.Create<Hearing>();
                 return await _hearingDao.UpdateAsync(request.Hearing, includes);
+
             }
         }
     }

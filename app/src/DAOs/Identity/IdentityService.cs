@@ -1,11 +1,12 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using BallerupKommune.Operations.Common.Interfaces;
+﻿using System;
+using Agora.Operations.Common.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
 
 
-namespace BallerupKommune.DAOs.Identity
+namespace Agora.DAOs.Identity
 {
     public class IdentityService : IIdentityService
     {
@@ -55,7 +56,10 @@ namespace BallerupKommune.DAOs.Identity
 
         public async Task<string> FindUserOrCreateUser(string personalIdentifier)
         {
-            var possibleUser = await _userManager.Users.FirstOrDefaultAsync(user => user.UserName == personalIdentifier);
+            // Filter must be applied in memory because UserName column can be encrypted!
+            var allUsers = await _userManager.Users.ToListAsync();
+            var possibleUser = allUsers.FirstOrDefault(user => string.Equals(user.UserName, personalIdentifier, StringComparison.InvariantCultureIgnoreCase));
+
             if (possibleUser == null)
             {
                 var newlyCreatedUserId = await CreateUserAsync(personalIdentifier);

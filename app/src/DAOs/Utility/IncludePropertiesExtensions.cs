@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using BallerupKommune.Entities.Attributes;
-using BallerupKommune.Entities.Common;
-using BallerupKommune.Models.Common;
-using InvalidOperationException = BallerupKommune.Operations.Common.Exceptions.InvalidOperationException;
+using Agora.Entities.Attributes;
+using Agora.Entities.Common;
+using Agora.Models.Common;
+using InvalidOperationException = Agora.Operations.Common.Exceptions.InvalidOperationException;
 
-namespace BallerupKommune.DAOs.Utility
+namespace Agora.DAOs.Utility
 {
     public static class IncludePropertiesExtensions
     {

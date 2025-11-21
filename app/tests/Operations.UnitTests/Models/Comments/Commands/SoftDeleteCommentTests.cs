@@ -2,14 +2,14 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Models.Comments.Commands.SoftDeleteComment;
+using Agora.Models.Models;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Models.Comments.Commands.SoftDeleteComment;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 
-namespace BallerupKommune.Operations.UnitTests.Models.Comments.Commands
+namespace Agora.Operations.UnitTests.Models.Comments.Commands
 {
     public class SoftDeleteTests : ModelsTestBase<SoftDeleteCommentCommand, Comment>
     {

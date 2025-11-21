@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using BallerupKommune.Models.Common;
+using Agora.Models.Common;
 
-namespace BallerupKommune.Models.Models
+namespace Agora.Models.Models
 {
     public class HearingType : AuditableModel
     {
@@ -17,6 +17,8 @@ namespace BallerupKommune.Models.Models
         public ICollection<KleMapping> KleMappings { get; set; } = new List<KleMapping>();
 
         public ICollection<FieldTemplate> FieldTemplates { get; set; } = new List<FieldTemplate>();
+
+        public ICollection<InvitationGroupMapping> InvitationGroupMappings { get; set; } = new List<InvitationGroupMapping>();
 
         public static List<string> DefaultIncludes => new List<string>
         {

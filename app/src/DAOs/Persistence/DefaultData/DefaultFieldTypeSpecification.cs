@@ -1,12 +1,13 @@
-﻿using BallerupKommune.Entities.Entities;
-using BallerupKommune.Entities.Enums;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using FieldTypeSpecificationEntity = Agora.Entities.Entities.FieldTypeSpecificationEntity;
+using FieldType = Agora.Entities.Enums.FieldType;
+using ContentType = Agora.Entities.Enums.ContentType;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
-namespace BallerupKommune.DAOs.Persistence.DefaultData
+namespace Agora.DAOs.Persistence.DefaultData
 {
     public class DefaultFieldTypeSpecification : DefaultDataSeeder<FieldTypeSpecificationEntity>
     {
@@ -51,7 +52,12 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
                 {
                     FieldType = fieldTypes.First(fieldType => fieldType.Type == FieldType.CONCLUSION),
                     ContentType = contentTypes.First(contentType => contentType.Type == ContentType.TEXT)
-                }
+                },
+                new FieldTypeSpecificationEntity
+                {
+                    FieldType = fieldTypes.First(fieldType => fieldType.Type == FieldType.CONCLUSION),
+                    ContentType = contentTypes.First(contentType => contentType.Type == ContentType.FILE)
+                },
             };
         }
 
@@ -62,20 +68,21 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
         {
         }
 
-        public static async Task SeedData(ApplicationDbContext context)
+        public static async Task SeedData(ApplicationDbContext context, List<FieldTypeSpecificationEntity> municipalitySpecificEntities = null)
         {
             List<FieldTypeSpecificationEntity> defaultEntities = await GetDefaultEntities(context);
-            var seeder = new DefaultFieldTypeSpecification(context, defaultEntities);
+            var seeder = new DefaultFieldTypeSpecification(context, municipalitySpecificEntities ?? defaultEntities);
             await seeder.SeedEntitiesAsync();
         }
 
-        public override List<FieldTypeSpecificationEntity> FetchEntitiesToUpdate(List<FieldTypeSpecificationEntity> existingEntities, List<FieldTypeSpecificationEntity> defaultEntities)
+        public override List<FieldTypeSpecificationEntity> GetUpdatedEntities(List<FieldTypeSpecificationEntity> existingEntities, List<FieldTypeSpecificationEntity> defaultEntities)
         {
             var updatedEntities = new List<FieldTypeSpecificationEntity>();
 
             foreach (var entity in existingEntities)
             {
                 var defaultEntity = defaultEntities.FirstOrDefault(e => _comparer(e, entity));
+
                 if (defaultEntity == null)
                 {
                     continue;

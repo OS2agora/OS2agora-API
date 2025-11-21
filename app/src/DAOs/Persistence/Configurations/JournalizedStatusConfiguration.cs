@@ -1,10 +1,10 @@
 using System;
-using BallerupKommune.DAOs.Persistence.Configurations.Utility;
-using BallerupKommune.Entities.Entities;
-using BallerupKommune.Entities.Enums;
+using Agora.DAOs.Persistence.Configurations.Utility;
+using Agora.Entities.Entities;
+using Agora.Entities.Enums;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BallerupKommune.DAOs.Persistence.Configurations
+namespace Agora.DAOs.Persistence.Configurations
 {
     public class JournalizedStatusConfiguration : AuditableEntityTypeConfiguration<JournalizedStatusEntity>
     {

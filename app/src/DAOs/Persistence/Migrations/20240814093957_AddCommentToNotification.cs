@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace BallerupKommune.DAOs.Persistence.Migrations
+namespace Agora.DAOs.Persistence.Migrations
 {
     public partial class AddCommentToNotification : Migration
     {

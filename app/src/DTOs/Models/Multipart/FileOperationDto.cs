@@ -1,7 +1,7 @@
-﻿using BallerupKommune.DTOs.Enums;
+﻿using Agora.DTOs.Enums;
 using Microsoft.AspNetCore.Http;
 
-namespace BallerupKommune.DTOs.Models.Multipart
+namespace Agora.DTOs.Models.Multipart
 {
     public class FileOperationDto
     {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Diagnostics;
 using DbCommand = System.Data.Common.DbCommand;
 
-namespace BallerupKommune.DAOs.Statistics
+namespace Agora.DAOs.Statistics
 {
     internal class CommandCountInterceptor : DbCommandInterceptor
     {

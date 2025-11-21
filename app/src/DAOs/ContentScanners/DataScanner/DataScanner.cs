@@ -1,8 +1,8 @@
-﻿using BallerupKommune.Operations.Common.Enums;
-using BallerupKommune.Operations.Common.Interfaces;
+﻿using Agora.Operations.Common.Enums;
+using Agora.Operations.Common.Interfaces;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.DAOs.ContentScanners.DataScanner
+namespace Agora.DAOs.ContentScanners.DataScanner
 {
     public class DataScanner : IDataScanner
     {

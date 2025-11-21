@@ -1,17 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BallerupKommune.Api.Mappings;
-using BallerupKommune.Api.Models.DTOs;
-using BallerupKommune.Api.Models.JsonApi;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Models.SubjectAreas.Command.CreateSubjectArea;
-using BallerupKommune.Operations.Models.SubjectAreas.Command.DeleteSubjectArea;
-using BallerupKommune.Operations.Models.SubjectAreas.Command.UpdateSubjectArea;
-using BallerupKommune.Operations.Models.SubjectAreas.Queries.GetSubjectAreas;
+using Agora.Api.Mappings;
+using Agora.Api.Models.DTOs;
+using Agora.Api.Models.JsonApi;
+using Agora.Models.Models;
+using Agora.Operations.Models.SubjectAreas.Command.CreateSubjectArea;
+using Agora.Operations.Models.SubjectAreas.Command.DeleteSubjectArea;
+using Agora.Operations.Models.SubjectAreas.Command.UpdateSubjectArea;
+using Agora.Operations.Models.SubjectAreas.Queries.GetSubjectAreas;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BallerupKommune.Api.Controllers
+namespace Agora.Api.Controllers
 {
     public class SubjectAreaController : ApiController
     {

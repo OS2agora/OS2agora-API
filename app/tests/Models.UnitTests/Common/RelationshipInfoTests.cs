@@ -1,8 +1,8 @@
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
+using Agora.Models.Common;
+using Agora.Models.Models;
 using NUnit.Framework;
 
-namespace BallerupKommune.Models.UnitTests.Common
+namespace Agora.Models.UnitTests.Common
 {
     public class RelationshipInfoTests
     {

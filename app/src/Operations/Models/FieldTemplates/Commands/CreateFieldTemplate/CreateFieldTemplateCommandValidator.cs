@@ -1,6 +1,6 @@
-﻿using BallerupKommune.Operations.Models.FieldTemplates.Commands.Rules;
+﻿using Agora.Operations.Models.FieldTemplates.Commands.Rules;
 using FluentValidation;
-namespace BallerupKommune.Operations.Models.FieldTemplates.Commands.CreateFieldTemplate
+namespace Agora.Operations.Models.FieldTemplates.Commands.CreateFieldTemplate
 {
     public class CreateFieldTemplateCommandValidator : AbstractValidator<CreateFieldTemplateCommand>
     {

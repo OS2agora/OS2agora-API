@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+using Agora.Models.Common;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using MediatR;
 
-namespace BallerupKommune.Operations.Models.SubjectAreas.Queries.GetSubjectAreas
+namespace Agora.Operations.Models.SubjectAreas.Queries.GetSubjectAreas
 {
     public class GetSubjectAreasQuery : IRequest<List<SubjectArea>>
     {

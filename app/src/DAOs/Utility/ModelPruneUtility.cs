@@ -1,11 +1,11 @@
-﻿using BallerupKommune.Models.Common;
+﻿using Agora.Models.Common;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace BallerupKommune.DAOs.Utility
+namespace Agora.DAOs.Utility
 {
     /// <summary>
     /// Contains logic to prune model objects based on a set of includes. 

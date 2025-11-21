@@ -1,7 +1,7 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Constants;
-using BallerupKommune.Operations.Common.Interfaces;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Constants;
+using Agora.Operations.Common.Interfaces;
+using Agora.Operations.Common.Interfaces.DAOs;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -9,17 +9,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Operations.Common.Extensions;
-using BallerupKommune.Operations.Resolvers;
-using CommentStatus = BallerupKommune.Models.Enums.CommentStatus;
-using CommentType = BallerupKommune.Models.Enums.CommentType;
-using ContentType = BallerupKommune.Models.Enums.ContentType;
-using FieldType = BallerupKommune.Models.Enums.FieldType;
-using HearingStatus = BallerupKommune.Models.Enums.HearingStatus;
-using JournalizedStatus = BallerupKommune.Models.Enums.JournalizedStatus;
+using Agora.Models.Common;
+using Agora.Operations.Common.Extensions;
+using Agora.Operations.Resolvers;
+using CommentStatus = Agora.Models.Enums.CommentStatus;
+using CommentType = Agora.Models.Enums.CommentType;
+using ContentType = Agora.Models.Enums.ContentType;
+using FieldType = Agora.Models.Enums.FieldType;
+using HearingStatus = Agora.Models.Enums.HearingStatus;
+using JournalizedStatus = Agora.Models.Enums.JournalizedStatus;
+using Agora.Models.Models.Records;
+using Agora.Operations.Common.Interfaces.Files.Pdf;
+using Agora.Operations.Common.Interfaces.Files;
 
-namespace BallerupKommune.Operations.Models.Hearings.Command.JournalizeHearings
+namespace Agora.Operations.Models.Hearings.Command.JournalizeHearings
 {
     public class JournalizeHearingsCommand : IRequest<Unit>
     {
@@ -56,6 +59,9 @@ namespace BallerupKommune.Operations.Models.Hearings.Command.JournalizeHearings
                     $"{nameof(Hearing.Comments)}.{nameof(Comment.CommentType)}",
                     $"{nameof(Hearing.Comments)}.{nameof(Comment.CommentStatus)}",
                     $"{nameof(Hearing.Comments)}.{nameof(Comment.Contents)}.{nameof(Content.ContentType)}",
+                    $"{nameof(Hearing.Comments)}.{nameof(Comment.User)}",
+                    $"{nameof(Hearing.Comments)}.{nameof(Comment.User)}.{nameof(User.UserCapacity)}",
+                    $"{nameof(Hearing.Comments)}.{nameof(Comment.User)}.{nameof(User.Company)}",
                     $"{nameof(Hearing.SubjectArea)}",
                 });
 
@@ -109,20 +115,28 @@ namespace BallerupKommune.Operations.Models.Hearings.Command.JournalizeHearings
                     return;
                 }
 
-                var title = titleContent.TextContent;
-                var summary = summaryContent.TextContent;
-                var bodyInformation = bodyInformationTextContent.TextContent;
-                var conclusion = conclusionContent.TextContent;
-                var conclusionCreated = conclusionContent.Created;
-                var hearingId = hearing.Id;
-                var esdhNumber = hearing.EsdhNumber;
-                var subjectArea = hearing.SubjectArea.Name;
-                var hearingType = hearing.HearingType.Name;
-                var startDate = hearing.StartDate.Value;
-                var deadline = hearing.Deadline.Value;
+                var hearingRecord = new HearingRecord
+                {
+                    BaseData = new HearingBaseData
+                    {
+                        Title = titleContent.TextContent,
+                        Summary = summaryContent.TextContent,
+                        BodyText = bodyInformationTextContent.TextContent,
+                        Conclusion = conclusionContent.TextContent,
+                        ConclusionCreatedDate = conclusionContent.Created,
+                        EsdhNumber = hearing.EsdhNumber,
+                        SubjectArea = hearing.SubjectArea.Name,
+                        HearingType = hearing.HearingType.Name,
+                        StartDate = hearing.StartDate.Value,
+                        Deadline = hearing.Deadline.Value,
 
-                var hearingPdf = _pdfService.CreateHearingPdf(title, summary, bodyInformation, esdhNumber, hearingType, subjectArea, startDate, deadline);
-                var conclusionPdf = _pdfService.CreateConclusionPdf(esdhNumber, summary, hearingType, subjectArea, conclusion, conclusionCreated);
+                    }
+                };
+
+                var hearingPdf = _pdfService.CreateHearingPdf(hearingRecord);
+                var conclusionPdf = _pdfService.CreateConclusionPdf(hearingRecord);
+
+                var hearingId = hearing.Id;
 
                 await _esdhService.JournalizeHearingText(hearingId, hearingPdf, Esdh.HearingFileName, Esdh.HearingFileDescription, Esdh.HearingFileContentType);
                 await _esdhService.JournalizeHearingConclusion(hearing.Id, conclusionPdf, Esdh.ConclusionFileName, Esdh.ConclusionFileDescription, Esdh.ConclusionFileContentType);
@@ -145,14 +159,21 @@ namespace BallerupKommune.Operations.Models.Hearings.Command.JournalizeHearings
                         continue;
                     }
 
-                    var commentText = commentTextContent.TextContent;
-                    var commentCreated = comment.Created;
-                    var commentWriterName = comment.User.Name;
+                    // If comment is created after the hearing deadline, then use the hearing deadline as the created date.
+                    var clampedCreatedDate = (!hearing.Deadline.HasValue || comment.Created < hearing.Deadline) ? comment.Created : hearing.Deadline.Value;
 
-                    var commentPdf = _pdfService.CreateCommentPdf(title, commentWriterName, commentText, esdhNumber, hearingType, subjectArea, commentCreated);
+                    var commentRecord = new CommentRecord
+                    {
+                        CommentText = commentTextContent.TextContent,
+                        Created = clampedCreatedDate,
+                        Number = comment.Number,
+                        ResponderName = comment.User.UserCapacity.Capacity == Agora.Models.Enums.UserCapacity.COMPANY ? comment.User.Company.Name : comment.User.Name,
+                    };
 
-                    var commentFileName = Esdh.CommentFileName(comment.Number);
-                    var commentFileDescription = Esdh.CommentFileDescription(comment.Number, commentWriterName);
+                    var commentPdf = _pdfService.CreateCommentPdf(commentRecord, hearingRecord);
+
+                    var commentFileName = Esdh.CommentFileName(commentRecord.Number);
+                    var commentFileDescription = Esdh.CommentFileDescription(commentRecord.Number, commentRecord.ResponderName);
 
                     await _esdhService.JournalizeHearingAnswer(hearingId, commentPdf, commentFileName, commentFileDescription, Esdh.CommentFileContentType);
 
@@ -162,8 +183,8 @@ namespace BallerupKommune.Operations.Models.Hearings.Command.JournalizeHearings
                     {
                         var fileFromDisk = await _fileService.GetFileFromDisk(file.FilePath);
 
-                        var fileNameInEsdh = Esdh.CommentAppendixTitle(comment.Number, file.FileName);
-                        var fileDescriptionInEsdh = Esdh.CommentAppendixDescription(comment.Number);
+                        var fileNameInEsdh = Esdh.CommentAppendixTitle(commentRecord.Number, file.FileName);
+                        var fileDescriptionInEsdh = Esdh.CommentAppendixDescription(commentRecord.Number);
 
                         await _esdhService.JournalizeHearingAnswer(hearingId, fileFromDisk, fileNameInEsdh, fileDescriptionInEsdh, file.FileContentType);
                     }

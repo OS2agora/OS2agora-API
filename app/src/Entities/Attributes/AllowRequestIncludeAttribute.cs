@@ -1,6 +1,6 @@
 using System;
 
-namespace BallerupKommune.Entities.Attributes
+namespace Agora.Entities.Attributes
 {
     /// <summary>
     /// Attribute for allowing request include of an entity. 

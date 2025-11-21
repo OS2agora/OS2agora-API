@@ -1,53 +1,106 @@
-﻿using BallerupKommune.Api.Mappings;
-using BallerupKommune.Api.Models.JsonApi;
-using BallerupKommune.DTOs.Models;
-using BallerupKommune.DTOs.Models.Multipart;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Models.Models.Files;
-using BallerupKommune.Models.Models.Multiparts;
-using BallerupKommune.Operations.Models.Comments.Commands.CreateComment;
-using BallerupKommune.Operations.Models.Comments.Commands.SoftDeleteComment;
-using BallerupKommune.Operations.Models.Comments.Commands.UpdateComment;
-using BallerupKommune.Operations.Models.Comments.Queries.GetComments;
-using BallerupKommune.Operations.Models.Fields.Commands.UpdateFields;
-using BallerupKommune.Operations.Models.Hearings.Command.CreateHearing;
-using BallerupKommune.Operations.Models.Hearings.Command.DeleteHearing;
-using BallerupKommune.Operations.Models.Hearings.Command.UpdateHearing;
-using BallerupKommune.Operations.Models.Hearings.Command.UploadInvitee;
-using BallerupKommune.Operations.Models.Hearings.Command.UploadReviewers;
-using BallerupKommune.Operations.Models.Hearings.Queries.ExportHearing;
-using BallerupKommune.Operations.Models.Hearings.Queries.GetHearing;
-using BallerupKommune.Operations.Models.Hearings.Queries.GetHearings;
-using BallerupKommune.Operations.Models.UserHearingRoles.Commands.CreateUserHearingRole;
-using BallerupKommune.Operations.Models.UserHearingRoles.Commands.DeleteUserHearingRole;
-using Microsoft.AspNetCore.Authorization;
+﻿using Agora.Api.Mappings;
+using Agora.Api.Models.DTOs;
+using Agora.Api.Models.JsonApi;
+using Agora.DTOs.Common.CustomResponseDto;
+using Agora.DTOs.Mappings;
+using Agora.DTOs.Models;
+using Agora.DTOs.Models.Multipart;
+using Agora.Models.Common.CustomResponse;
+using Agora.Models.Common.CustomResponse.Pagination;
+using Agora.Models.Common.CustomResponse.SortAndFilter;
+using Agora.Models.Models;
+using Agora.Models.Models.Files;
+using Agora.Models.Models.Invitations;
+using Agora.Models.Models.Multiparts;
+using Agora.Operations.Common.Interfaces.Security;
+using Agora.Operations.Models.Comments.Commands.CreateComment;
+using Agora.Operations.Models.Comments.Commands.SoftDeleteComment;
+using Agora.Operations.Models.Comments.Commands.UpdateComment;
+using Agora.Operations.Models.Comments.Queries.GetComments;
+using Agora.Operations.Models.Fields.Commands.UpdateFields;
+using Agora.Operations.Models.Hearings.Command.CreateHearing;
+using Agora.Operations.Models.Hearings.Command.DeleteHearing;
+using Agora.Operations.Models.Hearings.Command.DeleteInvitationSource;
+using Agora.Operations.Models.Hearings.Command.DeleteInvitationSourceMappings;
+using Agora.Operations.Models.Hearings.Command.UpdateHearing;
+using Agora.Operations.Models.Hearings.Command.UpdateInvitees.UpdateInviteesFromCsvFile;
+using Agora.Operations.Models.Hearings.Command.UpdateInvitees.UpdateInviteesFromExcelFile;
+using Agora.Operations.Models.Hearings.Command.UpdateInvitees.UpdateInviteesFromInvitationGroup;
+using Agora.Operations.Models.Hearings.Command.UpdateInvitees.UpdateInviteesFromPersonalInviteeIdentifiers;
+using Agora.Operations.Models.Hearings.Command.UploadReviewers;
+using Agora.Operations.Models.Hearings.Queries.ExportHearing;
+using Agora.Operations.Models.Hearings.Queries.GetHearing;
+using Agora.Operations.Models.Hearings.Queries.GetHearings;
+using Agora.Operations.Models.NotificationContents.Commands;
+using Agora.Operations.Models.NotificationContentSpecifications.Queries;
+using Agora.Operations.Models.Notifications.Commands.SendTestNotification;
+using Agora.Operations.Models.Notifications.Queries.ExportNotification;
+using Agora.Operations.Models.Notifications.Queries.GetInvitationNotifications;
+using Agora.Operations.Models.UserHearingRoles.Commands.CreateUserHearingRole;
+using Agora.Operations.Models.UserHearingRoles.Commands.DeleteUserHearingRole;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CommentDto = BallerupKommune.Api.Models.DTOs.CommentDto;
-using CommentStatus = BallerupKommune.Models.Enums.CommentStatus;
-using CommentType = BallerupKommune.Models.Enums.CommentType;
-using ExportFormat = BallerupKommune.Api.Models.Enums.ExportFormat;
-using HearingDto = BallerupKommune.Api.Models.DTOs.HearingDto;
-using UserHearingRoleDto = BallerupKommune.Api.Models.DTOs.UserHearingRoleDto;
+using CommentDto = Agora.Api.Models.DTOs.CommentDto;
+using CommentStatus = Agora.Models.Enums.CommentStatus;
+using CommentType = Agora.Models.Enums.CommentType;
+using ContentDto = Agora.DTOs.Models.ContentDto;
+using ExportFormat = Agora.Api.Models.Enums.ExportFormat;
+using HearingDto = Agora.Api.Models.DTOs.HearingDto;
+using NotificationContentDto = Agora.Api.Models.DTOs.NotificationContentDto;
+using NotificationContentSpecificationDto = Agora.Api.Models.DTOs.NotificationContentSpecificationDto;
+using NotificationType = Agora.Api.Models.Enums.NotificationType;
+using PaginationParametersDto = Agora.DTOs.Common.CustomResponseDto.PaginationParametersDto;
+using UserHearingRoleDto = Agora.Api.Models.DTOs.UserHearingRoleDto;
 
-namespace BallerupKommune.Api.Controllers
+namespace Agora.Api.Controllers
 {
     public class HearingController : ApiController
     {
-        [HttpGet]
-        public async Task<ActionResult<JsonApiTopLevelDto<List<HearingDto>>>> GetHearings([FromQuery] string include)
+        private readonly ISecurityExpressions _securityExpressions;
+
+        public HearingController(ISecurityExpressions securityExpressions)
         {
+            _securityExpressions = securityExpressions;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<JsonApiTopLevelDto<IList<HearingDto>>>> GetHearings(
+            [FromQuery] string include,
+            [FromQuery] PaginationParametersDto paginationParametersDto,
+            [FromQuery] FilterParametersDto filterParametersDto,
+            [FromQuery] SortingParametersDto sortingParametersDto)
+        {
+            var paginationParameters =
+                Mapper.Map<PaginationParametersDto, PaginationParameters>(paginationParametersDto);
+            var filterParameters =
+                Mapper.Map<FilterParametersDto, FilterParameters>(filterParametersDto);
+            var sortingParameters = Mapper.Map<SortingParametersDto, SortingParameters>(sortingParametersDto);
+
+
             var operationResponse = await Mediator.Send(new GetHearingsQuery
             {
-                RequestIncludes = include.MapToIncludeList()
+                RequestIncludes = include.MapToIncludeList(),
+                PaginationParameters = paginationParameters,
+                FilterParameters = filterParameters,
+                SortingParameters = sortingParameters
             });
 
-            var hearingsDtoList = operationResponse
-                .Select(hearing => Mapper.Map<Hearing, DTOs.Models.HearingDto>(hearing)).ToList();
-            return Ok(hearingsDtoList);
+
+            if (operationResponse is ResponseList<Hearing> responseList)
+            {
+                var hearingsDtoList = Mapper.Map<ResponseList<Hearing>, ResponseListDto<DTOs.Models.HearingDto>>(responseList);
+                var responseWithMeta = ResponseListDtoMapper<DTOs.Models.HearingDto>.MapToDocumentRoot(hearingsDtoList);
+                return Ok(responseWithMeta);
+            }
+            else
+            {
+                var hearingsDtoList = operationResponse
+                    .Select(hearing => Mapper.Map<Hearing, DTOs.Models.HearingDto>(hearing)).ToList();
+                return Ok(hearingsDtoList);
+            }
         }
 
         [HttpGet("{id}")]
@@ -59,7 +112,11 @@ namespace BallerupKommune.Api.Controllers
                 RequestIncludes = include.MapToIncludeList()
             });
 
-            var hearingDto = Mapper.Map<Hearing, DTOs.Models.HearingDto>(operationResponse);
+            // If the current user is the owner of the hearing, include personal information in the response
+            var hearingDto = _securityExpressions.IsHearingOwnerByHearingId(id) ?
+                Mapper.Map<Hearing, DTOs.Models.HearingDto>(operationResponse, options => options.Items.Add(PersonalInformationValueResolver.GetIncludePersonalInfoOption(true))) :
+                Mapper.Map<Hearing, DTOs.Models.HearingDto>(operationResponse);
+
             return Ok(hearingDto);
         }
 
@@ -74,7 +131,6 @@ namespace BallerupKommune.Api.Controllers
             return Ok(hearingDto);
         }
 
-        [AllowAnonymous]
         [HttpPatch("{id}")]
         public async Task<ActionResult<JsonApiTopLevelDto<HearingDto>>> UpdateHearing(int id,
             JsonApiTopLevelDto<HearingDto> dto, [FromQuery] string include)
@@ -131,22 +187,126 @@ namespace BallerupKommune.Api.Controllers
             return Ok(hearingDto);
         }
 
-        [HttpPost("{id}/invite")]
-        public async Task<ActionResult<JsonApiTopLevelDto<HearingDto>>> UploadInviteList(int id, IFormFile formFile, 
-            [FromQuery] string include)
+        [HttpGet("{hearingId}/invitationNotifications")]
+        public async Task<ActionResult<JsonApiTopLevelDto<List<NotificationDto>>>> GetInvitationNotifications(
+            int hearingId)
+        {
+            var operationResponse = await Mediator.Send(new GetInvitationNotificationsQuery
+            {
+                HearingId = hearingId
+            });
+
+            var invitationNotificationsDtoList = operationResponse
+                .Select(notification
+                    => Mapper.Map<Notification, NotificationDto>(notification, options
+                        => options.Items.Add(PersonalInformationValueResolver.GetIncludePersonalInfoOption(true))))
+                .ToList();
+
+            return Ok(invitationNotificationsDtoList);
+        }
+
+        [HttpDelete("{hearingId}/invitationSource/{invitationSourceName}")]
+        public async Task<ActionResult> DeleteInvitationSource(int hearingId, string invitationSourceName)
+        {
+            var operationResponse = await Mediator.Send(new DeleteInvitationSourceCommand
+            {
+                HearingId = hearingId,
+                InvitationSourceName = invitationSourceName
+            });
+
+            var metaDataResponseDto = Mapper.Map<MetaDataResponse<Hearing, InvitationMetaData>,
+                MetaDataResponseDto<DTOs.Models.HearingDto, InvitationMetaDataDto>>(operationResponse, options => options.Items.Add(PersonalInformationValueResolver.GetIncludePersonalInfoOption(true)));
+
+            return Ok(MetaDataResponseDtoMapper<DTOs.Models.HearingDto, InvitationMetaDataDto>.MapToDocumentRoot(metaDataResponseDto));
+        }
+
+        [HttpPost("{hearingId}/invitationSourceMappings/delete")]
+        public async Task<ActionResult> DeleteInvitationSourceMappings(int hearingId,
+            [FromBody] List<int> invitationSourceMappingIds,
+            [FromQuery] bool deleteFromAllInvitationSources)
+        {
+            var operationResponse = await Mediator.Send(new DeleteInvitationSourceMappingsCommand
+            {
+                HearingId = hearingId,
+                InvitationSourceMappingIds = invitationSourceMappingIds,
+                DeleteFromAllInvitationSources = deleteFromAllInvitationSources
+            });
+            var metaDataResponseDto = Mapper.Map<MetaDataResponse<Hearing, InvitationMetaData>,
+                MetaDataResponseDto<DTOs.Models.HearingDto, InvitationMetaDataDto>>(operationResponse, options => options.Items.Add(PersonalInformationValueResolver.GetIncludePersonalInfoOption(true)));
+            return Ok(MetaDataResponseDtoMapper<DTOs.Models.HearingDto, InvitationMetaDataDto>.MapToDocumentRoot(metaDataResponseDto));
+        }
+
+        [HttpPost("{hearingId}/invite/{invitationSourceId}/csv")]
+        public async Task<ActionResult<JsonApiTopLevelDto<HearingDto>>> UpdateInviteesFromCsvFile(int hearingId, int invitationSourceId, IFormFile formFile)
         {
             var file = Mapper.Map<IFormFile, File>(formFile);
 
-            var operationResponse = await Mediator.Send(new UploadInviteeCommand
+            var operationResponse = await Mediator.Send(new UpdateInviteesFromCsvFileCommand
             {
-                Id = id,
+                HearingId = hearingId,
                 File = file,
-                RequestIncludes = include.MapToIncludeList()
+                InvitationSourceId = invitationSourceId
             });
 
-            var hearingDto = Mapper.Map<Hearing, DTOs.Models.HearingDto>(operationResponse);
-            return Ok(hearingDto);
+            var metaDataResponseDto = Mapper.Map<MetaDataResponse<Hearing, InvitationMetaData>,
+                MetaDataResponseDto<DTOs.Models.HearingDto, InvitationMetaDataDto>>(operationResponse, options => options.Items.Add(PersonalInformationValueResolver.GetIncludePersonalInfoOption(true)));
+
+            return Ok(MetaDataResponseDtoMapper<DTOs.Models.HearingDto, InvitationMetaDataDto>.MapToDocumentRoot(metaDataResponseDto));
         }
+
+        [HttpPost("{hearingId}/invite/{invitationSourceId}/excel")]
+        public async Task<ActionResult<JsonApiTopLevelDto<HearingDto>>> UpdateInviteesFromExcelFile(int hearingId, int invitationSourceId, IFormFile formFile)
+        {
+            var file = Mapper.Map<IFormFile, File>(formFile);
+
+            var operationResponse = await Mediator.Send(new UpdateInviteesFromExcelFileCommand
+            {
+                HearingId = hearingId,
+                File = file,
+                InvitationSourceId = invitationSourceId
+            });
+
+            var metaDataResponseDto = Mapper.Map<MetaDataResponse<Hearing, InvitationMetaData>,
+                MetaDataResponseDto<DTOs.Models.HearingDto, InvitationMetaDataDto>>(operationResponse, options => options.Items.Add(PersonalInformationValueResolver.GetIncludePersonalInfoOption(true)));
+
+            return Ok(MetaDataResponseDtoMapper<DTOs.Models.HearingDto, InvitationMetaDataDto>.MapToDocumentRoot(metaDataResponseDto));
+        }
+
+        [HttpPost("{hearingId}/invite/{invitationSourceId}/personal")]
+        public async Task<ActionResult<JsonApiTopLevelDto<HearingDto>>> UpdateInviteesFromPersonalInviteeIdentifiers(int hearingId, int invitationSourceId, List<JsonApiTopLevelDto<InviteeIdentifiersDto>> dtos)
+        {
+            var inviteeIdentifiersDtos = dtos.Select(dto => dto.MapFromJsonApiDtoToDto<DTOs.Models.Invitations.InviteeIdentifiersDto, JsonApiTopLevelDto<InviteeIdentifiersDto>, InviteeIdentifiersDto, InviteeIdentifiersDto.InviteeIdentifiersAttributeDto>());
+            var inviteeIdentifiers = inviteeIdentifiersDtos.Select(resourceDto => Mapper.Map<DTOs.Models.Invitations.InviteeIdentifiersDto, InviteeIdentifiers>(resourceDto)).ToList();
+
+            var operationResponse = await Mediator.Send(new UpdateInviteesFromPersonalInviteeIdentifiersCommand
+            {
+                HearingId = hearingId,
+                InvitationSourceId = invitationSourceId,
+                InviteeIdentifiers = inviteeIdentifiers
+            });
+
+            var metaDataResponseDto = Mapper.Map<MetaDataResponse<Hearing, InvitationMetaData>,
+                MetaDataResponseDto<DTOs.Models.HearingDto, InvitationMetaDataDto>>(operationResponse, options => options.Items.Add(PersonalInformationValueResolver.GetIncludePersonalInfoOption(true)));
+
+            return Ok(MetaDataResponseDtoMapper<DTOs.Models.HearingDto, InvitationMetaDataDto>.MapToDocumentRoot(metaDataResponseDto));
+        }
+
+        [HttpPost("{hearingId}/invite/{invitationSourceId}/invitationGroup/{invitationGroupId}")]
+        public async Task<ActionResult<JsonApiTopLevelDto<HearingDto>>> UpdateInviteesFromInvitationGroup(int hearingId, int invitationSourceId, int invitationGroupId)
+        {
+            var operationResponse = await Mediator.Send(new UpdateInviteesFromInvitationGroupCommand
+            {
+                HearingId = hearingId,
+                InvitationSourceId = invitationSourceId,
+                InvitationGroupId = invitationGroupId
+            });
+
+            var metaDataResponseDto = Mapper.Map<MetaDataResponse<Hearing, InvitationMetaData>,
+                MetaDataResponseDto<DTOs.Models.HearingDto, InvitationMetaDataDto>>(operationResponse, options => options.Items.Add(PersonalInformationValueResolver.GetIncludePersonalInfoOption(true)));
+
+            return Ok(MetaDataResponseDtoMapper<DTOs.Models.HearingDto, InvitationMetaDataDto>.MapToDocumentRoot(metaDataResponseDto));
+        }
+
 
         [HttpPost("{id}/reviewers")]
         public async Task<ActionResult<List<UserHearingRoleDto>>> UpdateReviewerList(int id, List<JsonApiTopLevelDto<UserHearingRoleDto>> dtos)
@@ -176,7 +336,7 @@ namespace BallerupKommune.Api.Controllers
             var command = new ExportHearingQuery
             {
                 Id = id,
-                Format = (BallerupKommune.Models.Enums.ExportFormat)format
+                Format = (Agora.Models.Enums.ExportFormat)format
             };
 
             var result = await Mediator.Send(command);
@@ -184,21 +344,62 @@ namespace BallerupKommune.Api.Controllers
             return File(result.Content, result.ContentType, result.FileName);
         }
 
-        [HttpGet("{hearingId}/comment")]
-        public async Task<ActionResult<JsonApiTopLevelDto<List<CommentDto>>>> GetComments(int hearingId, [FromQuery] string include)
+        [HttpGet("{hearingId}/notification/{type}/export")]
+        public async Task<FileResult> ExportNotification(int hearingId, NotificationType type)
         {
+            var command = new ExportNotificationQuery
+            {
+                HearingId = hearingId,
+                NotificationType = (Agora.Models.Enums.NotificationType)type
+            };
+            var result = await Mediator.Send(command);
+
+            return File(result.Content, result.ContentType, result.FileName);
+        }
+
+        [HttpPost("{hearingId}/notification/{type}/send")]
+        public async Task<ActionResult> SendNotification(int hearingId, NotificationType type)
+        {
+            var command = new SendTestNotificationCommand
+            {
+                HearingId = hearingId,
+                NotificationType = (Agora.Models.Enums.NotificationType)type
+            };
+            await Mediator.Send(command);
+
+            return Ok();
+        }
+
+        [HttpGet("{hearingId}/comment")]
+        public async Task<ActionResult<JsonApiTopLevelDto<List<CommentDto>>>> GetComments(int hearingId, [FromQuery] string include, [FromQuery] PaginationParametersDto paginationParametersDto, [FromQuery] bool myCommentsOnly = false)
+        {
+
+            var paginationParameters =
+                Mapper.Map<PaginationParametersDto, PaginationParameters>(paginationParametersDto);
+
             var operationResponse = await Mediator.Send(new GetCommentsQuery
             {
                 HearingIds = new List<int> { hearingId },
-                RequestIncludes = include.MapToIncludeList()
+                RequestIncludes = include.MapToIncludeList(),
+                PaginationParameters = paginationParameters,
+                MyCommentsOnly = myCommentsOnly
             });
 
-            var commentsDtoList = operationResponse.Select(comment => Mapper.Map<Comment, DTOs.Models.CommentDto>(comment)).ToList();
-            return Ok(commentsDtoList);
+            if (operationResponse is ResponseList<Comment> responseList)
+            {
+                var commentsDtoList = Mapper.Map<ResponseList<Comment>, ResponseListDto<DTOs.Models.CommentDto>>(responseList);
+                var responseWithMeta = ResponseListDtoMapper<DTOs.Models.CommentDto>.MapToDocumentRoot(commentsDtoList);
+                return Ok(responseWithMeta);
+            }
+            else
+            {
+                var commentsDtoList = operationResponse.Select(comment => Mapper.Map<Comment, DTOs.Models.CommentDto>(comment)).ToList();
+                return Ok(commentsDtoList);
+            }
         }
 
-        // Setting unlimited file size for this request
-        [DisableRequestSizeLimit]
+        // Setting request size limit to 150 MB for this request
+        [RequestSizeLimit(150000000)]
         [HttpPost("{hearingId}/comment")]
         public async Task<ActionResult<JsonApiTopLevelDto<CommentDto>>> CreateComment(int hearingId,
             [FromForm] MultiPartCreateCommentDto dto)
@@ -221,8 +422,6 @@ namespace BallerupKommune.Api.Controllers
             return Ok(dtoResult);
         }
 
-        // Setting unlimited file size for this request
-        [DisableRequestSizeLimit]
         [HttpPatch("{hearingId}/comment/{id}")]
         public async Task<ActionResult<JsonApiTopLevelDto<CommentDto>>> UpdateComment(int hearingId, int id)
         {
@@ -237,8 +436,8 @@ namespace BallerupKommune.Api.Controllers
             return Ok(dtoResult);
         }
 
-        // Setting unlimited file size for this request
-        [DisableRequestSizeLimit]
+        // Setting request size limit to 150 MB for this request
+        [RequestSizeLimit(150000000)]
         [HttpPatch("{hearingId}/comment/{id}/content")]
         public async Task<ActionResult<JsonApiTopLevelDto<CommentDto>>> UpdateContent(int hearingId, int id,
             [FromForm] MultiPartUpdateCommentDto dto)
@@ -252,7 +451,7 @@ namespace BallerupKommune.Api.Controllers
                 Text = dto?.Content,
                 OnBehalfOf = dto?.OnBehalfOf,
                 CommentStatus = dto != null ? (CommentStatus)dto.CommentStatus : CommentStatus.NONE,
-                CommentDeclineReason = dto.CommentDeclineReason,
+                CommentDeclineReason = dto?.CommentDeclineReason,
                 FileOperations = fileOperations
             };
 
@@ -262,8 +461,8 @@ namespace BallerupKommune.Api.Controllers
             return Ok(dtoResult);
         }
 
-        // Setting unlimited file size for this request
-        [DisableRequestSizeLimit]
+        // Setting request size limit to 150 MB for this request
+        [RequestSizeLimit(150000000)]
         [HttpPatch("{hearingId}/fieldContent")]
         public async Task<ActionResult<JsonApiTopLevelDto<ContentDto>>> UpdateFieldContent(int hearingId, [FromQuery] int hearingStatusId, [FromQuery] bool notifyAboutChanges,
             [FromForm] MultiPartFieldsDto dto)
@@ -315,6 +514,36 @@ namespace BallerupKommune.Api.Controllers
 
             var userHearingRoleDto = Mapper.Map<UserHearingRole, DTOs.Models.UserHearingRoleDto>(operationResponse);
             return Ok(userHearingRoleDto);
+        }
+
+        [HttpGet("{hearingId}/notificationContentSpecification")]
+        public async Task<ActionResult<JsonApiTopLevelDto<List<NotificationContentSpecificationDto>>>> GetNotificationContentSpecifications(int hearingId)
+        {
+            var operationResponse = await Mediator.Send(new GetNotificationContentSpecificationsQuery
+            {
+                HearingId = hearingId
+            });
+
+            var notificationContentSpecificationDtoList = operationResponse.Select(ncs => Mapper.Map<NotificationContentSpecification, DTOs.Models.NotificationContentSpecificationDto>(ncs)).ToList();
+            return Ok(notificationContentSpecificationDtoList);
+        }
+
+        [HttpPatch("{hearingId}/notificationContentSpecification/{notificationContentSpecificationId}/notificationContent")]
+        public async Task<ActionResult<JsonApiTopLevelDto<NotificationContentDto>>> UpdateNotificationContent(int hearingId, int notificationContentSpecificationId, List<JsonApiTopLevelDto<NotificationContentDto>> dtos)
+        {
+            var resourceDtos = dtos.Select(dto => dto.MapFromJsonApiDtoToDto<DTOs.Models.NotificationContentDto, JsonApiTopLevelDto<NotificationContentDto>, NotificationContentDto, NotificationContentDto.NotificationContentAttributeDto>());
+
+            var resources = resourceDtos.Select(resourceDto => Mapper.Map<DTOs.Models.NotificationContentDto, NotificationContent>(resourceDto)).ToList();
+
+            var operationResponse = await Mediator.Send(new UpdateNotificationContentsCommand
+            {
+                HearingId = hearingId,
+                NotificationContentSpecificationId = notificationContentSpecificationId,
+                NotificationContents = resources
+            });
+
+            var notificationContentDtoList = operationResponse.Select(notificationContent => Mapper.Map<NotificationContent, DTOs.Models.NotificationContentDto>(notificationContent)).ToList();
+            return Ok(notificationContentDtoList);
         }
     }
 }

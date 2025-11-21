@@ -1,13 +1,10 @@
-﻿using BallerupKommune.Api.Models.JsonApi;
-using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using System.Net.Http;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Reflection;
-using System.Threading.Tasks;
 
-namespace BallerupKommune.Api.Controllers
+namespace Agora.Api.Controllers
 {
-	public class VersionController : ApiController
+    public class VersionController : ApiController
 	{
 		[HttpGet]
 		public IActionResult GetVersion()
@@ -16,7 +13,18 @@ namespace BallerupKommune.Api.Controllers
 			return Ok(version);
 		}
 
-		private string GetInformationalVersion()
+        [HttpGet("HealthCheck")]
+        public IActionResult HealthCheck()
+        {
+            var response = new Dictionary<string, string>
+            {
+                { "status", "Healthy" }
+            };
+
+            return Ok(response);
+        }
+
+        private string GetInformationalVersion()
 		{
 			return Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
 		}

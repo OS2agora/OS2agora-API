@@ -1,11 +1,9 @@
-﻿namespace BallerupKommune.Operations.ApplicationOptions
+﻿namespace Agora.Operations.ApplicationOptions
 {
     public class OAuth2Options
     {
         public const string OAuth2 = "OAuth2";
 
-        public string InternalApiKey { get; set; }
-        public string PublicApiKey { get; set; }
         public string InternalClientId { get; set; }
         public string PublicClientId { get; set; }
         public string InternalClientSecret { get; set; }
@@ -18,9 +16,14 @@
         public string MaxAge { get; set; }
         public string WhrInternal { get; set; }
         public string WhrPublic { get; set; }
+
+        // Some municipalities require multiple CodeFlow authentication handlers. Therefore, we must be able to configure overrides for these settings
+        public OAuth2Options CitizenAuthOverrides { get; set; }
+        public OAuth2Options EmployeeOverrides { get; set; }
+        public OAuth2Options CompanyOverrides { get; set; }
     }
 
-    public class OAuth2Client
+    public class OAuth2ClientOptions
     {
         public string ApiKey { get; set; }
         public string ClientId { get; set; }

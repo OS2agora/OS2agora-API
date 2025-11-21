@@ -1,6 +1,6 @@
-using BallerupKommune.Operations.Common.Telemetry;
+using Agora.Operations.Common.Telemetry;
 
-namespace BallerupKommune.Operations.Common.Constants
+namespace Agora.Operations.Common.Constants
 {
     public static class Telemetry
     {

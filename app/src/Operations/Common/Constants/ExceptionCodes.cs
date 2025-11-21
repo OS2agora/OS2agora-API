@@ -1,4 +1,4 @@
-﻿namespace BallerupKommune.Operations.Common.Constants
+﻿namespace Agora.Operations.Common.Constants
 {
     public static class ExceptionCodes
     {
@@ -13,5 +13,7 @@
         public static readonly string KleMapping = "8";
         public static readonly string EmptyConclusion = "9";
         public static readonly string SbsipAuthorization = "10";
+        public static readonly string SortAndFilter = "11";
+        public static readonly string InvalidFileContent = "12";
     }
 }

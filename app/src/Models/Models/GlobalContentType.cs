@@ -1,8 +1,8 @@
-﻿using BallerupKommune.Models.Common;
+﻿using Agora.Models.Common;
 using System.Collections.Generic;
-using Enum = BallerupKommune.Models.Enums;
+using Enum = Agora.Models.Enums;
 
-namespace BallerupKommune.Models.Models
+namespace Agora.Models.Models
 {
     public class GlobalContentType : AuditableModel
     {

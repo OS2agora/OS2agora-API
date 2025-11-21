@@ -4,7 +4,7 @@ using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 
-namespace BallerupKommune.TestUtilities
+namespace Agora.TestUtilities
 {
     /// <summary>
     /// This attribute allows for the test of generic functions

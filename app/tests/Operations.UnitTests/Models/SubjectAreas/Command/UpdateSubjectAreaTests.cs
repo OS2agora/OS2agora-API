@@ -2,19 +2,19 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Constants;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Models.SubjectAreas.Command.UpdateSubjectArea;
+using Agora.Models.Models;
+using Agora.Operations.Common.Constants;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Models.SubjectAreas.Command.UpdateSubjectArea;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 
-namespace BallerupKommune.Operations.UnitTests.Models.SubjectAreas.Command
+namespace Agora.Operations.UnitTests.Models.SubjectAreas.Command
 {
-    public class UpdateSubjectAreaTests : ModelsTestBase<UpdateSubjectAreaCommand, SubjectArea>
+    public class UpdateCityAreaTests : ModelsTestBase<UpdateSubjectAreaCommand, SubjectArea>
     {
-        public UpdateSubjectAreaTests()
+        public UpdateCityAreaTests()
         {
             RequestHandlerDelegateMock
                 .Setup(x => x())

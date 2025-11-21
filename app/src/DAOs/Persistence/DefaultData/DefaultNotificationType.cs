@@ -1,100 +1,126 @@
-﻿using BallerupKommune.Entities.Entities;
-using BallerupKommune.Entities.Enums;
-using BallerupKommune.Operations.Common.Constants;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using NotificationType = Agora.Entities.Enums.NotificationType;
+using NotificationTypeEntity = Agora.Entities.Entities.NotificationTypeEntity;
 
-namespace BallerupKommune.DAOs.Persistence.DefaultData
+namespace Agora.DAOs.Persistence.DefaultData
 {
     public class DefaultNotificationType : DefaultDataSeeder<NotificationTypeEntity>
     {
         private static async Task<List<NotificationTypeEntity>> GetDefaultEntities(ApplicationDbContext context)
         {
-            var addedReviewersTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(template => template.SubjectTemplate == NotificationSubjectTemplates.AddedReviewers);
-            var newHearingOwnerTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(template => template.SubjectTemplate == NotificationSubjectTemplates.NewHearingOwner);
-            var hearingStatusChangeTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(template => template.SubjectTemplate == NotificationSubjectTemplates.HearingStatusChange);
-            var newHearingAnswersTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(template => template.SubjectTemplate == NotificationSubjectTemplates.NewHearingAnswers);
-            var newHearingCommentsTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(template => template.SubjectTemplate == NotificationSubjectTemplates.NewHearingComments);
-            var publicHearingTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(template => template.SubjectTemplate == NotificationSubjectTemplates.PublicHearing);
-            var hearingAnswerDeclinedTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(template => template.SubjectTemplate == NotificationSubjectTemplates.HearingAnswerDeclined);
-            var hearingAnswerConfirmationTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(template => template.SubjectTemplate == NotificationSubjectTemplates.HearingAnswerConfirmation);
-            var hearingConcludedTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(template => template.SubjectTemplate == NotificationSubjectTemplates.HearingConcluded);
-            var hearingUpdatedTemplate = await context.NotificationTemplates.FirstOrDefaultAsync(template  => template.SubjectTemplate == NotificationSubjectTemplates.HearingUpdated);
+            var notificationTemplates = await context.NotificationTemplates.ToListAsync();
+            var notificationTemplateDefaultFooterId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.DefaultFooter)!.Id;
+
+            var notificationTemplateDefaultAddedAsReviewerSubjectId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.AddedAsReviewerSubject)!.Id;
+            var notificationTemplateDefaultAddedAsReviewerHeaderId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.AddedAsReviewerHeader)!.Id;
+            var notificationTemplateDefaultAddedAsReviewerBodyId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.AddedAsReviewerBody)!.Id;
+            
+            var notificationTemplateDefaultInvitationSubjectId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.InvitedToHearingSubject)!.Id;
+            var notificationTemplateDefaultInvitationHeaderId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.InvitedToHearingHeader)!.Id;
+            var notificationTemplateDefaultInvitationBodyId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.InvitedToHearingBody)!.Id;
+            var notificationTemplateDefaultInvitationFooterId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.InvitedToHearingFooter)!.Id;
+            
+            var notificationTemplateDefaultReceiptSubjectId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.ReceiptSubject)!.Id;
+            var notificationTemplateDefaultReceiptHeaderId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.ReceiptHeader)!.Id;
+            var notificationTemplateDefaultReceiptBodyId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.ReceiptBody)!.Id;
+            
+            var notificationTemplateDefaultHearingConclusionPublishedSubjectId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.ConcludedSubject)!.Id;
+            var notificationTemplateDefaultHearingConclusionPublishedHeaderId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.ConcludedHeader)!.Id;
+            var notificationTemplateDefaultHearingConclusionPublishedBodyId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.ConcludedBody)!.Id;
+            
+            var notificationTemplateDefaultHearingChangedSubjectId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.UpdatedSubject)!.Id;
+            var notificationTemplateDefaultHearingChangedHeaderId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.UpdatedHeader)!.Id;
+            var notificationTemplateDefaultHearingChangedBodyId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.UpdatedBody)!.Id;
+            
+            var notificationTemplateDefaultHearingResponseDeclinedSubjectId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.RejectedSubject)!.Id;
+            var notificationTemplateDefaultHearingResponseDeclinedHeaderId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.RejectedHeader)!.Id;
+            var notificationTemplateDefaultHearingResponseDeclinedBodyId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.RejectedBody)!.Id;
+            
+            var notificationTemplateDefaultDailyStatusSubjectId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.DailyStatusSubject)!.Id;
+            var notificationTemplateDefaultDailyStatusHeaderId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.DailyStatusHeader)!.Id;
+            var notificationTemplateDefaultDailyStatusBodyId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.DailyStatusBody)!.Id;
+            
+            var notificationTemplateDefaultNewsletterStatusSubjectId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.NewsLetterSubject)!.Id;
+            var notificationTemplateDefaultNewsletterStatusHeaderId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.NewsLetterHeader)!.Id;
+            var notificationTemplateDefaultNewsletterStatusBodyId = notificationTemplates.FirstOrDefault(nt => nt.Name == DefaultNotificationTemplates.NewsLetterBody)!.Id;
 
             return new List<NotificationTypeEntity>
             {
                 new NotificationTypeEntity
                 {
-                    Frequency = NotificationFrequency.DAILY,
                     Name = "Tilføjet som reviewer",
                     Type = NotificationType.ADDED_AS_REVIEWER,
-                    NotificationTemplate = addedReviewersTemplate
+                    SubjectTemplateId = notificationTemplateDefaultAddedAsReviewerSubjectId,
+                    HeaderTemplateId = notificationTemplateDefaultAddedAsReviewerHeaderId,
+                    BodyTemplateId = notificationTemplateDefaultAddedAsReviewerBodyId,
+                    FooterTemplateId = notificationTemplateDefaultFooterId
                 },
                 new NotificationTypeEntity
                 {
-                    Frequency = NotificationFrequency.DAILY,
-                    Name = "Høringsejer skiftet",
-                    Type = NotificationType.CHANGED_HEARING_OWNER,
-                    NotificationTemplate = newHearingOwnerTemplate
-                },
-                new NotificationTypeEntity
-                {
-                    Frequency = NotificationFrequency.DAILY,
-                    Name = "Høringstatus skiftet",
-                    Type = NotificationType.CHANGED_HEARING_STATUS,
-                    NotificationTemplate = hearingStatusChangeTemplate
-                },
-                new NotificationTypeEntity
-                {
-                    Frequency = NotificationFrequency.DAILY,
-                    Name = "Høringssvar modtaget",
-                    Type = NotificationType.HEARING_RESPONSE_RECEIVED,
-                    NotificationTemplate = newHearingAnswersTemplate
-                },
-                new NotificationTypeEntity
-                {
-                    Frequency = NotificationFrequency.DAILY,
-                    Name = "Høringskommentar modtaget",
-                    Type = NotificationType.HEARING_REVIEW_RECEIVED,
-                    NotificationTemplate = newHearingCommentsTemplate
-                },
-                new NotificationTypeEntity
-                {
-                    Frequency = NotificationFrequency.INSTANT,
                     Name = "Inviteret til høring",
                     Type = NotificationType.INVITED_TO_HEARING,
-                    NotificationTemplate = publicHearingTemplate
+                    SubjectTemplateId = notificationTemplateDefaultInvitationSubjectId,
+                    HeaderTemplateId = notificationTemplateDefaultInvitationHeaderId,
+                    BodyTemplateId = notificationTemplateDefaultInvitationBodyId,
+                    FooterTemplateId = notificationTemplateDefaultInvitationFooterId
                 },
                 new NotificationTypeEntity
                 {
-                    Frequency = NotificationFrequency.INSTANT,
-                    Name = "Høringssvar afvist",
-                    Type = NotificationType.HEARING_RESPONSE_DECLINED,
-                    NotificationTemplate = hearingAnswerDeclinedTemplate
-                },
-                new NotificationTypeEntity
-                {
-                    Frequency = NotificationFrequency.INSTANT,
                     Name = "Kvittering for høringssvar",
                     Type = NotificationType.HEARING_ANSWER_RECEIPT,
-                    NotificationTemplate = hearingAnswerConfirmationTemplate
+                    SubjectTemplateId = notificationTemplateDefaultReceiptSubjectId,
+                    HeaderTemplateId = notificationTemplateDefaultReceiptHeaderId,
+                    BodyTemplateId = notificationTemplateDefaultReceiptBodyId,
+                    FooterTemplateId = notificationTemplateDefaultFooterId
                 },
                 new NotificationTypeEntity
                 {
-                    Frequency = NotificationFrequency.INSTANT,
                     Name = "Høringskonklusion publiseret",
                     Type = NotificationType.HEARING_CONCLUSION_PUBLISHED,
-                    NotificationTemplate = hearingConcludedTemplate
+                    SubjectTemplateId = notificationTemplateDefaultHearingConclusionPublishedSubjectId,
+                    HeaderTemplateId = notificationTemplateDefaultHearingConclusionPublishedHeaderId,
+                    BodyTemplateId = notificationTemplateDefaultHearingConclusionPublishedBodyId,
+                    FooterTemplateId = notificationTemplateDefaultFooterId
                 },
                 new NotificationTypeEntity
                 {
-                    Frequency = NotificationFrequency.INSTANT,
                     Name = "Høring ændret",
                     Type = NotificationType.HEARING_CHANGED,
-                    NotificationTemplate = hearingUpdatedTemplate
+                    SubjectTemplateId = notificationTemplateDefaultHearingChangedSubjectId,
+                    HeaderTemplateId = notificationTemplateDefaultHearingChangedHeaderId,
+                    BodyTemplateId = notificationTemplateDefaultHearingChangedBodyId,
+                    FooterTemplateId = notificationTemplateDefaultFooterId
+                },
+                new NotificationTypeEntity
+                {
+                    Name = "Høringssvar afvist",
+                    Type = NotificationType.HEARING_RESPONSE_DECLINED,
+                    SubjectTemplateId = notificationTemplateDefaultHearingResponseDeclinedSubjectId,
+                    HeaderTemplateId = notificationTemplateDefaultHearingResponseDeclinedHeaderId,
+                    BodyTemplateId = notificationTemplateDefaultHearingResponseDeclinedBodyId,
+                    FooterTemplateId = notificationTemplateDefaultFooterId
+                },
+                new NotificationTypeEntity
+                {
+                    Name = "Daglig status",
+                    Type = NotificationType.DAILY_STATUS,
+                    SubjectTemplateId = notificationTemplateDefaultDailyStatusSubjectId,
+                    HeaderTemplateId = notificationTemplateDefaultDailyStatusHeaderId,
+                    BodyTemplateId = notificationTemplateDefaultDailyStatusBodyId,
+                    FooterTemplateId = notificationTemplateDefaultFooterId
+                },
+                new NotificationTypeEntity
+                {
+                    Name = "Nyhedsbrev",
+                    Type = NotificationType.NEWSLETTER,
+                    SubjectTemplateId = notificationTemplateDefaultNewsletterStatusSubjectId,
+                    HeaderTemplateId = notificationTemplateDefaultNewsletterStatusHeaderId,
+                    BodyTemplateId = notificationTemplateDefaultNewsletterStatusBodyId,
+                    FooterTemplateId = notificationTemplateDefaultFooterId
                 }
             };
         }
@@ -106,14 +132,14 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
         {
         }
 
-        public static async Task SeedData(ApplicationDbContext context)
+        public static async Task SeedData(ApplicationDbContext context, List<NotificationTypeEntity> municipalitySpecificEntities = null)
         {
-            List<NotificationTypeEntity> defaultEntities = await GetDefaultEntities(context);
-            var seeder = new DefaultNotificationType(context, defaultEntities);
+            var defaultEntities = await GetDefaultEntities(context);
+            var seeder = new DefaultNotificationType(context, municipalitySpecificEntities ?? defaultEntities);
             await seeder.SeedEntitiesAsync();
         }
 
-        public override List<NotificationTypeEntity> FetchEntitiesToUpdate(List<NotificationTypeEntity> existingEntities, List<NotificationTypeEntity> defaultEntities)
+        public override List<NotificationTypeEntity> GetUpdatedEntities(List<NotificationTypeEntity> existingEntities, List<NotificationTypeEntity> defaultEntities)
         {
             var updatedEntities = new List<NotificationTypeEntity>();
 
@@ -125,10 +151,12 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
                     continue;
                 }
 
-                entity.Frequency = defaultEntity.Frequency;
                 entity.Name = defaultEntity.Name;
                 entity.Type = defaultEntity.Type;
-                entity.NotificationTemplate = defaultEntity.NotificationTemplate;
+                entity.SubjectTemplateId = defaultEntity.SubjectTemplateId;
+                entity.HeaderTemplateId = defaultEntity.HeaderTemplateId;
+                entity.BodyTemplateId = defaultEntity.BodyTemplateId;
+                entity.FooterTemplateId = defaultEntity.FooterTemplateId;
 
                 updatedEntities.Add(entity);
             }

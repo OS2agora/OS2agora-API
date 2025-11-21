@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using BallerupKommune.Models.Common;
+using Agora.Models.Common;
 using NovaSec.Attributes;
 
-namespace BallerupKommune.Models.Models
+namespace Agora.Models.Models
 {
     [PostFilter("HasAnyRole(['Administrator', 'HearingOwner'])")]
     [PostFilter("HasRole('Employee') && @Security.HasRoleOnAnyHearing(resultObject.Role)")]

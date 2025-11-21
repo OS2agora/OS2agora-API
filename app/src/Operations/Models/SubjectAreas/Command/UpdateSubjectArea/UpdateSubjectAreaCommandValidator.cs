@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace BallerupKommune.Operations.Models.SubjectAreas.Command.UpdateSubjectArea
+namespace Agora.Operations.Models.SubjectAreas.Command.UpdateSubjectArea
 {
     public class UpdateSubjectAreaCommandValidator : AbstractValidator<UpdateSubjectAreaCommand>
     {

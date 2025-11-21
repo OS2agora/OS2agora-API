@@ -1,18 +1,17 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.ApplicationOptions;
-using BallerupKommune.Operations.Common.Interfaces;
+﻿using Agora.Models.Models;
+using Agora.Operations.ApplicationOptions;
+using Agora.Operations.Common.Interfaces;
+using Agora.Operations.Resolvers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BallerupKommune.Operations.Resolvers;
-using HearingRole = BallerupKommune.Models.Enums.HearingRole;
-using HearingStatus = BallerupKommune.Models.Enums.HearingStatus;
+using HearingRole = Agora.Models.Enums.HearingRole;
+using HearingStatus = Agora.Models.Enums.HearingStatus;
 
-namespace BallerupKommune.Operations.Plugins.Plugins
+namespace Agora.Operations.Plugins.Plugins
 {
     public class EsdhPlugin : PluginBase
     {

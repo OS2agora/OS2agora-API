@@ -1,0 +1,12 @@
+name: agora
+services:
+  # Service containing backend application
+  api:
+    build:
+      context: ..
+      dockerfile: docker/image/app/Dockerfile
+      args:
+          buildNumber: notprovided
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - RUNNING_IN_DOCKER=yes

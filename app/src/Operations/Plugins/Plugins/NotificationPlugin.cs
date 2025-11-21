@@ -1,20 +1,22 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.ApplicationOptions;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Common;
+using Agora.Models.Enums;
+using Agora.Models.Models;
+using Agora.Operations.ApplicationOptions;
+using Agora.Operations.Common.Extensions;
+using Agora.Operations.Common.Interfaces.DAOs;
+using Agora.Operations.Resolvers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Operations.Common.Extensions;
-using BallerupKommune.Operations.Resolvers;
-using Microsoft.Extensions.Logging;
-using HearingRole = BallerupKommune.Models.Enums.HearingRole;
-using NotificationTypeEnum = BallerupKommune.Models.Enums.NotificationType;
-using UserCapacity = BallerupKommune.Models.Enums.UserCapacity;
+using HearingRole = Agora.Models.Enums.HearingRole;
+using NotificationType = Agora.Models.Models.NotificationType;
+using NotificationTypeEnum = Agora.Models.Enums.NotificationType;
+using UserCapacity = Agora.Models.Enums.UserCapacity;
 
-namespace BallerupKommune.Operations.Plugins.Plugins
+namespace Agora.Operations.Plugins.Plugins
 {
     public class NotificationPlugin : PluginBase
     {
@@ -22,6 +24,7 @@ namespace BallerupKommune.Operations.Plugins.Plugins
         private readonly INotificationTypeDao _notificationTypeDao;
         private readonly IHearingDao _hearingDao;
         private readonly IUserDao _userDao;
+        private readonly IEventDao _eventDao;
         private readonly IHearingRoleResolver _hearingRoleResolver;
         private readonly ILogger<NotificationPlugin> _logger;
 
@@ -32,6 +35,7 @@ namespace BallerupKommune.Operations.Plugins.Plugins
             _notificationTypeDao = serviceProvider.GetService<INotificationTypeDao>();
             _hearingDao = serviceProvider.GetService<IHearingDao>();
             _userDao = serviceProvider.GetService<IUserDao>();
+            _eventDao = serviceProvider.GetService<IEventDao>();
             _hearingRoleResolver = serviceProvider.GetRequiredService<IHearingRoleResolver>();
             _logger = serviceProvider.GetRequiredService<ILogger<NotificationPlugin>>();
         }
@@ -52,28 +56,23 @@ namespace BallerupKommune.Operations.Plugins.Plugins
         {
             var hearing = await GetHearingWithUserHearingRoles(hearingId);
 
-            User hearingOwner = await hearing.GetHearingOwner(_hearingRoleResolver);
+            var hearingOwner = await hearing.GetHearingOwner(_hearingRoleResolver);
 
             if (userId != hearingOwner.Id)
             {
                 var currentUser = await GetUserById(userId);
-                var hearingAnswerReceiptNotificationType =
-                    await GetNotificationType(NotificationTypeEnum.HEARING_ANSWER_RECEIPT);
+                var hearingAnswerReceiptNotificationType = await GetNotificationType(NotificationTypeEnum.HEARING_ANSWER_RECEIPT);
 
                 await NotifyUserOrCompany(hearingAnswerReceiptNotificationType, hearingId, currentUser);
             }
 
-            var hearingResponseReceivedNotificationType =
-                await GetNotificationType(NotificationTypeEnum.HEARING_RESPONSE_RECEIVED);
-
-            await NotifyHearingOwnerAndReviewers(hearingResponseReceivedNotificationType.Id, hearing);
-
+            await CreateEvents(EventType.HEARING_RESPONSE_RECEIVED, hearing.Id, userId);
         }
 
         public override async Task NotifyAfterHearingResponseDecline(int hearingId, int userId, int commentId)
         {
             var hearing = await GetHearingWithUserHearingRoles(hearingId);
-            User hearingOwner = await hearing.GetHearingOwner(_hearingRoleResolver);
+            var hearingOwner = await hearing.GetHearingOwner(_hearingRoleResolver);
 
             var hearingResponseDeclinedNotificationType = await GetNotificationType(NotificationTypeEnum.HEARING_RESPONSE_DECLINED);
 
@@ -93,7 +92,7 @@ namespace BallerupKommune.Operations.Plugins.Plugins
                 .Where(user => user.UserCapacity.Capacity != UserCapacity.COMPANY)
                 .Select(user => user.Id).ToHashSet().ToList();
 
-            var allCompaniesToNotify = (await hearing.GetCompaniesWithAnyOfTheRoles(_hearingRoleResolver, 
+            var allCompaniesToNotify = (await hearing.GetCompaniesWithAnyOfTheRoles(_hearingRoleResolver,
                 HearingRole.HEARING_INVITEE, HearingRole.HEARING_RESPONDER))
                 .Select(company => company.Id).ToHashSet().ToList();
 
@@ -125,37 +124,26 @@ namespace BallerupKommune.Operations.Plugins.Plugins
         public override async Task NotifyAfterAddedAsReviewer(int hearingId, int userId)
         {
             var addedAsReviewerNotificationType = await GetNotificationType(NotificationTypeEnum.ADDED_AS_REVIEWER);
-
             await NotifyUser(addedAsReviewerNotificationType.Id, hearingId, userId);
+            await CreateEvents(EventType.REVIEWER_ADDED, hearingId, userId);
         }
 
         public override async Task NotifyAfterChangeHearingOwner(int hearingId)
         {
             var hearing = await GetHearingWithUserHearingRoles(hearingId);
-            var changedHearingOwnerNotificationType =
-                await GetNotificationType(NotificationTypeEnum.CHANGED_HEARING_OWNER);
-
-            await NotifyHearingOwnerAndReviewers(changedHearingOwnerNotificationType.Id, hearing);
+            var newHearingOwner = await hearing.GetHearingOwner(_hearingRoleResolver);
+            await CreateEvents(EventType.HEARING_OWNER_CHANGED, hearingId, newHearingOwner.Id);
         }
 
         public override async Task NotifyAfterChangeHearingStatus(int hearingId)
         {
-            var hearing = await GetHearingWithUserHearingRoles(hearingId);
-            var changedHearingStatusNotificationType =
-                await GetNotificationType(NotificationTypeEnum.CHANGED_HEARING_STATUS);
-
-            await NotifyHearingOwnerAndReviewers(changedHearingStatusNotificationType.Id, hearing);
+            await CreateEvents(EventType.HEARING_STATUS_CHANGED, hearingId);
         }
 
         public override async Task NotifyAfterHearingReview(int hearingId)
         {
-            var hearing = await GetHearingWithUserHearingRoles(hearingId);
-            var hearingReviewReceivedNotificationType =
-                await GetNotificationType(NotificationTypeEnum.HEARING_REVIEW_RECEIVED);
-
-            await NotifyHearingOwnerAndReviewers(hearingReviewReceivedNotificationType.Id, hearing);
+            await CreateEvents(EventType.HEARING_REVIEW_RECEIVED, hearingId);
         }
-
 
         private async Task NotifyUser(int notificationTypeId, int hearingId, int userId, int commentId = -1)
         {
@@ -168,9 +156,9 @@ namespace BallerupKommune.Operations.Plugins.Plugins
 
         private async Task NotifyMultipleUsers(int notificationTypeId, int hearingId, List<int> userIds)
         {
-            List<Notification> notifications = new List<Notification>();
+            var notifications = new List<Notification>();
 
-            foreach (int userId in userIds)
+            foreach (var userId in userIds)
             {
                 var notification = CreateUserNotificationModel(notificationTypeId, hearingId, userId);
                 notifications.Add(notification);
@@ -179,17 +167,7 @@ namespace BallerupKommune.Operations.Plugins.Plugins
             await _notificationDao.CreateRangeAsync(notifications);
         }
 
-        private async Task NotifyCompany(int notificationTypeId, int hearingId, int companyId, int commentId = -1)
-        {
-            var notification = commentId == -1 
-                ? CreateCompanyNotificationModel(notificationTypeId, hearingId, companyId) 
-                : CreateCompanyNotificationModelWithComment(notificationTypeId, hearingId, companyId, commentId);
-
-            await _notificationDao.CreateAsync(notification);
-        }
-
-        private async Task NotifyCompanyWithUser(int notificationTypeId, int hearingId, int companyId, int userId,
-            int commentId = -1)
+        private async Task NotifyCompanyWithUser(int notificationTypeId, int hearingId, int companyId, int userId, int commentId = -1)
         {
             var notification = commentId == -1
                 ? CreateCompanyNotificationModel(notificationTypeId, hearingId, companyId, userId)
@@ -201,9 +179,9 @@ namespace BallerupKommune.Operations.Plugins.Plugins
 
         private async Task NotifyMultipleCompanies(int notificationTypeId, int hearingId, List<int> companyIds)
         {
-            List<Notification> notifications = new List<Notification>();
+            var notifications = new List<Notification>();
 
-            foreach (int companyId in companyIds)
+            foreach (var companyId in companyIds)
             {
                 var notification = CreateCompanyNotificationModel(notificationTypeId, hearingId, companyId);
                 notifications.Add(notification);
@@ -219,7 +197,7 @@ namespace BallerupKommune.Operations.Plugins.Plugins
                 var companyId = user?.CompanyId;
                 if (companyId == null)
                 {
-                    _logger.LogWarning($"Cannot create notification '{notificationType.Name}' for User with Id {user.Id}. User has UserCapacity Company, but has no CompanyId.");
+                    _logger.LogWarning("Cannot create notification '{NotificationTypeName}' for User with Id {UserId}. User has UserCapacity Company, but has no CompanyId.", notificationType.Name, user.Id);
                     return;
                 }
 
@@ -229,16 +207,6 @@ namespace BallerupKommune.Operations.Plugins.Plugins
             {
                 await NotifyUser(notificationType.Id, hearingId, user.Id, commentId);
             }
-        }
-
-        private async Task NotifyHearingOwnerAndReviewers(int notificationTypeId, Hearing hearing)
-        {
-            User hearingOwner = await hearing.GetHearingOwner(_hearingRoleResolver);
-            List<User> hearingReviewers = await hearing.GetUsersWithRole(_hearingRoleResolver, HearingRole.HEARING_REVIEWER);
-            List<int> reviewerIds = hearingReviewers.Select(reviewer => reviewer.Id).ToList();
-
-            await NotifyUser(notificationTypeId, hearing.Id, hearingOwner.Id);
-            await NotifyMultipleUsers(notificationTypeId, hearing.Id, reviewerIds);
         }
 
         private async Task<NotificationType> GetNotificationType(NotificationTypeEnum type)
@@ -294,7 +262,8 @@ namespace BallerupKommune.Operations.Plugins.Plugins
                 NotificationTypeId = notificationTypeId,
                 HearingId = hearingId,
                 CompanyId = companyId,
-                UserId = userId
+                UserId = userId,
+                IsSentToQueue = false
             };
         }
 
@@ -306,7 +275,8 @@ namespace BallerupKommune.Operations.Plugins.Plugins
                 HearingId = hearingId,
                 CompanyId = companyId,
                 CommentId = commentId,
-                UserId = userId
+                UserId = userId,
+                IsSentToQueue = false
             };
         }
 
@@ -316,7 +286,8 @@ namespace BallerupKommune.Operations.Plugins.Plugins
             {
                 NotificationTypeId = notificationTypeId,
                 HearingId = hearingId,
-                UserId = userId
+                UserId = userId,
+                IsSentToQueue = false
             };
         }
 
@@ -327,8 +298,40 @@ namespace BallerupKommune.Operations.Plugins.Plugins
                 NotificationTypeId = notificationTypeId,
                 HearingId = hearingId,
                 UserId = userId,
-                CommentId = commentId
+                CommentId = commentId,
+                IsSentToQueue = false
             };
+        }
+
+        private async Task CreateEvents(EventType eventType, int hearingId, int? userId = null)
+        {
+            switch (eventType)
+            {
+                case EventType.HEARING_OWNER_CHANGED:
+                case EventType.HEARING_STATUS_CHANGED:
+                case EventType.REVIEWER_ADDED:
+                case EventType.HEARING_RESPONSE_RECEIVED:
+                case EventType.HEARING_REVIEW_RECEIVED:
+                case EventType.HEARING_ACTIVATED:
+                    await CreateDailyStatusEvent(eventType, hearingId, userId);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(eventType), eventType, null);
+            }
+        }
+
+        private async Task CreateDailyStatusEvent(EventType eventType, int hearingId, int? userId = null)
+        {
+            var dailyNotificationType = await GetNotificationType(NotificationTypeEnum.DAILY_STATUS);
+
+            await _eventDao.CreateAsync(new Event
+            {
+                Type = eventType,
+                HearingId = hearingId,
+                UserId = userId,
+                NotificationTypeId = dailyNotificationType.Id,
+                IsSentInNotification = false
+            });
         }
     }
 }

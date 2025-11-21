@@ -1,23 +1,22 @@
-﻿using BallerupKommune.Api.Models.JsonApi;
-using BallerupKommune.DTOs.Models;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Enums;
-using BallerupKommune.Operations.Common.Interfaces;
-using BallerupKommune.Operations.Models.Users.Queries.GetMe;
-using IdentityModel;
+﻿using Agora.Api.Models.JsonApi;
+using Agora.Api.Services.Interfaces;
+using Agora.DTOs.Models;
+using Agora.Models.Models;
+using Agora.Operations.Common.Enums;
+using Agora.Operations.Common.Interfaces;
+using Agora.Operations.Models.Users.Queries.GetMe;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Globalization;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
-using UserDto = BallerupKommune.Api.Models.DTOs.UserDto;
+using UserCapacityEnum = Agora.Models.Enums.UserCapacity;
+using UserDto = Agora.Api.Models.DTOs.UserDto;
 
-namespace BallerupKommune.Api.Controllers
+namespace Agora.Api.Controllers
 {
     public class AuthenticationController : ApiController
     {
@@ -26,20 +25,20 @@ namespace BallerupKommune.Api.Controllers
         private readonly IOauth2Service _oauth2Service;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IAuthenticationClientService _authenticationClientService;
-        private readonly ILogger<AuthenticationController> _logger;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IAuthenticationHandlerFactory _authenticationHandlerFactory;
 
         public AuthenticationController(IJwtService jwtService, ICookieService cookieService,
             IOauth2Service oauth2Service, IHttpContextAccessor httpContextAccessor,
-            IAuthenticationClientService authenticationClientService, ILogger<AuthenticationController> logger, ICurrentUserService currentUserService)
+            IAuthenticationClientService authenticationClientService, ICurrentUserService currentUserService, IAuthenticationHandlerFactory authenticationHandlerFactory)
         {
             _cookieService = cookieService;
             _oauth2Service = oauth2Service;
             _httpContextAccessor = httpContextAccessor;
             _authenticationClientService = authenticationClientService;
-            _logger = logger;
             _currentUserService = currentUserService;
             _jwtService = jwtService;
+            _authenticationHandlerFactory = authenticationHandlerFactory;
         }
 
         [HttpGet("Authorized")]
@@ -49,23 +48,26 @@ namespace BallerupKommune.Api.Controllers
             return Ok(isAuthenticated);
         }
 
+        [Authorize]
         [HttpGet("RefreshToken")]
-        public ActionResult<RefreshTokenDto> GetRefreshToken()
+        public async Task<ActionResult<RefreshTokenDto>> GetRefreshToken()
         {
             var refreshToken = _currentUserService.RefreshToken;
             var accessTokenExpiration = _currentUserService.ExpirationDate;
 
             if (refreshToken == null || accessTokenExpiration == default)
             {
-                return BadRequest("Refresh token not valid");
+                return Forbid();
             }
 
             var urlEncodedToken = HttpUtility.UrlEncode(refreshToken, Encoding.ASCII);
+            var refreshTokenExpirationDate = await _jwtService.GetRefreshTokenExpirationDate(refreshToken);
 
             var result = new RefreshTokenDto
             {
                 Token = urlEncodedToken,
-                AccessTokenExpirationDate = accessTokenExpiration
+                AccessTokenExpirationDate = accessTokenExpiration,
+                RefreshTokenExpirationDate = refreshTokenExpirationDate
             };
 
             return Ok(result);
@@ -77,8 +79,19 @@ namespace BallerupKommune.Api.Controllers
             var apiKey = _authenticationClientService.ReadApiKey();
             var currentAccessToken = _cookieService.ReadAccessCookieFromRequest(apiKey);
 
-            // Update access token
-            var newAccessToken = await _jwtService.RenewAccessToken(currentAccessToken, refreshToken);
+            string newAccessToken;
+            try
+            {
+                // Update access token
+                newAccessToken = await _jwtService.RenewAccessToken(currentAccessToken, refreshToken);
+            }
+            catch (Exception)
+            {
+                // If an exception is thrown, the token cannot be renewed and the session should be terminated. 
+                await _jwtService.RevokeRefreshToken();
+                _cookieService.RemoveAccessCookieInResponse(apiKey);
+                return Forbid();
+            }
 
             // Set new access token in cookie
             _cookieService.SetAccessCookieInResponse(newAccessToken, apiKey);
@@ -119,116 +132,133 @@ namespace BallerupKommune.Api.Controllers
                 var tokenResponseFromIdp =
                 await _oauth2Service.RequestAccessTokenCode(username, "codeVerifier", apiKey);
                 var userReadFromToken = _jwtService.ReadAccessToken(tokenResponseFromIdp.Access_Token);
-                var newJwtTokenPayload = await _jwtService.ExchangeExternalToken(userReadFromToken);
+
+                var authHandler = _authenticationHandlerFactory
+                    .CreateAuthenticationHandler(AuthHandlerType.CodeFlow);
+
+                var tokenUser = authHandler.ParseUserFromClaims(userReadFromToken);
+
+                var newJwtTokenPayload = await _jwtService.LoginAndGenerateAccessToken(tokenUser);
 
                 _cookieService.SetAccessCookieInResponse(newJwtTokenPayload.Token, apiKey);
                 return Ok(newJwtTokenPayload.Token);
 
             } catch (Exception e)
             {
-                var AuthURL = new Uri(_authenticationClientService.GetAuthenticationEndpoint());
+                var AuthURL = new Uri(_oauth2Service.GetAuthenticationEndpoint());
                 return BadRequest($"Could not find user with the provided username. Find all allowed users in the dropdown here: {AuthURL.Scheme}://localhost:{AuthURL.Port}");
             }
         }
-
-
-        [HttpGet("CodeFlowLogin")]
-        public IActionResult CodeFlowLogin(string redirectUri, string apiKey = null)
+        
+        [HttpGet("Login")]
+        public IActionResult Login(string redirectUri, string loginAs, string apiKey = null)
         {
-            if (Primitives.Logic.Environment.IsProduction() && !string.IsNullOrEmpty(apiKey))
+            var apiKeyValidationResult = ValidateApiKey(apiKey, out var clientType, out var validatedApiKey);
+            if (apiKeyValidationResult != null)
             {
-                return BadRequest("api-key only allowed in development");
+                return apiKeyValidationResult;
             }
 
-            apiKey ??= _authenticationClientService.ReadApiKey();
-
-            var trustedApiKey = _authenticationClientService.IsApiKeyTrusted(apiKey);
-            if (!trustedApiKey)
+            var userCapacityValidationResult = ValidateUserCapacity(loginAs, clientType, out var userCapacity);
+            if (userCapacityValidationResult != null)
             {
-                return BadRequest($"api-key: {apiKey} not valid");
+                return userCapacityValidationResult;
             }
 
-            var codeVerifier = CryptoRandom.CreateUniqueId();
-            var state = CryptoRandom.CreateUniqueId();
-            var authorizationUrl = _oauth2Service.CreateAuthorizationUrl(codeVerifier, state, apiKey);
-            var timestamp = DateTime.Now.ToString("O");
-
-            if (!_httpContextAccessor.HttpContext.Session.IsAvailable)
-            {
-                return BadRequest("Session unavailable");
-            }
-
-            _httpContextAccessor.HttpContext.Session.SetString("codeVerifier", codeVerifier);
-            _httpContextAccessor.HttpContext.Session.SetString("redirectUri", redirectUri);
-            _httpContextAccessor.HttpContext.Session.SetString("state", state);
-            _httpContextAccessor.HttpContext.Session.SetString("timestamp", timestamp);
-            _httpContextAccessor.HttpContext.Session.SetString("apiKey", apiKey);
-            return Redirect(authorizationUrl);
-        }
-
-        [HttpGet("CodeFlowCallback")]
-        public async Task<IActionResult> CodeFlowCallback(string code, string session_state, string state)
-        {
-            _httpContextAccessor.HttpContext.Session.TryGetValue("timestamp", out var timestamp);
-            var timestampAsString = Encoding.UTF8.GetString(timestamp);
-            var timestampAsDateTime = DateTime.ParseExact(timestampAsString, "O", CultureInfo.InvariantCulture);
-
-            _httpContextAccessor.HttpContext.Session.TryGetValue("apiKey", out var apiKey);
-            var apiKeyAsString = Encoding.UTF8.GetString(apiKey);
-
-            var notProduction = !Primitives.Logic.Environment.IsProduction();
-
-            if (timestampAsDateTime <= DateTime.Now.AddSeconds(-100))
-            {
-                _httpContextAccessor.HttpContext.Session.TryGetValue("redirectUri", out var redirectUri);
-                var redirectUriAsString = Encoding.UTF8.GetString(redirectUri);
-                return CodeFlowLogin(redirectUriAsString, notProduction ? apiKeyAsString : null);
-            }
-
-            _httpContextAccessor.HttpContext.Session.TryGetValue("state", out var sessionState);
-            var stateAsString = Encoding.UTF8.GetString(sessionState);
-
-            if (state != stateAsString)
-            {
-                _httpContextAccessor.HttpContext.Session.TryGetValue("redirectUri", out var redirectUri);
-                var redirectUriAsString = Encoding.UTF8.GetString(redirectUri);
-                return CodeFlowLogin(redirectUriAsString, notProduction ? apiKeyAsString : null);
-            }
-
-            _httpContextAccessor.HttpContext.Session.TryGetValue("codeVerifier", out var codeVerifier);
-            var codeVerifierAsString = Encoding.UTF8.GetString(codeVerifier);
-
-            // This function is not called directly by the frontend-applications
-            // So the apiKey does not exist in a header, and we have to send it in as a parameter manually
-            var tokenResponseFromIdp =
-                await _oauth2Service.RequestAccessTokenCode(code, codeVerifierAsString, apiKeyAsString);
-
-            var userReadFromToken = _jwtService.ReadAccessToken(tokenResponseFromIdp.Access_Token);
-
-            var newJwtTokenPayload = await _jwtService.ExchangeExternalToken(userReadFromToken);
-
-            // This function is not called directly by the frontend-applications
-            // So the apiKey does not exist in a header, and we have to send it in as a parameter manually
-            _cookieService.SetAccessCookieInResponse(newJwtTokenPayload.Token, apiKeyAsString);
-
-            _httpContextAccessor.HttpContext.Session.TryGetValue("redirectUri", out var redirectUriByteArray);
-            var redirectUrl = Encoding.UTF8.GetString(redirectUriByteArray);
-
-            _httpContextAccessor.HttpContext.Session.Remove("codeVerifier");
-            _httpContextAccessor.HttpContext.Session.Remove("redirectUri");
-            _httpContextAccessor.HttpContext.Session.Remove("state");
-            _httpContextAccessor.HttpContext.Session.Remove("timestamp");
-            _httpContextAccessor.HttpContext.Session.Remove("apiKey");
-
-            return Redirect(redirectUrl);
+            var authHandlerType = _authenticationClientService.GetAuthHandlerTypeFromUserCapacity(userCapacity);
+            var authHandler = _authenticationHandlerFactory.CreateAuthenticationHandler(authHandlerType);
+            return authHandler.HandleLogin(_httpContextAccessor, redirectUri, loginAs, validatedApiKey, userCapacity);
         }
 
         [HttpGet("Logout")]
         public async Task<IActionResult> Logout(string redirectUri, string apiKey = null)
         {
+            var validationResult = ValidateApiKey(apiKey, out var clientType, out var validatedApiKey);
+            if (validationResult != null)
+            {
+                return validationResult;
+            }
+
+            var authMethod = _currentUserService.AuthenticationMethod;
+            if (authMethod == null)
+            {
+                await _jwtService.RevokeRefreshToken();
+                _cookieService.RemoveAccessCookieInResponse(apiKey);
+                return Redirect(redirectUri);
+            }
+
+            var authHandlerType = _authenticationClientService.GetAuthHandlerTypeFromAuthMethod(authMethod.Value);
+            var authHandler = _authenticationHandlerFactory.CreateAuthenticationHandler(authHandlerType);
+            return await authHandler.HandleLogout(_httpContextAccessor, redirectUri, validatedApiKey);
+
+        }
+
+        [HttpGet("CodeFlowCallback")]
+        public async Task<IActionResult> CodeFlowCallback(string code, string state)
+        {
+            var authHandler = _authenticationHandlerFactory.CreateAuthenticationHandler(AuthHandlerType.CodeFlow);
+            return await authHandler.HandleOAuthCallback(_httpContextAccessor, code, state, Login);
+        }
+
+        [HttpGet("EntraIdCallback")]
+        public async Task<IActionResult> EntraIdCallback(string code, string state)
+        {
+            var authHandler = _authenticationHandlerFactory.CreateAuthenticationHandler(AuthHandlerType.EntraId);
+            return await authHandler.HandleEntraIdCallback(_httpContextAccessor, code, state, Login);
+        }
+
+
+        [Route("saml2/assertionconsumerservice")]
+        public async Task<IActionResult> AssertionConsumerService()
+        {
+            var defaultRedirectUri = Url.Content("~/");
+            var authHandler = _authenticationHandlerFactory.CreateAuthenticationHandler(AuthHandlerType.NemLogin);
+            return await authHandler.HandleNemLoginCallback(_httpContextAccessor, defaultRedirectUri);
+        }
+
+        [Route("saml2/singlelogout")]
+        public async Task<IActionResult>SingleLogout()
+        {
+            var defaultRedirectUri = Url.Content("~/");
+            var apiKey = _authenticationClientService.ReadApiKey();
+            var authHandler = _authenticationHandlerFactory.CreateAuthenticationHandler(AuthHandlerType.NemLogin);
+            return await authHandler.HandleNemLoginSingleLogout(_httpContextAccessor, defaultRedirectUri, apiKey);
+        }
+
+        [Route("saml2/loggedout")]
+        public IActionResult LoggedOut()
+        {
+            var defaultRedirectUri = Url.Content("~/");
+            var authHandler = _authenticationHandlerFactory.CreateAuthenticationHandler(AuthHandlerType.NemLogin);
+            return authHandler.HandleNemLoginLogoutResponse(_httpContextAccessor, defaultRedirectUri);
+        }
+
+        private IActionResult ValidateUserCapacity(string loginAs, ClientTypes client, out UserCapacityEnum userCapacity)
+        {
+            if (!Enum.TryParse<UserCapacityEnum>(loginAs, out userCapacity))
+            {
+                return new BadRequestObjectResult("Invalid UserCapacity");
+            }
+
+            var isLoginAllowed = _authenticationClientService.IsLoginAsAllowed(userCapacity, client);
+            if (!isLoginAllowed)
+            {
+                return new BadRequestObjectResult(
+                    $"Cannot login as {nameof(userCapacity)} on client of type {nameof(client)}");
+            }
+
+            return null;
+        }
+
+        private IActionResult ValidateApiKey(string apiKey, out ClientTypes clientType, out string validatedApiKey)
+        {
+            clientType = ClientTypes.None;
+            validatedApiKey = "";
+
+            // Check API key
             if (Primitives.Logic.Environment.IsProduction() && !string.IsNullOrEmpty(apiKey))
             {
-                return BadRequest("api-key only allowed in development");
+                return new BadRequestObjectResult("api-key only allowed in development");
             }
 
             apiKey ??= _authenticationClientService.ReadApiKey();
@@ -236,14 +266,13 @@ namespace BallerupKommune.Api.Controllers
             var trustedApiKey = _authenticationClientService.IsApiKeyTrusted(apiKey);
             if (!trustedApiKey)
             {
-                return BadRequest($"api-key: {apiKey} not valid");
+                return new BadRequestObjectResult($"api-key: {apiKey} not valid");
             }
 
-            await _jwtService.RevokeRefreshToken();
+            clientType = _authenticationClientService.GetClientTypeFromApiKey(apiKey);
+            validatedApiKey = apiKey;
 
-            _cookieService.RemoveAccessCookieInResponse(apiKey);
-
-            return Redirect(redirectUri);
+            return null;
         }
 
         private bool IsAuthenticated(IPrincipal principal)

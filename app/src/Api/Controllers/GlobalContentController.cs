@@ -1,13 +1,13 @@
-﻿using BallerupKommune.Api.Mappings;
-using BallerupKommune.Api.Models.DTOs;
-using BallerupKommune.Api.Models.JsonApi;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Models.GlobalContents.Commands;
-using BallerupKommune.Operations.Models.GlobalContents.Queries.GetLatestGlobalContent;
+﻿using Agora.Api.Mappings;
+using Agora.Api.Models.DTOs;
+using Agora.Api.Models.JsonApi;
+using Agora.Models.Models;
+using Agora.Operations.Models.GlobalContents.Commands;
+using Agora.Operations.Models.GlobalContents.Queries.GetLatestGlobalContent;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.Api.Controllers
+namespace Agora.Api.Controllers
 {
     public class GlobalContentController : ApiController
     {

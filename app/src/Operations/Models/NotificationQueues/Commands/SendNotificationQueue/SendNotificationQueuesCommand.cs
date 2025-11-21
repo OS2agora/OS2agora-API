@@ -1,16 +1,18 @@
-﻿using BallerupKommune.Models.Enums;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Common.Interfaces;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Enums;
+using Agora.Models.Models;
+using Agora.Operations.ApplicationOptions.OperationsOptions;
+using Agora.Operations.Common.Interfaces;
+using Agora.Operations.Common.Interfaces.DAOs;
+using Agora.Operations.Common.Messages;
 using MediatR;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.Operations.Models.NotificationQueues.Commands.SendNotificationQueue
+namespace Agora.Operations.Models.NotificationQueues.Commands.SendNotificationQueue
 {
     public class SendNotificationQueuesCommand : IRequest<Unit>
     {
@@ -18,68 +20,56 @@ namespace BallerupKommune.Operations.Models.NotificationQueues.Commands.SendNoti
         {
             private readonly INotificationQueueDao _notificationQueueDao;
             private readonly IEmailService _emailService;
-            private readonly IEBoksService _eBoksService;
+            private readonly IDigitalPostService _digitalPostService;
+            private readonly int _maxRetryCount;
+            private readonly int _notificationQueuesToHandle;
 
             public SendNotificationQueuesCommandHandler(INotificationQueueDao notificationQueueDao,
-                IEmailService emailService, IEBoksService eBoksService)
+                IEmailService emailService, IDigitalPostService digitalPostService, IOptions<NotificationQueueOperationsOptions> options)
             {
                 _notificationQueueDao = notificationQueueDao;
                 _emailService = emailService;
-                _eBoksService = eBoksService;
+                _digitalPostService = digitalPostService;
+                _maxRetryCount = options.Value.SendNotificationQueues.MaxRetryCount;
+                _notificationQueuesToHandle = options.Value.SendNotificationQueues.NotificationQueuesToHandle;
             }
 
             public async Task<Unit> Handle(SendNotificationQueuesCommand request, CancellationToken cancellationToken)
             {
+                // MapToEntityExpression throws error if we read directly from _maxRetryCount
+                var maxRetryCount = _maxRetryCount;
                 List<NotificationQueue> notificationQueuesThatShouldBeSent =
-                    await _notificationQueueDao.GetAllAsync(null, queue => !queue.IsSend && queue.RetryCount < 10);
+                    await _notificationQueueDao.GetAllAsync(null, queue => queue.RetryCount < maxRetryCount && (!queue.IsSent || queue.DeliveryStatus == NotificationDeliveryStatus.FAILED), _notificationQueuesToHandle, asNoTracking: true);
 
                 foreach (var notificationQueue in notificationQueuesThatShouldBeSent)
                 {
-                    var recipient = notificationQueue.RecipientAddress;
-                    var subject = notificationQueue.Subject;
-                    var content = notificationQueue.Content;
+                    var receipt = await SendNotificationQueue(notificationQueue);
 
-                    var successfullySent = false;
-                    var errorMessage = new List<string>();
-
-                    if (notificationQueue.MessageChannel == NotificationMessageChannel.EBOKS)
+                    if (receipt.IsSent)
                     {
-                        try
-                        {
-                            successfullySent = await _eBoksService.SendMessage(subject, content, recipient);
-                        }
-                        catch (Exception e)
-                        {
-                            errorMessage.Add(e.Message);
-                        }
-                    }
+                        var currentTime = DateTime.Now;
 
-                    if (notificationQueue.MessageChannel == NotificationMessageChannel.EMAIL)
-                    {
-                        try
-                        {
-                            successfullySent = await _emailService.SendMessage(subject, content, recipient);
-                        }
-                        catch (EmailException e)
-                        {
-                            errorMessage.AddRange(e.Errors);
-                        }
-                        catch (Exception e)
-                        {
-                            errorMessage.Add(e.Message);
-                        }
-                    }
-
-                    if (successfullySent)
-                    {
                         var updatedNotificationQueue = notificationQueue;
-                        updatedNotificationQueue.IsSend = true;
-                        updatedNotificationQueue.SuccessfullSendDate = DateTime.Now;
+                        updatedNotificationQueue.IsSent = receipt.IsSent;
+                        updatedNotificationQueue.SentAs = receipt.SentAs;
+                        updatedNotificationQueue.MessageId = receipt.MessageId;
+                        updatedNotificationQueue.DeliveryStatus = receipt.DeliveryStatus;
+                        updatedNotificationQueue.SuccessfulSentDate = currentTime;
                         updatedNotificationQueue.PropertiesUpdated = new List<string>
                         {
-                            nameof(NotificationQueue.IsSend),
-                            nameof(NotificationQueue.SuccessfullSendDate)
+                            nameof(NotificationQueue.IsSent),
+                            nameof(NotificationQueue.SuccessfulSentDate),
+                            nameof(NotificationQueue.SentAs),
+                            nameof(NotificationQueue.MessageId),
+                            nameof(NotificationQueue.DeliveryStatus)
                         };
+
+                        if (updatedNotificationQueue.DeliveryStatus == NotificationDeliveryStatus.SUCCESSFUL)
+                        {
+                            updatedNotificationQueue.SuccessfulDeliveryDate = currentTime;
+                            updatedNotificationQueue.PropertiesUpdated.Add(nameof(NotificationQueue.SuccessfulDeliveryDate));
+                        }
+
                         await _notificationQueueDao.UpdateAsync(updatedNotificationQueue);
                     }
                     else
@@ -87,20 +77,57 @@ namespace BallerupKommune.Operations.Models.NotificationQueues.Commands.SendNoti
                         var updatedNotificationQueue = notificationQueue;
 
                         var currentErrors = updatedNotificationQueue.ErrorTexts.ToList();
-                        currentErrors.AddRange(errorMessage);
 
+                        currentErrors.AddRange(receipt.Errors);
+
+                        updatedNotificationQueue.SentAs = receipt.SentAs;
                         updatedNotificationQueue.ErrorTexts = currentErrors.ToArray();
                         updatedNotificationQueue.RetryCount += 1;
                         updatedNotificationQueue.PropertiesUpdated = new List<string>
                         {
+                            nameof(NotificationQueue.SentAs),
                             nameof(NotificationQueue.ErrorTexts),
                             nameof(NotificationQueue.RetryCount)
                         };
+
+                        if (updatedNotificationQueue.RetryCount >= _maxRetryCount)
+                        {
+                            updatedNotificationQueue.DeliveryStatus = NotificationDeliveryStatus.FAILED;
+                            updatedNotificationQueue.PropertiesUpdated.Add(nameof(NotificationQueue.DeliveryStatus));
+                        }
+
                         await _notificationQueueDao.UpdateAsync(updatedNotificationQueue);
                     }
                 }
 
                 return Unit.Value;
+            }
+
+            private async Task<NotificationSentReceipt> SendNotificationQueue(NotificationQueue notificationQueue)
+            {
+                var recipient = notificationQueue.RecipientAddress;
+                var subject = notificationQueue.Subject;
+                var content = notificationQueue.Content;
+
+                if (notificationQueue.MessageChannel == NotificationMessageChannel.EBOKS)
+                {
+                    return await _digitalPostService.SendMessage(notificationQueue.Id, subject, content, recipient);
+                }
+
+                if (notificationQueue.MessageChannel == NotificationMessageChannel.EMAIL)
+                {
+                    return await _emailService.SendMessage(subject, content, recipient);
+                }
+
+                return new NotificationSentReceipt
+                {
+                    IsSent = false,
+                    SentAs = NotificationSentAs.UNKNOWN,
+                    Errors = new List<string>
+                    {
+                        $"Invalid MessageChannel. The provided MessageChannel was '{notificationQueue.MessageChannel}'"
+                    }
+                };
             }
         }
     }

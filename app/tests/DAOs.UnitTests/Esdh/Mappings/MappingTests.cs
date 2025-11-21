@@ -1,12 +1,12 @@
-﻿using AutoMapper;
-using BallerupKommune.DAOs.Esdh.Mappings;
-using BallerupKommune.DAOs.Esdh.Sbsip.DTOs;
-using BallerupKommune.Models.Models.Esdh;
+﻿using Agora.DAOs.Esdh.Mappings;
+using Agora.DAOs.Esdh.Sbsip.DTOs;
+using Agora.Models.Models.Esdh;
+using AutoMapper;
 using NUnit.Framework;
 using System;
 using System.Runtime.Serialization;
 
-namespace BallerupKommune.DAOs.UnitTests.Esdh.Mappings
+namespace Agora.DAOs.UnitTests.Esdh.Mappings
 {
     public class MappingTests
     {

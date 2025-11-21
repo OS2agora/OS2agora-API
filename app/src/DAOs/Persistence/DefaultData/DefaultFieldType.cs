@@ -1,11 +1,11 @@
-﻿using BallerupKommune.Entities.Entities;
-using BallerupKommune.Entities.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using FieldTypeEntity = Agora.Entities.Entities.FieldTypeEntity;
+using FieldType = Agora.Entities.Enums.FieldType;
+using System.Linq;
 
-namespace BallerupKommune.DAOs.Persistence.DefaultData
+namespace Agora.DAOs.Persistence.DefaultData
 {
     public class DefaultFieldType : DefaultDataSeeder<FieldTypeEntity>
     {
@@ -47,20 +47,21 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
         {
         }
 
-        public static async Task SeedData(ApplicationDbContext context)
+        public static async Task SeedData(ApplicationDbContext context, List<FieldTypeEntity> municipalitySpecificEntities = null)
         {
             var defaultEntities = GetDefaultEntities();
-            var seeder = new DefaultFieldType(context, defaultEntities);
+            var seeder = new DefaultFieldType(context, municipalitySpecificEntities ?? defaultEntities);
             await seeder.SeedEntitiesAsync();
         }
 
-        public override List<FieldTypeEntity> FetchEntitiesToUpdate(List<FieldTypeEntity> existingEntities, List<FieldTypeEntity> defaultEntities)
+        public override List<FieldTypeEntity> GetUpdatedEntities(List<FieldTypeEntity> existingEntities, List<FieldTypeEntity> defaultEntities)
         {
             var updatedEntities = new List<FieldTypeEntity>();
 
             foreach (var entity in existingEntities)
             {
                 var defaultEntity = defaultEntities.FirstOrDefault(e => _comparer(e, entity));
+
                 if (defaultEntity == null)
                 {
                     continue;

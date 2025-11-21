@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using BallerupKommune.Entities.Common;
-using BallerupKommune.Models.Common;
+using Agora.Entities.Common;
+using Agora.Models.Common;
 
-namespace BallerupKommune.DAOs.Mappings
+namespace Agora.DAOs.Mappings
 {
     public interface IEntityMapper<TEntity, TModel>
         where TEntity : BaseEntity

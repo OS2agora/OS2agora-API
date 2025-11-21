@@ -1,7 +1,7 @@
 ﻿using System;
-using BallerupKommune.Operations.Common.Interfaces;
+using Agora.Operations.Common.Interfaces;
 
-namespace BallerupKommune.DAOs.Services
+namespace Agora.DAOs.Services
 {
     public class DateTimeService : IDateTime
     {

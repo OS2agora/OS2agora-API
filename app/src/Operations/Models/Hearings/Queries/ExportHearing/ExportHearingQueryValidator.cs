@@ -1,7 +1,7 @@
-﻿using BallerupKommune.Models.Enums;
+﻿using Agora.Models.Enums;
 using FluentValidation;
 
-namespace BallerupKommune.Operations.Models.Hearings.Queries.ExportHearing
+namespace Agora.Operations.Models.Hearings.Queries.ExportHearing
 {
     public class ExportHearingQueryValidator : AbstractValidator<ExportHearingQuery>
     {

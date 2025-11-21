@@ -1,9 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyName>BallerupKommune.DTOs</AssemblyName>
-    <RootNamespace>BallerupKommune.DTOs</RootNamespace>
+    <AssemblyName>Agora.DTOs</AssemblyName>
+    <RootNamespace>Agora.DTOs</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BallerupKommune.DAOs.Messages.EBoks.DTOs
+namespace Agora.DAOs.Messages.EBoks.DTOs
 {
     class OpretEboksDokumentDto
     {

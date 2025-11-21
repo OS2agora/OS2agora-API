@@ -1,12 +1,12 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
+using Agora.Models.Common;
 using NovaSec.Attributes;
 
-namespace BallerupKommune.Operations.Models.FieldTemplates.Commands.UpdateFieldTemplate
+namespace Agora.Operations.Models.FieldTemplates.Commands.UpdateFieldTemplate
 {
     [PreAuthorize("HasRole('Administrator')")]
     public class UpdateFieldTemplateCommand : IRequest<FieldTemplate>

@@ -1,4 +1,4 @@
-﻿namespace BallerupKommune.DAOs.Esdh.Sbsip.DTOs
+﻿namespace Agora.DAOs.Esdh.Sbsip.DTOs
 {
     /// <summary>
     /// NOTE: Do not add any extra properties to this class

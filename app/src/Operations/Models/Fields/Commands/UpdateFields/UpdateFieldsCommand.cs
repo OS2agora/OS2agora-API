@@ -1,10 +1,10 @@
-﻿using BallerupKommune.Models.Enums;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Models.Models.Multiparts;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Common.Interfaces;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
-using BallerupKommune.Operations.Common.Interfaces.Plugins;
+﻿using Agora.Models.Enums;
+using Agora.Models.Models;
+using Agora.Models.Models.Multiparts;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Common.Interfaces;
+using Agora.Operations.Common.Interfaces.DAOs;
+using Agora.Operations.Common.Interfaces.Plugins;
 using MediatR;
 using NovaSec.Attributes;
 using System;
@@ -12,14 +12,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using ContentType = BallerupKommune.Models.Enums.ContentType;
-using FieldType = BallerupKommune.Models.Enums.FieldType;
-using FieldTypeModel = BallerupKommune.Models.Models.FieldType;
-using HearingStatus = BallerupKommune.Models.Enums.HearingStatus;
-using InvalidOperationException = BallerupKommune.Operations.Common.Exceptions.InvalidOperationException;
+using Agora.Models.Common;
+using ContentType = Agora.Models.Enums.ContentType;
+using FieldType = Agora.Models.Enums.FieldType;
+using FieldTypeModel = Agora.Models.Models.FieldType;
+using HearingStatus = Agora.Models.Enums.HearingStatus;
+using InvalidOperationException = Agora.Operations.Common.Exceptions.InvalidOperationException;
+using Agora.Operations.Common.Interfaces.Files;
 
-namespace BallerupKommune.Operations.Models.Fields.Commands.UpdateFields
+namespace Agora.Operations.Models.Fields.Commands.UpdateFields
 {
     [PreAuthorize("@Security.IsHearingOwnerByHearingId(#request.HearingId)")]
     public class UpdateFieldsCommand : IRequest<List<Content>>
@@ -38,9 +39,11 @@ namespace BallerupKommune.Operations.Models.Fields.Commands.UpdateFields
             private readonly IHearingStatusDao _hearingStatusDao;
             private readonly IPluginService _pluginService;
             private readonly IFieldsValidator _fieldsValidator;
+            private readonly IDateTime _dateTimeService;
 
             public UpdateFieldsCommandHandler(IHearingDao hearingDao, IContentDao contentDao,
-                IContentTypeDao contentTypeDao, IFileService fileService, IHearingStatusDao hearingStatusDao, IPluginService pluginService, IFieldsValidator fieldsValidator)
+                IContentTypeDao contentTypeDao, IFileService fileService, IHearingStatusDao hearingStatusDao, IPluginService pluginService, IFieldsValidator fieldsValidator, IDateTime dateTimeService
+                )
             {
                 _hearingDao = hearingDao;
                 _contentDao = contentDao;
@@ -49,6 +52,7 @@ namespace BallerupKommune.Operations.Models.Fields.Commands.UpdateFields
                 _hearingStatusDao = hearingStatusDao;
                 _pluginService = pluginService;
                 _fieldsValidator = fieldsValidator;
+                _dateTimeService = dateTimeService;
             }
 
             public async Task<List<Content>> Handle(UpdateFieldsCommand request, CancellationToken cancellationToken)
@@ -149,6 +153,9 @@ namespace BallerupKommune.Operations.Models.Fields.Commands.UpdateFields
                     if (matchingHearingField.FieldType.Type == FieldType.CONCLUSION)
                     {
                         await _pluginService.NotifyAfterConclusionPublished(currentHearing.Id);
+                        currentHearing.PropertiesUpdated.Add(nameof(Hearing.ConcludedDate));
+                        currentHearing.ConcludedDate = _dateTimeService.Now;
+
                     }
 
                     if (matchingHearingField.FieldType.Type == FieldType.TITLE ||
@@ -175,13 +182,25 @@ namespace BallerupKommune.Operations.Models.Fields.Commands.UpdateFields
                     await _pluginService.NotifyAfterChangeHearingStatus(currentHearing.Id);
                 }
 
-                return result;
+                // Refetch updated/created contents to ensure that changes to all related entities are reflected in the final result
+                var resultIncludes = IncludeProperties.Create<Content>(null, new List<string>
+                {
+                    nameof(Content.Field), 
+                    $"{nameof(Content.Field)}.{nameof(Field.FieldType)}", 
+                    nameof(Content.ContentType), 
+                    nameof(Content.Hearing)
+                });
+                var resultIds = result.Select(content => content.Id).ToList();
+                var finalResult =
+                    await _contentDao.GetAllAsync(resultIncludes, content => resultIds.Contains(content.Id));
+
+                return finalResult;
             }
 
             private async Task<IEnumerable<Content>> UpdateField(MultiPartField multiPartField, Field hearingField, Hearing currentHearing)
             {
-                var includes = IncludeProperties.Create<BallerupKommune.Models.Models.ContentType>(null,
-                    new List<string> {nameof(BallerupKommune.Models.Models.ContentType.FieldTypeSpecifications)});
+                var includes = IncludeProperties.Create<Agora.Models.Models.ContentType>(null,
+                    new List<string> {nameof(Agora.Models.Models.ContentType.FieldTypeSpecifications)});
                 var contentTypes = await _contentTypeDao.GetAllAsync(includes);
                 var textContentType = contentTypes.Single(contentType => contentType.Type == ContentType.TEXT);
                 var fileContentType = contentTypes.Single(contentType => contentType.Type == ContentType.FILE);
@@ -215,10 +234,15 @@ namespace BallerupKommune.Operations.Models.Fields.Commands.UpdateFields
             }
 
             private async Task<Content> HandleTextContent(string content, bool isEmptyContent, Field hearingField, Hearing currentHearing,
-                BallerupKommune.Models.Models.ContentType textContentType)
+                Agora.Models.Models.ContentType textContentType)
             {
                 // There can only be one text FieldType, and that should be updated if it exists
-                var includes = IncludeProperties.Create<Content>(null, new List<string> { "Field.FieldType", "ContentType", "Hearing" });
+                var includes = IncludeProperties.Create<Content>(null, new List<string> 
+                {
+                    $"{nameof(Content.Field)}.{nameof(Field.FieldType)}",
+                    nameof(Content.ContentType),
+                    nameof(Content.Hearing)
+                });
                 var existingContentFromDb = await _contentDao.GetAllAsync(includes);
                 var existingTextContent = existingContentFromDb.SingleOrDefault(x => x.Field != null && x.Field.Id == hearingField.Id && x.ContentType.Type == ContentType.TEXT && x.Hearing.Id == currentHearing.Id);
 
@@ -240,14 +264,23 @@ namespace BallerupKommune.Operations.Models.Fields.Commands.UpdateFields
                 }
 
                 existingTextContent.PropertiesUpdated = new List<string> { nameof(Content.TextContent) };
-                includes = IncludeProperties.Create<Content>(null, new List<string> { "Field", "ContentType", "Hearing" });
+                includes = IncludeProperties.Create<Content>(null, new List<string>
+                {
+                    nameof(Content.Field),
+                    nameof(Content.ContentType),
+                    nameof(Content.Hearing)
+                });
                 return await _contentDao.UpdateAsync(existingTextContent, includes);
             }
 
-            private async Task<IEnumerable<Content>> HandleFileContent(List<FileOperation> fileOperations, Field hearingField, Hearing currentHearing, BallerupKommune.Models.Models.ContentType fileContentType)
+            private async Task<IEnumerable<Content>> HandleFileContent(List<FileOperation> fileOperations, Field hearingField, Hearing currentHearing, Agora.Models.Models.ContentType fileContentType)
             {
                 // There can be many file FieldType, and the request should indicate if they should be deleted or created
-                var includes = IncludeProperties.Create<Content>(null, new List<string> { "Field.FieldType", "ContentType" });
+                var includes = IncludeProperties.Create<Content>(null, new List<string>
+                {
+                    $"{nameof(Content.Field)}.{nameof(Field.FieldType)}", 
+                    nameof(Content.ContentType)
+                });
                 var existingContentFromDb = await _contentDao.GetAllAsync(includes);
                 var existingFileContent = existingContentFromDb.Where(x => x.Field != null && x.Field.Id == hearingField.Id && x.ContentType.Type == ContentType.FILE).ToList();
 
@@ -269,7 +302,12 @@ namespace BallerupKommune.Operations.Models.Fields.Commands.UpdateFields
                     foreach (var fileOperation in fileOperations.Where(x => x.Operation == FileOperationEnum.ADD))
                     {
                         var filePath = await _fileService.SaveFieldFileToDisk(fileOperation.File.Content, currentHearing.Id, hearingField.Id);
-                        includes = IncludeProperties.Create<Content>(null, new List<string> { "Field", "ContentType", "Hearing" });
+                        includes = IncludeProperties.Create<Content>(null, new List<string>
+                        {
+                            nameof(Content.Field),
+                            nameof(Content.ContentType),
+                            nameof(Content.Hearing)
+                        });
 
                         var fileContent = await _contentDao.CreateAsync(new Content
                         {

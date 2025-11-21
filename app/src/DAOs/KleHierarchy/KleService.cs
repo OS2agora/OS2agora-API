@@ -1,13 +1,13 @@
-﻿using AutoMapper;
-using BallerupKommune.DAOs.KleHierarchy.DTOs;
-using BallerupKommune.Operations.Common.Interfaces;
-using BallerupKommune.Operations.Common.Utility;
+﻿using Agora.DAOs.KleHierarchy.DTOs;
+using Agora.Operations.Common.Interfaces;
+using Agora.Operations.Common.Interfaces.Files;
+using AutoMapper;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.DAOs.KleHierarchy
+namespace Agora.DAOs.KleHierarchy
 {
     public class KleService : IKleService
     {
@@ -20,7 +20,7 @@ namespace BallerupKommune.DAOs.KleHierarchy
             _mapper = mapper;
         }
 
-        public async Task<List<BallerupKommune.Models.Models.KleHierarchy>> GetKleHierarchies()
+        public async Task<List<Agora.Models.Models.KleHierarchy>> GetKleHierarchies()
         {
             var dockerEnvironment = Primitives.Logic.Environment.IsRunningInDocker();
 
@@ -33,13 +33,13 @@ namespace BallerupKommune.DAOs.KleHierarchy
 
             if (file == null)
             {
-                return new List<BallerupKommune.Models.Models.KleHierarchy>();
+                return new List<Agora.Models.Models.KleHierarchy>();
             }
 
             var fileAsString = System.Text.Encoding.Default.GetString(file);
             var mainKleGroups = JsonSerializer.Deserialize<List<KleMainGroupDto>>(fileAsString);
 
-            var mainKleGroupsModel = mainKleGroups.Select(kleGroup => _mapper.Map<BallerupKommune.Models.Models.KleHierarchy>(kleGroup));
+            var mainKleGroupsModel = mainKleGroups.Select(kleGroup => _mapper.Map<Agora.Models.Models.KleHierarchy>(kleGroup));
 
             return mainKleGroupsModel.ToList();
         }

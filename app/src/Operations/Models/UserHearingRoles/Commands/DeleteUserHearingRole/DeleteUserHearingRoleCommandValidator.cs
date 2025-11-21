@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace BallerupKommune.Operations.Models.UserHearingRoles.Commands.DeleteUserHearingRole
+namespace Agora.Operations.Models.UserHearingRoles.Commands.DeleteUserHearingRole
 {
     public class DeleteUserHearingRoleCommandValidator : AbstractValidator<DeleteUserHearingRoleCommand>
     {

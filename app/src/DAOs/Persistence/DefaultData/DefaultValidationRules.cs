@@ -1,11 +1,10 @@
-﻿using BallerupKommune.Entities.Entities;
-using BallerupKommune.Entities.Enums;
+﻿using Agora.Entities.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.DAOs.Persistence.DefaultData
+namespace Agora.DAOs.Persistence.DefaultData
 {
     public class DefaultValidationRules : DefaultDataSeeder<ValidationRuleEntity>
     {
@@ -18,14 +17,13 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
                 {
                     CanBeEmpty = false,
                     MaxLength = 60,
-                    FieldType = FieldType.TITLE,
+                    FieldType = Entities.Enums.FieldType.TITLE,
                 },
                 // Esdh Titel
                 new ValidationRuleEntity
                 {
-                    CanBeEmpty = false,
                     MaxLength = 110,
-                    FieldType = FieldType.ESDH_TITLE,
+                    FieldType = Entities.Enums.FieldType.ESDH_TITLE,
                 },
                 // Billede
                 new ValidationRuleEntity
@@ -36,27 +34,41 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
                         "image/png",
                         "image/svg"
                     },
-                    MaxFileSize = 1000000,
+                    MaxFileSize = (int)Math.Pow(10, 6), // 1 MB
                     CanBeEmpty = true,
-                    FieldType = FieldType.IMAGE,
+                    FieldType = Entities.Enums.FieldType.IMAGE,
                 },
                 // Resumé
                 new ValidationRuleEntity
                 {
                     MaxLength = 500,
-                    FieldType = FieldType.SUMMARY,
+                    FieldType = Entities.Enums.FieldType.SUMMARY,
                 },
                 // Brød tekst
                 new ValidationRuleEntity
                 {
-                    MaxFileSize = 100000000,
-                    FieldType = FieldType.BODYINFORMATION,
+                    MaxFileSize = 100 * (int)Math.Pow(10, 6), // 100 MB,
+                    FieldType = Entities.Enums.FieldType.BODYINFORMATION,
+                    AllowedFileTypes = new[]
+                    {
+                        "image/jpeg",
+                        "image/png",
+                        "image/svg",
+                        "application/pdf"
+                    },
                 },
+                // Konklusion
                 new ValidationRuleEntity
                 {
-                    MaxLength = 1000,
-                    CanBeEmpty = false,
-                    FieldType = FieldType.CONCLUSION,
+                    MaxFileSize = 100 * (int)Math.Pow(10, 6), // 100 MB
+                    FieldType = Entities.Enums.FieldType.CONCLUSION,
+                    AllowedFileTypes = new[]
+                    {
+                        "image/jpeg",
+                        "image/png",
+                        "image/svg",
+                        "application/pdf"
+                    },
                 }
             };
         }
@@ -68,20 +80,21 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
         {
         }
 
-        public static async Task SeedData(ApplicationDbContext context)
+        public static async Task SeedData(ApplicationDbContext context, List<ValidationRuleEntity> municipalitySpecificEntities = null)
         {
             var defaultEntities = GetDefaultEntities(context);
-            var seeder = new DefaultValidationRules(context, defaultEntities);
+            var seeder = new DefaultValidationRules(context, municipalitySpecificEntities ?? defaultEntities);
             await seeder.SeedEntitiesAsync();
         }
 
-        public override List<ValidationRuleEntity> FetchEntitiesToUpdate(List<ValidationRuleEntity> existingEntities, List<ValidationRuleEntity> defaultEntities)
+        public override List<ValidationRuleEntity> GetUpdatedEntities(List<ValidationRuleEntity> existingEntities, List<ValidationRuleEntity> defaultEntities)
         {
             var updatedEntities = new List<ValidationRuleEntity>();
 
             foreach (var entity in existingEntities)
             {
                 var defaultEntity = defaultEntities.FirstOrDefault(e => _comparer(e, entity));
+
                 if (defaultEntity == null)
                 {
                     continue;

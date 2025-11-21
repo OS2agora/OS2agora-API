@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BallerupKommune.Models.Common
+namespace Agora.Models.Common
 {
     public abstract class BaseModel
     {

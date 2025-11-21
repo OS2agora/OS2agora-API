@@ -1,25 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
 
-        <IsPackable>false</IsPackable>
+    <IsPackable>false</IsPackable>
 
-        <AssemblyName>BallerupKommune.DAOs.UnitTests</AssemblyName>
+    <AssemblyName>Agora.DAOs.UnitTests</AssemblyName>
 
-        <RootNamespace>BallerupKommune.DAOs.UnitTests</RootNamespace>
-    </PropertyGroup>
+    <RootNamespace>Agora.DAOs.UnitTests</RootNamespace>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="FluentAssertions" Version="5.10.3" />
-        <PackageReference Include="Moq" Version="4.15.2" />
-        <PackageReference Include="NUnit" Version="3.14.0" />
-        <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="5.10.3" />
+    <PackageReference Include="Moq" Version="4.15.2" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\..\src\DAOs\DAOs.csproj" />
-        <ProjectReference Include="..\..\src\Operations\Operations.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DAOs\DAOs.csproj" />
+    <ProjectReference Include="..\..\src\Operations\Operations.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ContentScanners\DataScanners\" />
+  </ItemGroup>
 </Project>

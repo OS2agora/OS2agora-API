@@ -1,16 +1,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Extensions;
-using BallerupKommune.Operations.Resolvers;
+using Agora.Models.Models;
+using Agora.Operations.Common.Extensions;
+using Agora.Operations.Resolvers;
 using Moq;
 using NUnit.Framework;
-using HearingRoleEnum = BallerupKommune.Models.Enums.HearingRole;
-using ContentTypeEnum = BallerupKommune.Models.Enums.ContentType;
-using FieldTypeEnum = BallerupKommune.Models.Enums.FieldType;
+using HearingRoleEnum = Agora.Models.Enums.HearingRole;
+using ContentTypeEnum = Agora.Models.Enums.ContentType;
+using FieldTypeEnum = Agora.Models.Enums.FieldType;
 
-namespace BallerupKommune.Operations.UnitTests.Common.Extensions
+namespace Agora.Operations.UnitTests.Common.Extensions
 {
     public class HearingExtensionsTests
     {

@@ -1,4 +1,4 @@
-﻿using BallerupKommune.DAOs.Persistence;
+﻿using Agora.DAOs.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -7,12 +7,13 @@ using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.DAOs.Identity
+namespace Agora.DAOs.Identity
 {
     public interface IRefreshTokenDao
     {
-        Task<RefreshToken> Get(string token);
-        Task Invalidate(RefreshToken token);
+        Task<RefreshToken> Get(string refreshToken);
+        Task<RefreshToken> Get(string providedRefreshToken, string applicationUserId);
+        Task Invalidate(RefreshToken refreshToken);
         Task<RefreshToken> GenerateNew(string userId, string expirationTime);
     }
 
@@ -55,6 +56,13 @@ namespace BallerupKommune.DAOs.Identity
         public async Task<RefreshToken> Get(string token)
         {
             var refreshTokens = await GetAll(refreshToken => refreshToken.Token == token);
+            return refreshTokens.SingleOrDefault();
+        }
+
+        public async Task<RefreshToken> Get(string providedRefreshToken, string applicationUserId)
+        {
+            var refreshTokens = await GetAll(dbRefreshToken =>
+                dbRefreshToken.Token == providedRefreshToken && dbRefreshToken.ApplicationUserId == applicationUserId);
             return refreshTokens.SingleOrDefault();
         }
 

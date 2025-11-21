@@ -1,11 +1,12 @@
-﻿using BallerupKommune.Models.Enums;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Models.Models.Multiparts;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Common.Interfaces;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
-using BallerupKommune.Operations.Common.Interfaces.Plugins;
-using BallerupKommune.Operations.Common.Interfaces.Security;
+﻿using Agora.Models.Common;
+using Agora.Models.Models;
+using Agora.Models.Models.Multiparts;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Common.Interfaces;
+using Agora.Operations.Common.Interfaces.DAOs;
+using Agora.Operations.Common.Interfaces.Files;
+using Agora.Operations.Common.Interfaces.Plugins;
+using Agora.Operations.Common.Interfaces.Security;
 using MediatR;
 using NovaSec.Attributes;
 using System;
@@ -13,17 +14,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Operations.Common.Extensions;
-using BallerupKommune.Operations.Resolvers;
-using CommentStatus = BallerupKommune.Models.Enums.CommentStatus;
-using CommentType = BallerupKommune.Models.Enums.CommentType;
-using ContentType = BallerupKommune.Models.Enums.ContentType;
-using GlobalContentType = BallerupKommune.Models.Enums.GlobalContentType;
-using FileOperationEnum = BallerupKommune.Models.Enums.FileOperationEnum;
-using InvalidOperationException = BallerupKommune.Operations.Common.Exceptions.InvalidOperationException;
+using CommentStatusEnum = Agora.Models.Enums.CommentStatus;
+using CommentType = Agora.Models.Enums.CommentType;
+using ContentType = Agora.Models.Enums.ContentType;
+using FileOperationEnum = Agora.Models.Enums.FileOperationEnum;
+using GlobalContentType = Agora.Models.Enums.GlobalContentType;
+using InvalidOperationException = Agora.Operations.Common.Exceptions.InvalidOperationException;
 
-namespace BallerupKommune.Operations.Models.Comments.Commands.UpdateComment
+namespace Agora.Operations.Models.Comments.Commands.UpdateComment
 {
     [PreAuthorize("@Security.IsHearingResponder(#request.HearingId) && @Security.IsCommentOwnerByCommentId(#request.Id)")]
     [PreAuthorize("@Security.IsHearingOwnerByHearingId(#request.HearingId)")]
@@ -34,7 +32,7 @@ namespace BallerupKommune.Operations.Models.Comments.Commands.UpdateComment
         public string Text { get; set; }
         public string OnBehalfOf { get; set; }
         public string CommentDeclineReason { get; set; }
-        public CommentStatus CommentStatus { get; set; }
+        public CommentStatusEnum CommentStatus { get; set; }
         public IEnumerable<FileOperation> FileOperations { get; set; }
 
 
@@ -52,9 +50,20 @@ namespace BallerupKommune.Operations.Models.Comments.Commands.UpdateComment
             private readonly IPluginService _pluginService;
             private readonly ICurrentUserService _currentUserService;
             private readonly IUserDao _userDao;
-            private readonly IHearingRoleResolver _hearingRoleResolver;
 
-            public UpdateCommentCommandHandler(IHearingDao hearingDao, ICommentDao commentDao, ICommentDeclineInfoDao commentDeclineInfoDao, IContentDao contentDao, IContentTypeDao contentTypeDao, IFileService fileService, ISecurityExpressions securityExpressions, IGlobalContentDao globalContentDao, IConsentDao consentDao, IPluginService pluginService, ICurrentUserService currentUserService, IUserDao userDao, IHearingRoleResolver hearingRoleResolver)
+            public UpdateCommentCommandHandler(
+                IHearingDao hearingDao, 
+                ICommentDao commentDao, 
+                ICommentDeclineInfoDao commentDeclineInfoDao, 
+                IContentDao contentDao, 
+                IContentTypeDao contentTypeDao,
+                IFileService fileService, 
+                ISecurityExpressions securityExpressions, 
+                IGlobalContentDao globalContentDao, 
+                IConsentDao consentDao,
+                IPluginService pluginService, 
+                ICurrentUserService currentUserService, 
+                IUserDao userDao)
             {
                 _hearingDao = hearingDao;
                 _commentDao = commentDao;
@@ -68,19 +77,18 @@ namespace BallerupKommune.Operations.Models.Comments.Commands.UpdateComment
                 _pluginService = pluginService;
                 _currentUserService = currentUserService;
                 _userDao = userDao;
-                _hearingRoleResolver = hearingRoleResolver;
             }
 
             public async Task<Comment> Handle(UpdateCommentCommand request, CancellationToken cancellationToken)
             {
                 var commentIncludes = IncludeProperties.Create<Comment>(null, new List<string>
                 {
-                    nameof(Comment.Contents),
+                    nameof(Comment.Contents), 
                     $"{nameof(Comment.Contents)}.{nameof(Content.ContentType)}",
                     nameof(Comment.CommentType),
                     $"{nameof(Comment.CommentType)}.{nameof(Comment.CommentType.CommentStatuses)}",
                     nameof(Comment.Consent),
-                    $"{nameof(Comment.CommentDeclineInfo)}"
+                    nameof(Comment.CommentDeclineInfo)
                 });
                 var currentComment = await _commentDao.GetAsync(request.Id, commentIncludes);
 
@@ -96,16 +104,18 @@ namespace BallerupKommune.Operations.Models.Comments.Commands.UpdateComment
 
                 var allPossibleCommentStatus = currentComment.CommentType.CommentStatuses;
 
+                var statusBeforeUpdate = currentComment.CommentStatus.Status;
                 var newCommentStatus = allPossibleCommentStatus.SingleOrDefault(x => x.Status == request.CommentStatus);
                 if (newCommentStatus == null)
                 {
                     throw new InvalidOperationException($"Comment with type: {currentComment.CommentType.Type} with status: {request.CommentStatus} is not valid.");
                 }
-                var commentDeclinedStatus = allPossibleCommentStatus.Single(x => x.Status == CommentStatus.NOT_APPROVED);
-                var commentApprovedStatus = allPossibleCommentStatus.Single(x => x.Status == CommentStatus.APPROVED);
+
+                var commentDeclinedStatus = allPossibleCommentStatus.Single(x => x.Status == CommentStatusEnum.NOT_APPROVED);
+                var commentApprovedStatus =
+                    allPossibleCommentStatus.Single(x => x.Status == CommentStatusEnum.APPROVED);
                 var isDecliningComment = commentDeclinedStatus == newCommentStatus;
                 var isApprovingComment = commentApprovedStatus == newCommentStatus;
-
                 if (isDecliningComment && String.IsNullOrEmpty(request.CommentDeclineReason))
                 {
                     throw new InvalidOperationException($"A reason must be provided when declining a comment");
@@ -120,6 +130,7 @@ namespace BallerupKommune.Operations.Models.Comments.Commands.UpdateComment
                 {
                     throw new NotFoundException(nameof(Content), textContent.Id);
                 }
+
                 var hearingIncludes = IncludeProperties.Create<Hearing>(null, new List<string>
                 {
                     nameof(Hearing.UserHearingRoles),
@@ -156,18 +167,25 @@ namespace BallerupKommune.Operations.Models.Comments.Commands.UpdateComment
                 currentComment.CommentStatus = newCommentStatus;
                 currentComment.OnBehalfOf = request.OnBehalfOf;
 
+                currentComment.PropertiesUpdated = new List<string> 
+                    { 
+                        nameof(Comment.CommentStatusId), 
+                        nameof(Comment.CommentStatus), 
+                        nameof(Comment.OnBehalfOf)
+                    };
+
                 if (isDecliningComment && currentComment.CommentDeclineInfo == null)
                 {
-                    var commentDecliner = await currentHearing.GetHearingOwner(_hearingRoleResolver);
-                    var newCommentDeclineInfo = await _commentDeclineInfoDao.CreateAsync( new CommentDeclineInfo
+                    var newCommentDeclineInfo = await _commentDeclineInfoDao.CreateAsync(new CommentDeclineInfo
                     {
                         DeclineReason = request.CommentDeclineReason,
-                        DeclinerInitials = commentDecliner.EmployeeDisplayName,
+                        DeclinerInitials = _currentUserService.EmployeeName,
                     });
                     currentComment.CommentDeclineInfoId = newCommentDeclineInfo.Id;
-                } 
 
-                currentComment.PropertiesUpdated = new List<string> { nameof(Comment.OnBehalfOf) };
+                    currentComment.PropertiesUpdated.Add(nameof(Comment.CommentDeclineInfo));
+                }
+
                 await _commentDao.UpdateAsync(currentComment);
 
                 if (isApprovingComment && currentComment.CommentDeclineInfo != null)
@@ -228,7 +246,6 @@ namespace BallerupKommune.Operations.Models.Comments.Commands.UpdateComment
                 if (isDecliningComment)
                 {
                     var hearingCommentResponder = currentComment.User?.Id;
-                    
                     if (hearingCommentResponder != null)
                     {
                         await _pluginService.NotifyAfterHearingResponseDecline(currentHearing.Id, (int)hearingCommentResponder, currentComment.Id);
@@ -257,14 +274,33 @@ namespace BallerupKommune.Operations.Models.Comments.Commands.UpdateComment
                     await _pluginService.NotifyAfterHearingReview(currentHearing.Id);
                 }
 
-                // Round-trip to database to get the relationships
-                var defaultIncludes = IncludeProperties.Create<Comment>();
-                var result = await _commentDao.GetAsync(currentComment.Id, defaultIncludes);
+                var result = await EvaluateStatusAfterScan(currentComment.Id, allPossibleCommentStatus.ToList(), isHearingResponse,
+                    statusBeforeUpdate, currentHearing.AutoApproveComments, isDecliningComment);
 
                 return result;
             }
 
-            private bool ValidateNewCommentStatus(CommentStatus newCommentStatus, CommentType commentType, int hearingId)
+            private async Task<Comment> EvaluateStatusAfterScan(int commentId, List<CommentStatus> allCommentStatus, bool isHearingResponse,
+                CommentStatusEnum prevStatus, bool autoAccept, bool isDecliningComment)
+            {
+                // Round-trip to database to get the relationships
+                var defaultIncludes = IncludeProperties.Create<Comment>();
+                var result = await _commentDao.GetAsync(commentId, defaultIncludes);
+
+                if (isHearingResponse && !isDecliningComment && autoAccept && !result.ContainsSensitiveInformation && prevStatus == CommentStatusEnum.APPROVED)
+                {
+                    var approvedStatus = allCommentStatus.Single(status =>
+                        status.Status == CommentStatusEnum.APPROVED);
+                    result.CommentStatusId = approvedStatus.Id;
+                    result.CommentStatus = approvedStatus;
+                    result.PropertiesUpdated = new List<string> { nameof(Comment.CommentStatusId), nameof(Comment.CommentStatus) };
+                    result = await _commentDao.UpdateAsync(result);
+                } 
+
+                return result;
+            }
+
+            private bool ValidateNewCommentStatus(CommentStatusEnum newCommentStatus, CommentType commentType, int hearingId)
             {
                 var isHearingOwner = _securityExpressions.IsHearingOwnerByHearingId(hearingId);
                 if (commentType == CommentType.HEARING_RESPONSE)
@@ -273,14 +309,14 @@ namespace BallerupKommune.Operations.Models.Comments.Commands.UpdateComment
                     {
                         return true;
                     }
-                    if (newCommentStatus == CommentStatus.AWAITING_APPROVAL)
+                    if (newCommentStatus == CommentStatusEnum.AWAITING_APPROVAL)
                     {
                         return true;
                     }
                 }
                 if (commentType == CommentType.HEARING_REVIEW)
                 {
-                    if (newCommentStatus == CommentStatus.NONE)
+                    if (newCommentStatus == CommentStatusEnum.NONE)
                     {
                         return true;
                     }
@@ -288,7 +324,7 @@ namespace BallerupKommune.Operations.Models.Comments.Commands.UpdateComment
 
                 if (commentType == CommentType.HEARING_RESPONSE_REPLY)
                 {
-                    if (newCommentStatus == CommentStatus.NONE)
+                    if (newCommentStatus == CommentStatusEnum.NONE)
                     {
                         return true;
                     }

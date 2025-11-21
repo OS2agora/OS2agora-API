@@ -31,13 +31,11 @@ For example, to add a new migration from the root folder:
 
 ### Database Update
 
-~~To use ´dotnet-ef´ for updating your database, please add the following flags to your command (values assume you are executing from repository root)~~
+To use ´dotnet-ef´ for updating your database, please add the following flags to your command (values assume you are executing from repository root)
 
-* ~~`--project src/DAOs` (optional if in this folder)~~
-* ~~`--startup-project src/Api`~~
+* `--project src/DAOs` (optional if in this folder)
+* `--startup-project src/Api`
 
-~~To update the database to the latest migrations:~~
+To update the database to the latest migrations: 
  
- ~~`dotnet ef database update --project src/DAOs --startup-project src/Api`~~
-
-To update the database to use the newest migrations simply clear your docker image and run the Api locally
+ `dotnet ef database update --project src/DAOs --startup-project src/Api`

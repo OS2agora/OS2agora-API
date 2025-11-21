@@ -1,13 +1,13 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using MediatR;
 using NovaSec.Attributes;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
+using Agora.Models.Common;
 
-namespace BallerupKommune.Operations.Models.HearingTemplates.Queries.GetHearingTemplates
+namespace Agora.Operations.Models.HearingTemplates.Queries.GetHearingTemplates
 {
     [PostFilter("HasRole('Administrator')")]
     [PostFilter("HasAnyRole(['Anonymous', 'Citizen', 'Employee'])",

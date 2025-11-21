@@ -1,14 +1,14 @@
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
-using BallerupKommune.Operations.Resolvers;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces;
+using Agora.Operations.Common.Interfaces.DAOs;
+using Agora.Operations.Resolvers;
 using Moq;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using HearingRoleEnum = BallerupKommune.Models.Enums.HearingRole;
+using HearingRoleEnum = Agora.Models.Enums.HearingRole;
 
-namespace BallerupKommune.Operations.UnitTests.Resolvers
+namespace Agora.Operations.UnitTests.Resolvers
 {
     internal class CompanyHearingRoleResolverTest
     {
@@ -66,8 +66,9 @@ namespace BallerupKommune.Operations.UnitTests.Resolvers
                 });
             }
 
+            _currentUserServiceMock.Setup(userService => userService.CompanyId)
+                .Returns(companyId);
             _currentUserServiceMock.Setup(userService => userService.DatabaseUserId).Returns(currentUserId);
-            _currentUserServiceMock.Setup(userService => userService.CompanyId).Returns(companyId);
             _hearingRoleResolverMock.Setup(resolver => resolver.GetHearingRole(role)).ReturnsAsync(hearingRole);
             _companyHearingRoleDaoMock
                 .Setup(dao => dao.GetAllAsync(null, companyHearingRole => companyHearingRole.CompanyId == companyId))

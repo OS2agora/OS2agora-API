@@ -1,5 +1,5 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Models.HearingTypes.Queries.GetHearingTypes;
+﻿using Agora.Models.Models;
+using Agora.Operations.Models.HearingTypes.Queries.GetHearingTypes;
 using Moq;
 using NUnit.Framework;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.Operations.UnitTests.Models.HearingTypes.Queries
+namespace Agora.Operations.UnitTests.Models.HearingTypes.Queries
 {
     public class GetHearingTypesTest : ModelsTestBase<GetHearingTypesQuery, List<HearingType>>
     {

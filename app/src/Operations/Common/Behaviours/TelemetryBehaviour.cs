@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 
-namespace BallerupKommune.Operations.Common.Behaviours
+namespace Agora.Operations.Common.Behaviours
 {
     public class TelemetryBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     {

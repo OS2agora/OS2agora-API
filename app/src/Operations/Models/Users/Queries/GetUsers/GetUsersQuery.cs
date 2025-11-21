@@ -1,15 +1,15 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using MediatR;
 using NovaSec.Attributes;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using UserCapacity = BallerupKommune.Models.Enums.UserCapacity;
+using Agora.Models.Common;
+using UserCapacity = Agora.Models.Enums.UserCapacity;
 
-namespace BallerupKommune.Operations.Models.Users.Queries.GetUsers
+namespace Agora.Operations.Models.Users.Queries.GetUsers
 {
     [PreAuthorize("HasAnyRole(['Administrator', 'HearingOwner'])")]
     public class GetUsersQuery : IRequest<List<User>>

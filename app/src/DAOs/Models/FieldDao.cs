@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
-using BallerupKommune.DAOs.Persistence;
-using BallerupKommune.DAOs.Statistics;
-using BallerupKommune.Entities.Entities;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+using Agora.DAOs.Persistence;
+using Agora.DAOs.Statistics;
+using Agora.Entities.Entities;
+using Agora.Models.Common;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.DAOs.Models
+namespace Agora.DAOs.Models
 {
     public class FieldDao : BaseDao<FieldEntity, Field>, IFieldDao
     {

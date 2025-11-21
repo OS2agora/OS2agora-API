@@ -1,21 +1,21 @@
 ﻿using AutoMapper;
-using BallerupKommune.DAOs.Esdh.Sbsip.V12.Interface;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Models.Models.Esdh;
-using BallerupKommune.Operations.ApplicationOptions;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Common.Interfaces;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+using Agora.DAOs.Esdh.Sbsip.V12.Interface;
+using Agora.Models.Models;
+using Agora.Models.Models.Esdh;
+using Agora.Operations.ApplicationOptions;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Common.Interfaces;
+using Agora.Operations.Common.Interfaces.DAOs;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using HearingRole = BallerupKommune.Models.Enums.HearingRole;
+using Agora.Models.Common;
+using HearingRole = Agora.Models.Enums.HearingRole;
 
-namespace BallerupKommune.DAOs.Esdh.Sbsip
+namespace Agora.DAOs.Esdh.Sbsip
 {
     public class SbsipService : IEsdhService
     {

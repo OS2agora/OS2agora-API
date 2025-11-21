@@ -46,21 +46,21 @@ namespace Jobs
                    job => job.WithIdentity(Common.Constants.Jobs.HearingJournalizer.JobIdentity)
                        .WithDescription(Common.Constants.Jobs.HearingJournalizer.JobDescription));
 
-                options.ScheduleJob<InstantNotifications>(trigger => trigger
-                    .WithIdentity(Common.Constants.Jobs.InstantNotifications.TriggerIdentity)
+                options.ScheduleJob<CreateNotificationQueue>(trigger => trigger
+                    .WithIdentity(Common.Constants.Jobs.CreateNotificationQueue.TriggerIdentity)
                     .StartAt(DateBuilder.EvenSecondDate(DateTimeOffset.UtcNow.AddSeconds(7)))
-                    .WithCronSchedule(Common.Constants.Jobs.InstantNotifications.CronSchedule)
-                    .WithDescription(Common.Constants.Jobs.InstantNotifications.TriggerDescription),
-                    job => job.WithIdentity(Common.Constants.Jobs.InstantNotifications.JobIdentity)
-                        .WithDescription(Common.Constants.Jobs.InstantNotifications.JobDescription));
+                    .WithCronSchedule(Common.Constants.Jobs.CreateNotificationQueue.CronSchedule)
+                    .WithDescription(Common.Constants.Jobs.CreateNotificationQueue.TriggerDescription),
+                    job => job.WithIdentity(Common.Constants.Jobs.CreateNotificationQueue.JobIdentity)
+                        .WithDescription(Common.Constants.Jobs.CreateNotificationQueue.JobDescription));
 
-                options.ScheduleJob<DailyNotifications>(trigger => trigger
-                    .WithIdentity(Common.Constants.Jobs.DailyNotifications.TriggerIdentity)
+                options.ScheduleJob<CreateDailyStatusNotification>(trigger => trigger
+                    .WithIdentity(Common.Constants.Jobs.CreateDailyStatusNotifications.TriggerIdentity)
                     .StartAt(DateBuilder.EvenSecondDate(DateTimeOffset.UtcNow.AddSeconds(7)))
-                    .WithCronSchedule(Common.Constants.Jobs.DailyNotifications.CronSchedule)
-                    .WithDescription(Common.Constants.Jobs.DailyNotifications.TriggerDescription),
-                    job => job.WithIdentity(Common.Constants.Jobs.DailyNotifications.JobIdentity)
-                        .WithDescription(Common.Constants.Jobs.DailyNotifications.JobDescription));
+                    .WithCronSchedule(Common.Constants.Jobs.CreateDailyStatusNotifications.CronSchedule)
+                    .WithDescription(Common.Constants.Jobs.CreateDailyStatusNotifications.TriggerDescription),
+                    job => job.WithIdentity(Common.Constants.Jobs.CreateDailyStatusNotifications.JobIdentity)
+                        .WithDescription(Common.Constants.Jobs.CreateDailyStatusNotifications.JobDescription));
 
                 options.ScheduleJob<NotificationQueueSender>(trigger => trigger
                     .WithIdentity(Common.Constants.Jobs.NotificationQueueSender.TriggerIdentity)
@@ -69,6 +69,22 @@ namespace Jobs
                     .WithDescription(Common.Constants.Jobs.NotificationQueueSender.TriggerDescription),
                     job => job.WithIdentity(Common.Constants.Jobs.NotificationQueueSender.JobIdentity)
                         .WithDescription(Common.Constants.Jobs.NotificationQueueSender.JobDescription));
+
+                options.ScheduleJob<UpdateNotificationQueueDeliveryStatus>(trigger => trigger
+                    .WithIdentity(Common.Constants.Jobs.UpdateNotificationQueueDeliveryStatus.TriggerIdentity)
+                    .StartAt(DateBuilder.EvenSecondDate(DateTimeOffset.UtcNow).AddSeconds(7)) 
+                    .WithCronSchedule(Common.Constants.Jobs.UpdateNotificationQueueDeliveryStatus.CronSchedule)
+                    .WithDescription(Common.Constants.Jobs.UpdateNotificationQueueDeliveryStatus.TriggerDescription),
+                    job => job.WithIdentity(Common.Constants.Jobs.UpdateNotificationQueueDeliveryStatus.JobIdentity)
+                        .WithDescription(Common.Constants.Jobs.UpdateNotificationQueueDeliveryStatus.JobDescription));
+
+                options.ScheduleJob<DataCleanup>(trigger => trigger
+                        .WithIdentity(Common.Constants.Jobs.DataCleanup.TriggerIdentity)
+                        .StartAt(DateBuilder.EvenSecondDate(DateTimeOffset.UtcNow.AddSeconds(7)))
+                        .WithCronSchedule(Common.Constants.Jobs.DataCleanup.CronSchedule)
+                        .WithDescription(Common.Constants.Jobs.DataCleanup.TriggerDescription),
+                        job => job.WithIdentity(Common.Constants.Jobs.DataCleanup.JobIdentity)
+                            .WithDescription(Common.Constants.Jobs.DataCleanup.JobDescription));
 
                 // convert time zones using converter that can handle Windows/Linux differences
                 options.UseTimeZoneConverter();

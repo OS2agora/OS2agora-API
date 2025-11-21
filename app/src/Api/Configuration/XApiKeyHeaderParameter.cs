@@ -2,7 +2,7 @@
 using NSwag.Generation.Processors;
 using NSwag;
 
-namespace BallerupKommune.Api.Configuration
+namespace Agora.Api.Configuration
 {
     public class XApiKeyHeaderParameter : IOperationProcessor
     {
@@ -12,10 +12,10 @@ namespace BallerupKommune.Api.Configuration
             {
                 Name = "X-Api-Key",
                 Kind = OpenApiParameterKind.Header,
-                Description = "Api key that identifies whcih front end is calling.",
+                Description = "Api key that identifies which front end is calling.",
                 IsRequired = true,
                 IsNullableRaw = true,
-                Default = "Api key",
+                Default = "75f987dc-bb20-4062-99b9-756fdf110e0c",
                 Schema = new NJsonSchema.JsonSchema()
                 {
                     Type = NJsonSchema.JsonObjectType.String,
@@ -25,8 +25,8 @@ namespace BallerupKommune.Api.Configuration
                     },
                 },
             };
-            parameter.Schema.Enumeration.Add("replacewiththekeyfrominternalfrontend");
-            parameter.Schema.Enumeration.Add("replacewiththekeyfrompublicfrontend");
+            parameter.Schema.Enumeration.Add("75f987dc-bb20-4062-99b9-756fdf110e0c");
+            parameter.Schema.Enumeration.Add("01f81261-91cd-4c8b-8038-346de2c51742");
             context.OperationDescription.Operation.Parameters.Add(parameter);
             return true;
         }

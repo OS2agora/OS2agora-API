@@ -1,24 +1,25 @@
-﻿using BallerupKommune.DAOs.Mappings;
-using BallerupKommune.Entities.Common;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Agora.Entities.Common;
+using Agora.DAOs.Mappings;
+using Microsoft.EntityFrameworkCore;
 
-namespace BallerupKommune.DAOs.Persistence
+namespace Agora.DAOs.Persistence
 {
     internal static class ApplicationDbContextExtension
     {
         private static DbContext DbAsDbContext(IApplicationDbContext db) => db as DbContext;
 
         internal static async Task<IQueryable<TEntity>> GetEntityAsync<TEntity>(
-            this IApplicationDbContext db,
+            this IApplicationDbContext db, 
             int id,
-            List<string> includes = null) where TEntity : BaseEntity
+            List<string> includes = null,
+            bool asNoTracking = false) where TEntity : BaseEntity
         {
-            var query = await db.BuildQueryable<TEntity>(entity => entity.Id == id, includes);
+            var query = await db.BuildQueryable<TEntity>(entity => entity.Id == id, includes, asNoTracking: asNoTracking);
             return query;
         }
 
@@ -27,13 +28,15 @@ namespace BallerupKommune.DAOs.Persistence
             return (IQueryable<object>)context.GetType().GetMethod("Set").MakeGenericMethod(entityType).Invoke(context, null);
         }
 
-        internal static async Task<IQueryable<TEntity>> GetEntitiesAsync<TEntity>(
+        internal static async Task <IQueryable<TEntity>> GetEntitiesAsync<TEntity>(
             this IApplicationDbContext db,
             Expression<Func<TEntity, bool>> filter = null,
-            List<string> includes = null
+            List<string> includes = null,
+            int? limit = null,
+            bool asNoTracking = false
         ) where TEntity : BaseEntity
         {
-            var query = await db.BuildQueryable(filter, includes);
+            var query = await db.BuildQueryable(filter, includes, limit, asNoTracking);
             //var result = await query.ToListAsync();
             return query;
         }
@@ -41,13 +44,20 @@ namespace BallerupKommune.DAOs.Persistence
         internal static async Task<IQueryable<TEntity>> BuildQueryable<TEntity>(
             this IApplicationDbContext db,
             Expression<Func<TEntity, bool>> filter = null,
-            List<string> includes = null) where TEntity : BaseEntity
+            List<string> includes = null, int? limit = null, bool asNoTracking = false) where TEntity : BaseEntity
         {
-            var query = DbAsDbContext(db).Set<TEntity>().AsQueryable();
+            var query = asNoTracking 
+                ? DbAsDbContext(db).Set<TEntity>().AsNoTracking().AsQueryable() 
+                :  DbAsDbContext(db).Set<TEntity>().AsQueryable();
 
             if (filter != null)
             {
                 query = query.Where(filter);
+            }
+
+            if (limit.HasValue)
+            {
+                query = query.OrderBy(e => e.Id).Take(limit.Value);
             }
 
             if (includes != null && includes.Count > 0)
@@ -109,7 +119,7 @@ namespace BallerupKommune.DAOs.Persistence
 
             TEntity currentEntity = (await db.GetEntityAsync<TEntity>(entity.Id)).Single();
             currentEntity.CopyUpdatedPropertiesAndRelationships(entity, updatedProperties);
-
+            
             DbAsDbContext(db).Update(currentEntity);
             await DbAsDbContext(db).SaveChangesAsync();
         }

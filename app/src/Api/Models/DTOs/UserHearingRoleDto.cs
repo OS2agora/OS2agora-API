@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using BallerupKommune.Api.Models.Common;
-using BallerupKommune.Api.Models.JsonApi;
+using Agora.Api.Models.Common;
+using Agora.Api.Models.JsonApi;
 
-namespace BallerupKommune.Api.Models.DTOs
+namespace Agora.Api.Models.DTOs
 {
     public class UserHearingRoleDto : BaseDto<UserHearingRoleDto.UserHearingRoleAttributeDto>
     {

@@ -1,8 +1,8 @@
-﻿using BallerupKommune.Operations.Common.Constants;
-using BallerupKommune.Operations.Common.Interfaces;
+﻿using Agora.Operations.Common.Constants;
+using Agora.Operations.Common.Interfaces;
 using Microsoft.AspNetCore.Http;
 
-namespace BallerupKommune.Api.Services
+namespace Agora.Api.Services
 {
     public class CookieService : ICookieService
     {

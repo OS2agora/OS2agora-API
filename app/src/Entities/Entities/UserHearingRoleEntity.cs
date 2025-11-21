@@ -1,6 +1,8 @@
-﻿using BallerupKommune.Entities.Common;
+﻿using Agora.Entities.Attributes;
+using Agora.Entities.Common;
+using System.Collections.Generic;
 
-namespace BallerupKommune.Entities.Entities
+namespace Agora.Entities.Entities
 {
     public class UserHearingRoleEntity : AuditableEntity
     {
@@ -15,5 +17,10 @@ namespace BallerupKommune.Entities.Entities
         // Many-to-one relationship with User
         public int UserId { get; set; }
         public UserEntity User { get; set; }
+
+        // One-to-many-relationship with InvitationSourceMapping
+        [AllowRequestInclude(maxNavigationPathLength: 1)]
+        public ICollection<InvitationSourceMappingEntity> InvitationSourceMappings { get; set; } =
+            new List<InvitationSourceMappingEntity>();
     }
 }

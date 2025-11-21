@@ -1,10 +1,9 @@
-﻿using BallerupKommune.Entities.Common;
+﻿using Agora.Entities.Common;
 
-namespace BallerupKommune.Entities.Entities
+namespace Agora.Entities.Entities
 {
     public class ValidationRuleEntity : AuditableEntity
     {
-        public Enums.FieldType FieldType { get; set; }
         public bool? CanBeEmpty { get; set; }
 
         public int? MaxLength { get; set; }
@@ -16,6 +15,8 @@ namespace BallerupKommune.Entities.Entities
         public int? MaxFileCount { get; set; }
 
         public string[] AllowedFileTypes { get; set; }
+
+        public Enums.FieldType FieldType { get; set; }
 
         // One-to-one relationship with Field
         public FieldEntity Field { get; set; }

@@ -1,12 +1,12 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using MediatR;
 using NovaSec.Attributes;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
+using Agora.Models.Common;
 
-namespace BallerupKommune.Operations.Models.SubjectAreas.Command.CreateSubjectArea
+namespace Agora.Operations.Models.SubjectAreas.Command.CreateSubjectArea
 {
     [PreAuthorize("HasRole('Administrator')")]
     public class CreateSubjectAreaCommand : IRequest<SubjectArea>

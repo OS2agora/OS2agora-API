@@ -1,4 +1,4 @@
-namespace BallerupKommune.Operations.Common.Constants
+﻿namespace Agora.Operations.Common.Constants
 {
     public static class NotificationSubjectTemplates
     {

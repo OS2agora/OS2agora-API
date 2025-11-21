@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Operations.Common.Exceptions;
+using Agora.Models.Common;
+using Agora.Operations.Common.Exceptions;
 using NovaSec.Attributes;
 
-namespace BallerupKommune.Operations.Models.Comments.Commands.SoftDeleteComment
+namespace Agora.Operations.Models.Comments.Commands.SoftDeleteComment
 {
     [PreAuthorize("@Security.IsCommentOwnerByCommentId(#request.Id)")]
     public class SoftDeleteCommentCommand : IRequest<Comment>

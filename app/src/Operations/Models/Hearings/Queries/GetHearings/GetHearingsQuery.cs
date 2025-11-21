@@ -1,16 +1,17 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using MediatR;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Operations.Models.Comments.Queries.GetComments;
+using Agora.Models.Common;
+using Agora.Operations.Models.Comments.Queries.GetComments;
+using Agora.Operations.Common.CustomRequests;
 
-namespace BallerupKommune.Operations.Models.Hearings.Queries.GetHearings
+namespace Agora.Operations.Models.Hearings.Queries.GetHearings
 {
-    public class GetHearingsQuery : IRequest<List<Hearing>>
+    public class GetHearingsQuery : PaginationRequest<List<Hearing>>
     {
         public List<string> RequestIncludes { get; set; }
         
@@ -27,7 +28,7 @@ namespace BallerupKommune.Operations.Models.Hearings.Queries.GetHearings
 
             public async Task<List<Hearing>> Handle(GetHearingsQuery request, CancellationToken cancellationToken)
             {
-                var includes = IncludeProperties.Create<Hearing>(request.RequestIncludes, null);
+                var includes = IncludeProperties.Create<Hearing>(request.RequestIncludes, request.SortAndFilterIncludes);
                 List<Hearing> hearings = await _hearingDao.GetAllAsync(includes);
 
                 var comments = await _mediator.Send(new GetCommentsQuery

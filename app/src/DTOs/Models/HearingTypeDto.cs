@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using BallerupKommune.DTOs.Common;
+﻿using Agora.DTOs.Common;
+using System.Collections.Generic;
 
-namespace BallerupKommune.DTOs.Models
+namespace Agora.DTOs.Models
 {
     public class HearingTypeDto : AuditableDto<HearingTypeDto>
     {
@@ -16,5 +16,7 @@ namespace BallerupKommune.DTOs.Models
         public ICollection<KleMappingDto> KleMappings { get; set; } = new List<KleMappingDto>();
 
         public ICollection<FieldTemplateDto> FieldTemplates { get; set; } = new List<FieldTemplateDto>();
+
+        public ICollection<InvitationGroupMappingDto> InvitationGroupMappings { get; set; } = new List<InvitationGroupMappingDto>();
     }
 }

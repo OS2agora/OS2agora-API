@@ -1,24 +1,35 @@
-﻿using BallerupKommune.Entities.Entities;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using GlobalContentEntity = Agora.Entities.Entities.GlobalContentEntity;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using Agora.Entities.Enums;
 
-namespace BallerupKommune.DAOs.Persistence.DefaultData
+namespace Agora.DAOs.Persistence.DefaultData
 {
     public class DefaultGlobalContent : DefaultDataSeeder<GlobalContentEntity>
     {
         private static async Task<List<GlobalContentEntity>> GetDefaultEntities(ApplicationDbContext context)
         {
-            var globalContentType = await context.GlobalContentTypes.SingleAsync();
+            var termsAndConditionsType =
+                await context.GlobalContentTypes.FirstOrDefaultAsync(x => x.Type == GlobalContentType.TERMS_AND_CONDITIONS);
+            var cookieInformationType =
+                await context.GlobalContentTypes.FirstOrDefaultAsync(x => x.Type == GlobalContentType.COOKIE_INFORMATION);
 
             return new List<GlobalContentEntity> {
                 new GlobalContentEntity
                 {
-                    Content = "Udfyld venligst denne tekst via administrations siden",
+                    Content = "Udfyld venligst denne tekst vedrørende vilkår og betingelser via administrations siden",
                     Version = 1,
-                    GlobalContentType = globalContentType
-                }
+                    GlobalContentType = termsAndConditionsType
+                },
+                new GlobalContentEntity
+                {
+                Content = "Udfyld venligst denne tekst vedrørende cookies via administrations siden",
+                Version = 1,
+                GlobalContentType = cookieInformationType
+            }
             };
         }
 
@@ -29,19 +40,17 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
         {
         }
 
-        public static async Task SeedData(ApplicationDbContext context)
+        public static async Task SeedData(ApplicationDbContext context, List<GlobalContentEntity> municipalitySpecificEntities = null)
         {
             var defaultEntities = await GetDefaultEntities(context);
 
-            var seeder = new DefaultGlobalContent(context, defaultEntities);
+            var seeder = new DefaultGlobalContent(context, municipalitySpecificEntities ?? defaultEntities);
             await seeder.SeedEntitiesAsync();
         }
 
-        public override List<GlobalContentEntity> FetchEntitiesToUpdate(List<GlobalContentEntity> existingEntities, List<GlobalContentEntity> defaultEntities)
+        public override List<GlobalContentEntity> GetUpdatedEntities(List<GlobalContentEntity> existingEntities, List<GlobalContentEntity> defaultEntities)
         {
-            var updatedEntities = new List<GlobalContentEntity>();
-
-            return updatedEntities;
+            return new List<GlobalContentEntity>();
         }
     }
 }

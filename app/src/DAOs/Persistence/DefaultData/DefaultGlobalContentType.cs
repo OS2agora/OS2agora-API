@@ -1,11 +1,11 @@
-﻿using BallerupKommune.Entities.Entities;
-using BallerupKommune.Entities.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using GlobalContentTypeEntity = Agora.Entities.Entities.GlobalContentTypeEntity;
+using GlobalContentType = Agora.Entities.Enums.GlobalContentType;
+using System.Linq;
 
-namespace BallerupKommune.DAOs.Persistence.DefaultData
+namespace Agora.DAOs.Persistence.DefaultData
 {
     public class DefaultGlobalContentType : DefaultDataSeeder<GlobalContentTypeEntity>
     {
@@ -17,7 +17,13 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
                 {
                     Name = "Vilkår og betingelser",
                     Type = GlobalContentType.TERMS_AND_CONDITIONS
+                },
+                new GlobalContentTypeEntity
+                {
+                    Name = "Cookieinformation",
+                    Type = GlobalContentType.COOKIE_INFORMATION
                 }
+
             };
         }
 
@@ -28,20 +34,21 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
         {
         }
 
-        public static async Task SeedData(ApplicationDbContext context)
+        public static async Task SeedData(ApplicationDbContext context, List<GlobalContentTypeEntity> municipalitySpecificEntities = null)
         {
             var defaultEntities = GetDefaultEntities();
-            var seeder = new DefaultGlobalContentType(context, defaultEntities);
+            var seeder = new DefaultGlobalContentType(context, municipalitySpecificEntities ?? defaultEntities);
             await seeder.SeedEntitiesAsync();
         }
 
-        public override List<GlobalContentTypeEntity> FetchEntitiesToUpdate(List<GlobalContentTypeEntity> existingEntities, List<GlobalContentTypeEntity> defaultEntities)
+        public override List<GlobalContentTypeEntity> GetUpdatedEntities(List<GlobalContentTypeEntity> existingEntities, List<GlobalContentTypeEntity> defaultEntities)
         {
             var updatedEntities = new List<GlobalContentTypeEntity>();
 
             foreach (var entity in existingEntities)
             {
                 var defaultEntity = defaultEntities.FirstOrDefault(e => _comparer(e, entity));
+
                 if (defaultEntity == null)
                 {
                     continue;

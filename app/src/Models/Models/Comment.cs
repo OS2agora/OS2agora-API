@@ -1,7 +1,7 @@
-﻿using BallerupKommune.Models.Common;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Agora.Models.Common;
 
-namespace BallerupKommune.Models.Models
+namespace Agora.Models.Models
 {
     public class Comment : AuditableModel
     {
@@ -11,6 +11,9 @@ namespace BallerupKommune.Models.Models
         public bool ContainsSensitiveInformation { get; set; }
 
         public string OnBehalfOf { get; set; }
+
+        public int? CommentDeclineInfoId { get; set; }
+        public CommentDeclineInfo CommentDeclineInfo { get; set; } 
 
         public int UserId { get; set; }
         public User User { get; set; }
@@ -26,10 +29,11 @@ namespace BallerupKommune.Models.Models
 
         public int? CommentParrentId { get; set; }
         public Comment CommentParrent { get; set; }
-        public int? CommentDeclineInfoId { get; set; }
-        public CommentDeclineInfo CommentDeclineInfo { get; set; }
+
         public int? ConsentId { get; set; }
         public Consent Consent { get; set; }
+
+        public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
         public ICollection<Comment> CommentChildren { get; set; } = new List<Comment>();
 
@@ -40,8 +44,11 @@ namespace BallerupKommune.Models.Models
             "CommentType",
             "CommentStatus",
             "CommentParrent",
+            "CommentChildren",
             "CommentDeclineInfo",
             "User",
+            "User.Company",
+            "User.UserCapacity"
         };
     }
 }

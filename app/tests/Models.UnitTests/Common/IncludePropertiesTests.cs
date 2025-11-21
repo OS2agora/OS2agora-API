@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
-using BallerupKommune.TestUtilities;
+using Agora.Models.Common;
+using Agora.Models.Models;
+using Agora.TestUtilities;
 using NUnit.Framework;
 
-namespace BallerupKommune.Models.UnitTests.Common
+namespace Agora.Models.UnitTests.Common
 {
     public class IncludePropertiesTests
     {
@@ -14,6 +14,10 @@ namespace BallerupKommune.Models.UnitTests.Common
         [GenericTestCase(typeof(SubjectArea), "Hearings")]
         [GenericTestCase(typeof(SubjectArea), "Hearings", "Hearings.HearingType", "Hearings.UserHearingRoles")]
         [GenericTestCase(typeof(SubjectArea), "Hearings.HearingType.HearingTemplate.Fields.FieldTemplates")]
+        [GenericTestCase(typeof(CityArea))]
+        [GenericTestCase(typeof(CityArea), "Hearings")]
+        [GenericTestCase(typeof(CityArea), "Hearings", "Hearings.HearingType", "Hearings.UserHearingRoles")]
+        [GenericTestCase(typeof(CityArea), "Hearings.HearingType.HearingTemplate.Fields.FieldTemplates")]
         [GenericTestCase(typeof(User), "UserHearingRoles", "UserHearingRoles.HearingRole", "UserCapacity")]
         public void GetIncludes_ValidIncludes<T>(params string[] includes) where T : BaseModel
         {
@@ -21,6 +25,7 @@ namespace BallerupKommune.Models.UnitTests.Common
         }
 
         [Test]
+        [GenericTestCase(typeof(CityArea))]
         [GenericTestCase(typeof(Comment))]
         [GenericTestCase(typeof(CommentStatus))]
         [GenericTestCase(typeof(CommentType))]
@@ -60,6 +65,7 @@ namespace BallerupKommune.Models.UnitTests.Common
         }
 
         [Test]
+        [GenericTestCase(typeof(CityArea))]
         [GenericTestCase(typeof(Comment))]
         [GenericTestCase(typeof(CommentStatus))]
         [GenericTestCase(typeof(CommentType))]

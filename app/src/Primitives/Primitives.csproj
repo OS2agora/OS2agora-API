@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyName>BallerupKommune.Primitives</AssemblyName>
-    <RootNamespace>BallerupKommune.Primitives</RootNamespace>
+    <AssemblyName>Agora.Primitives</AssemblyName>
+    <RootNamespace>Agora.Primitives</RootNamespace>
   </PropertyGroup>
 
 </Project>

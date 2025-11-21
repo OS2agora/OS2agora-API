@@ -1,7 +1,7 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Constants;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Models.GlobalContents.Commands;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Constants;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Models.GlobalContents.Commands;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore.Internal;
 using Moq;
@@ -9,9 +9,9 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using GlobalContentType = BallerupKommune.Models.Enums.GlobalContentType;
+using GlobalContentType = Agora.Models.Enums.GlobalContentType;
 
-namespace BallerupKommune.Operations.UnitTests.Models.GlobalContents.Commands
+namespace Agora.Operations.UnitTests.Models.GlobalContents.Commands
 {
     public class CreateGlobalContentTests : ModelsTestBase<CreateGlobalContentCommand, GlobalContent>
     {
@@ -63,7 +63,7 @@ namespace BallerupKommune.Operations.UnitTests.Models.GlobalContents.Commands
                 },
                 Content = "Some string",
                 Version = 404,
-                GlobalContentType = new BallerupKommune.Models.Models.GlobalContentType
+                GlobalContentType = new Agora.Models.Models.GlobalContentType
                 {
                     Type = GlobalContentType.TERMS_AND_CONDITIONS
                 }

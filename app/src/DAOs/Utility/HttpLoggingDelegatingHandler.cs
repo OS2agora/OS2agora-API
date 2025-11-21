@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace BallerupKommune.DAOs.Utility
+namespace Agora.DAOs.Utility
 {
     public class HttpLoggingDelegatingHandler : DelegatingHandler
     {
@@ -38,9 +38,13 @@ namespace BallerupKommune.DAOs.Utility
                 stopwatch.Stop();
                 _logger.LogError(ex,
                     $"HTTP {request.Method} {request.RequestUri} responded in {stopwatch.ElapsedMilliseconds} ms with response {(int?)response?.StatusCode} ({response?.StatusCode}) {response?.Content?.ReadAsStringAsync().Result}");
-                if (request.Method == HttpMethod.Put || request.Method == HttpMethod.Post || request.Method == HttpMethod.Patch)
+
+                if (!Primitives.Logic.Environment.IsProduction())
                 {
-                    _logger.LogInformation($"Request body: {request.Content.ReadAsStringAsync().Result}");
+                    if (request.Method == HttpMethod.Put || request.Method == HttpMethod.Post || request.Method == HttpMethod.Patch)
+                    {
+                        _logger.LogInformation($"Request body: {request.Content.ReadAsStringAsync().Result}");
+                    }
                 }
                 throw;
             }

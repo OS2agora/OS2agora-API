@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace BallerupKommune.Operations.Models.Hearings.Command.UploadReviewers
+namespace Agora.Operations.Models.Hearings.Command.UploadReviewers
 {
     public class UploadReviewersCommandValidator : AbstractValidator<UploadReviewersCommand>
     {

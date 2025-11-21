@@ -347,6 +347,7 @@ healthchecksdb
 
 # file storage for local development
 /app/src/Api/file-drive/
+/app/src/Api/export-drive/
 
 # Local configuration override
 **/.env.local

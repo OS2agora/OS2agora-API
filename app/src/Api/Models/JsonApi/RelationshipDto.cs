@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using BallerupKommune.Api.Models.JsonApi.Interfaces;
+using Agora.Api.Models.JsonApi.Interfaces;
 using Newtonsoft.Json;
 
-namespace BallerupKommune.Api.Models.JsonApi
+namespace Agora.Api.Models.JsonApi
 {
     ///<inheritdoc/>
     public class RelationshipDto : IJsonApiRelationship

@@ -1,4 +1,4 @@
-﻿namespace BallerupKommune.Primitives.Exceptions
+﻿namespace Agora.Primitives.Exceptions
 {
     public class ResponseException : BaseException
     {

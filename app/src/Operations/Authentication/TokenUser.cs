@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Security.Claims;
-using BallerupKommune.Operations.Common.Enums;
+using Agora.Operations.Common.Enums;
 
-namespace BallerupKommune.Operations.Authentication
+namespace Agora.Operations.Authentication
 {
     public class TokenUser
     {
@@ -17,6 +17,7 @@ namespace BallerupKommune.Operations.Authentication
         public string EmployeeDisplayName { get; set; } = null;
         public string CompanyName { get; set; } = null;
         public List<Claim> PossibleRoles { get; set; } = new List<Claim>();
+        public List<Claim> AdditionalClaims { get; set; } = new List<Claim>();
 
     }
 }

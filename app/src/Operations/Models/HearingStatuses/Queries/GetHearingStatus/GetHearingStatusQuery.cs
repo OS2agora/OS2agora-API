@@ -1,12 +1,12 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using MediatR;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using NovaSec.Attributes;
 
-namespace BallerupKommune.Operations.Models.HearingStatuses.Queries.GetHearingStatus
+namespace Agora.Operations.Models.HearingStatuses.Queries.GetHearingStatus
 {
     [PostFilter("true","Hearings")]
     public class GetHearingStatusesQuery : IRequest<List<HearingStatus>>

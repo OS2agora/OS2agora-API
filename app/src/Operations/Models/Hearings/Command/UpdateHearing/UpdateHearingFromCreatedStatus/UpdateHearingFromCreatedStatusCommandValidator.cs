@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace BallerupKommune.Operations.Models.Hearings.Command.UpdateHearing.UpdateHearingFromCreatedStatus
+namespace Agora.Operations.Models.Hearings.Command.UpdateHearing.UpdateHearingFromCreatedStatus
 {
     public class UpdateHearingFromCreatedStatusCommandValidator : AbstractValidator<UpdateHearingFromCreatedStatusCommand>
     {

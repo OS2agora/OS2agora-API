@@ -1,11 +1,10 @@
+using Agora.DTOs.Common;
+using Agora.Models.Common;
+using AutoMapper;
 using System;
 using System.Linq;
-using System.Reflection;
-using AutoMapper;
-using BallerupKommune.DTOs.Common;
-using BallerupKommune.Models.Common;
 
-namespace BallerupKommune.DTOs.Mappings
+namespace Agora.DTOs.Mappings
 {
     /// <summary>
     /// Extension point to provide mapping to a relationship field in the <typeparamref name="TDto"/>.
@@ -57,24 +56,31 @@ namespace BallerupKommune.DTOs.Mappings
         /// <seealso cref="RelationshipResolver{TModel,TDto}">See for details on how it is resolved.</seealso>
         public object Resolve(TModel source, TDto destination, object sourceMember, object destMember, ResolutionContext context)
         {
-            PropertyInfo sourcePropertyInfo = typeof(TModel).GetProperty(_propertyName)!;
-            PropertyInfo destinationPropertyInfo = typeof(TDto).GetProperty(_propertyName)!;
-            object sourceRelationshipValue = sourcePropertyInfo.GetValue(source);
+            var sourcePropertyInfo = typeof(TModel).GetProperty(_propertyName)!;
+            var destinationPropertyInfo = typeof(TDto).GetProperty(_propertyName)!;
+            var sourceRelationshipValue = sourcePropertyInfo.GetValue(source);
 
             if (sourceRelationshipValue != null)
             {
-                Type destinationType = destinationPropertyInfo.PropertyType.GenericTypeArguments.Single();
+                var destinationType = destinationPropertyInfo.PropertyType.GenericTypeArguments.Single();
                 return context.Mapper.Map(sourceRelationshipValue, sourcePropertyInfo.PropertyType, destinationType);
             }
 
-            var id = (int?) typeof(TModel).GetProperty(_propertyName + "Id")!.GetValue(source);
+            // Note: For almost all Navigation properties we would expect the primary/alternate key to exist
+            // But for one-to-one relationships the primary/alternate key only exist on one of the models
+            var property = typeof(TModel).GetProperty(_propertyName + "Id");
+            if (property == null)
+            {
+                return null;
+            }
 
+            var id = (int?)property.GetValue(source);
             if (id == null)
             {
                 return null;
             }
-                
-            object baseDto = Activator.CreateInstance(destinationPropertyInfo.PropertyType);
+
+            var baseDto = Activator.CreateInstance(destinationPropertyInfo.PropertyType);
             destinationPropertyInfo.PropertyType.GetProperty("Id")!.SetValue(baseDto, id);
             return baseDto;
         }

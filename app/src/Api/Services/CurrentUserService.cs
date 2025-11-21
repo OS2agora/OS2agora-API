@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
-using BallerupKommune.Operations.Common.Constants;
-using BallerupKommune.Operations.Common.Enums;
-using BallerupKommune.Operations.Common.Interfaces;
+using Agora.Operations.Common.Constants;
+using Agora.Operations.Common.Enums;
+using Agora.Operations.Common.Interfaces;
 using Microsoft.AspNetCore.Http;
 
-namespace BallerupKommune.Api.Services
+namespace Agora.Api.Services
 {
     public class CurrentUserService : ICurrentUserService
     {
@@ -60,7 +62,25 @@ namespace BallerupKommune.Api.Services
         {
             var claim = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Expiration);
             var couldParse = DateTime.TryParse(claim, out var result);
-            return couldParse ? result : default;
+            return couldParse ? result : DateTime.MinValue;
+        }
+
+        public DateTime MainSessionExpiration => ParseSessionExpirationDate();
+
+        private DateTime ParseSessionExpirationDate()
+        {
+            var claim = _httpContextAccessor.HttpContext?.User.FindFirstValue(JWT.Claims.MainSessionExpiration);
+            var couldParse = DateTime.TryParse(claim, out var result);
+            return couldParse ? result : DateTime.MinValue;
+        }
+
+        public List<string> Roles => ParseRoles();
+
+        private List<string> ParseRoles()
+        {
+            var roleClaims = _httpContextAccessor.HttpContext?.User.FindAll(ClaimTypes.Role).Select(claim => claim.Value).ToList() ?? new List<string>();
+            return roleClaims;
+
         }
     }
 }

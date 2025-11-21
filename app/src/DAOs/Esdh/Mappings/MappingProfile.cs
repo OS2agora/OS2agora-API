@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using BallerupKommune.DAOs.Esdh.Sbsip.DTOs;
-using BallerupKommune.Models.Models.Esdh;
+using Agora.DAOs.Esdh.Sbsip.DTOs;
+using Agora.Models.Models.Esdh;
 
-namespace BallerupKommune.DAOs.Esdh.Mappings
+namespace Agora.DAOs.Esdh.Mappings
 {
     public class MappingProfile : Profile
     {

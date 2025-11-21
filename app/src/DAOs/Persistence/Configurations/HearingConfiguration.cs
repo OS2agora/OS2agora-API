@@ -1,8 +1,8 @@
-﻿using BallerupKommune.DAOs.Persistence.Configurations.Utility;
-using BallerupKommune.Entities.Entities;
+﻿using Agora.DAOs.Persistence.Configurations.Utility;
+using Agora.Entities.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BallerupKommune.DAOs.Persistence.Configurations
+namespace Agora.DAOs.Persistence.Configurations
 {
     public class HearingConfiguration : AuditableEntityTypeConfiguration<HearingEntity>
     {
@@ -12,7 +12,7 @@ namespace BallerupKommune.DAOs.Persistence.Configurations
 
             builder.Property(content => content.ContactPersonDepartmentName).HasMaxLength(100);
 
-            builder.Property(content => content.ContactPersonEmail).HasMaxLength(100);
+            builder.Property(content => content.ContactPersonEmail).HasMaxLength(500);
 
             builder.Property(content => content.ContactPersonName).HasMaxLength(100);
 

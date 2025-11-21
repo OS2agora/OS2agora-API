@@ -1,7 +1,7 @@
-﻿using BallerupKommune.DTOs.Common;
+﻿using Agora.DTOs.Common;
 using System.Collections.Generic;
 
-namespace BallerupKommune.DTOs.Models
+namespace Agora.DTOs.Models
 {
     public class FieldTypeDto : AuditableDto<FieldTypeDto>
     {

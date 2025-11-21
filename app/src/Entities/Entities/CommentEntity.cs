@@ -1,8 +1,8 @@
-﻿using BallerupKommune.Entities.Attributes;
-using BallerupKommune.Entities.Common;
+﻿using Agora.Entities.Attributes;
+using Agora.Entities.Common;
 using System.Collections.Generic;
 
-namespace BallerupKommune.Entities.Entities
+namespace Agora.Entities.Entities
 {
     public class CommentEntity : AuditableEntity
     {
@@ -14,6 +14,11 @@ namespace BallerupKommune.Entities.Entities
 
         public string OnBehalfOf { get; set; }
 
+        // One-to-one relationship with CommentDeclineInfo
+        public int? CommentDeclineInfoId { get; set; }
+        [AllowRequestInclude]
+        public CommentDeclineInfoEntity CommentDeclineInfo { get; set; }
+
         // Many-to-one relationship with UserEntity
         public int UserId { get; set; }
         public UserEntity User { get; set; }
@@ -21,10 +26,6 @@ namespace BallerupKommune.Entities.Entities
         // Many-to-one relationship with CommentStatus
         public int CommentStatusId { get; set; }
         public CommentStatusEntity CommentStatus { get; set; }
-
-        public int? CommentDeclineInfoId { get; set; }
-        [AllowRequestInclude]
-        public CommentDeclineInfoEntity CommentDeclineInfo { get; set; }
 
         // Many-to-one relationship with Hearing
         public int HearingId { get; set; }
@@ -38,6 +39,10 @@ namespace BallerupKommune.Entities.Entities
         public int? CommentParrentId { get; set; }
         public CommentEntity CommentParrent { get; set; }
 
+        // One-to-one relationship with Consent
+        public int? ConsentId { get; set; }
+        public ConsentEntity Consent { get; set; }
+
         // One-to-many relationship with Comments (child comments)
         public ICollection<CommentEntity> CommentChildren { get; set; } = new List<CommentEntity>();
 
@@ -45,8 +50,7 @@ namespace BallerupKommune.Entities.Entities
         [AllowRequestInclude(maxNavigationPathLength: 2)]
         public ICollection<ContentEntity> Contents { get; set; } = new List<ContentEntity>();
 
-        // One-to-one relationship with Consent
-        public int? ConsentId { get; set; }
-        public ConsentEntity Consent { get; set; }
+        // One-to-many relationship with Notification
+        public ICollection<NotificationEntity> Notifications { get; set; } = new List<NotificationEntity>();
     }
 }

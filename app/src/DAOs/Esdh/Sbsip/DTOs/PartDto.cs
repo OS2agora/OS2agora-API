@@ -1,4 +1,4 @@
-﻿namespace BallerupKommune.DAOs.Esdh.Sbsip.DTOs
+﻿namespace Agora.DAOs.Esdh.Sbsip.DTOs
 {
     public class PartDto
     {

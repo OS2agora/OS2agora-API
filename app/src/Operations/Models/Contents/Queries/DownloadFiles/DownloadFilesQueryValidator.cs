@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace BallerupKommune.Operations.Models.Contents.Queries.DownloadFiles
+namespace Agora.Operations.Models.Contents.Queries.DownloadFiles
 {
     public class DownloadFilesQueryValidator : AbstractValidator<DownloadFilesQuery>
     {

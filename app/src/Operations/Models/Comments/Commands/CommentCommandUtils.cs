@@ -1,10 +1,10 @@
-﻿using BallerupKommune.Models.Models.Multiparts;
+﻿using Agora.Models.Models.Multiparts;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
-namespace BallerupKommune.Operations.Models.Comments.Commands
+namespace Agora.Operations.Models.Comments.Commands
 {
     public static class CommentCommandUtils
     {

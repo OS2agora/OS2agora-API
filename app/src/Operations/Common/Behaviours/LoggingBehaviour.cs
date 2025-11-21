@@ -1,10 +1,10 @@
-﻿using BallerupKommune.Operations.Common.Interfaces;
+﻿using Agora.Operations.Common.Interfaces;
 using MediatR.Pipeline;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.Operations.Common.Behaviours
+namespace Agora.Operations.Common.Behaviours
 {
     public class LoggingBehaviour<TRequest> : IRequestPreProcessor<TRequest>
     {

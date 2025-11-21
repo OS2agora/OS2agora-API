@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BallerupKommune.DAOs.Esdh
+namespace Agora.DAOs.Esdh
 {
     public interface IEsdhServiceOptions
     {

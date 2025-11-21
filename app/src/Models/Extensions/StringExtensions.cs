@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 using System.Web;
 
-namespace BallerupKommune.Models.Extensions
+namespace Agora.Models.Extensions
 {
     public static class StringExtensions
     {

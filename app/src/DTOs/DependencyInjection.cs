@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
-using BallerupKommune.DTOs.Mappings;
+using Agora.DTOs.Mappings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BallerupKommune.DTOs
+namespace Agora.DTOs
 {
     public static class DependencyInjection
     {

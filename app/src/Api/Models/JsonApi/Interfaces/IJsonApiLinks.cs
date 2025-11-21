@@ -1,4 +1,4 @@
-﻿namespace BallerupKommune.Api.Models.JsonApi.Interfaces
+﻿namespace Agora.Api.Models.JsonApi.Interfaces
 {
     /// <summary>
     /// See https://jsonapi.org/format/#document-links for reference

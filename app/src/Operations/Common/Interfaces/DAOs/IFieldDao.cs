@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
+using Agora.Models.Common;
+using Agora.Models.Models;
 
-namespace BallerupKommune.Operations.Common.Interfaces.DAOs
+namespace Agora.Operations.Common.Interfaces.DAOs
 {
     public interface IFieldDao
     {

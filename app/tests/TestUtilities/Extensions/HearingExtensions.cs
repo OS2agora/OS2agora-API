@@ -1,18 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using BallerupKommune.Models.Models;
+using Agora.Models.Models;
 
-namespace BallerupKommune.TestUtilities.Extensions
+namespace Agora.TestUtilities.Extensions
 {
     public static class HearingExtensions
     {
-        public static bool ContainsHearingInRole(this List<Hearing> hearings, int hearingId, int userId, BallerupKommune.Models.Enums.HearingRole role)
+        public static bool ContainsHearingInRole(this List<Hearing> hearings, int hearingId, int userId, Agora.Models.Enums.HearingRole role)
         {
             var hearing = hearings.FirstOrDefault(x => x.Id == hearingId);
             return IsHearingInRole(hearing, userId, role);
         }
 
-        public static bool IsHearingInRole(this Hearing hearing, int userId, BallerupKommune.Models.Enums.HearingRole role)
+        public static bool IsHearingInRole(this Hearing hearing, int userId, Agora.Models.Enums.HearingRole role)
         {
             if (hearing?.UserHearingRoles == null)
             {
@@ -34,8 +34,8 @@ namespace BallerupKommune.TestUtilities.Extensions
             {
                 return false;
             }
-            return hearing.HearingStatus.Status != BallerupKommune.Models.Enums.HearingStatus.DRAFT &&
-                   hearing.HearingStatus.Status != BallerupKommune.Models.Enums.HearingStatus.CREATED;
+            return hearing.HearingStatus.Status != Agora.Models.Enums.HearingStatus.DRAFT &&
+                   hearing.HearingStatus.Status != Agora.Models.Enums.HearingStatus.CREATED;
         }
 
         public static bool ContainsInternalHearing(this List<Hearing> hearings, int hearingId)

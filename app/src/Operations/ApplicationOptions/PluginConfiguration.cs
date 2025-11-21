@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BallerupKommune.Operations.ApplicationOptions
+namespace Agora.Operations.ApplicationOptions
 {
     public class PluginOptions
     {

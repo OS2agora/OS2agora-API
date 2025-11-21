@@ -1,4 +1,4 @@
-﻿namespace BallerupKommune.Operations.ApplicationOptions
+﻿namespace Agora.Operations.ApplicationOptions
 {
     public class EmailOptions
     {
@@ -14,5 +14,8 @@
         public int SmtpPort { get; set; }
 
         public bool UseCredentials { get; set; }
+
+        public bool UseMsGraph { get; set; }
+        public string MsGraphMailAddress { get; set; }
     }
 }

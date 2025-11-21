@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BallerupKommune.DAOs.KleHierarchy.DTOs
+namespace Agora.DAOs.KleHierarchy.DTOs
 {
     public class KleGroupDto
     {

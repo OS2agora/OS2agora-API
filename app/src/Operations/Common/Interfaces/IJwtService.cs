@@ -1,14 +1,16 @@
-﻿using System.Security.Claims;
+﻿using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using BallerupKommune.Operations.Authentication;
+using Agora.Operations.Authentication;
 
-namespace BallerupKommune.Operations.Common.Interfaces
+namespace Agora.Operations.Common.Interfaces
 {
     public interface IJwtService
     {
-        Task<JwtTokenPayload> ExchangeExternalToken(ClaimsPrincipal userReadFromToken);
+        Task<JwtTokenPayload> LoginAndGenerateAccessToken(TokenUser tokenUser);
         ClaimsPrincipal ReadAccessToken(string accessToken);
         Task<string> RenewAccessToken(string accessToken, string refreshToken);
         Task RevokeRefreshToken();
+        Task<DateTime> GetRefreshTokenExpirationDate(string refreshToken);
     }
 }

@@ -1,13 +1,19 @@
-﻿using BallerupKommune.Models.Common;
+﻿using System.Collections.Generic;
+using Agora.Models.Common;
 
-namespace BallerupKommune.Models.Models
+namespace Agora.Models.Models
 {
     public class NotificationTemplate : AuditableModel
     {
-        public string NotificationTemplateText { get; set; }
-        public string SubjectTemplate { get; set; }
+        public string Name { get; set; }
+        public string TextContent { get; set; }
 
-        public int NotificationTypeId { get; set; }
-        public NotificationType NotificationType { get; set; }
+        public int NotificationContentTypeId { get; set; }
+        public NotificationContentType NotificationContentType { get; set; }
+
+        public ICollection<NotificationType> HeaderTemplateSpecifications { get; set; } = new List<NotificationType>();
+        public ICollection<NotificationType> BodyTemplateSpecifications { get; set; } = new List<NotificationType>();
+        public ICollection<NotificationType> FooterTemplateSpecifications { get; set; } = new List<NotificationType>();
+        public ICollection<NotificationType> SubjectTemplateSpecifications { get; set; } = new List<NotificationType>();
     }
 }

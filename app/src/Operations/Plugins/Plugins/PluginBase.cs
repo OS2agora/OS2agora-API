@@ -1,15 +1,14 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.ApplicationOptions;
-using BallerupKommune.Operations.Common.Interfaces.Plugins;
-using Microsoft.Extensions.Options;
+﻿using Agora.Models.Models;
+using Agora.Models.Models.Files;
+using Agora.Models.Models.Multiparts;
+using Agora.Operations.ApplicationOptions;
+using Agora.Operations.Common.Interfaces.Plugins;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Models.Multiparts;
-using HearingStatus = BallerupKommune.Models.Enums.HearingStatus;
-using BallerupKommune.Models.Models.Files;
+using HearingStatus = Agora.Models.Enums.HearingStatus;
 
-namespace BallerupKommune.Operations.Plugins.Plugins
+namespace Agora.Operations.Plugins.Plugins
 {
     public abstract class PluginBase : IPlugin
     {
@@ -102,7 +101,7 @@ namespace BallerupKommune.Operations.Plugins.Plugins
             throw new NotImplementedException();
         }
 
-        public virtual Task NotifyCompaniesAfterInvitedToHearing(int hearingId, List<int> companyIds) 
+        public virtual Task NotifyCompaniesAfterInvitedToHearing(int hearingId, List<int> companyIds)
         {
             throw new NotImplementedException();
         }
@@ -112,9 +111,9 @@ namespace BallerupKommune.Operations.Plugins.Plugins
             throw new NotImplementedException();
         }
 
-        public virtual Task NotifyAfterHearingResponseDecline(int hearingId, int userId, int commentId) 
-        { 
-            throw new NotImplementedException(); 
+        public virtual Task NotifyAfterHearingResponseDecline(int hearingId, int userId, int commentId)
+        {
+            throw new NotImplementedException();
         }
 
         public virtual Task NotifyAfterConclusionPublished(int hearingId)

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BallerupKommune.DAOs.Esdh.Sbsip.DTOs
+namespace Agora.DAOs.Esdh.Sbsip.DTOs
 {
     public class CreateSagFromSkabelonDto
     {

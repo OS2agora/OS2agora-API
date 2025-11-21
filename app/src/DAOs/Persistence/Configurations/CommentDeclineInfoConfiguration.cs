@@ -1,9 +1,9 @@
-﻿using BallerupKommune.DAOs.Persistence.Configurations.Utility;
-using BallerupKommune.Entities.Entities;
+﻿using Agora.DAOs.Persistence.Configurations.Utility;
+using Agora.Entities.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BallerupKommune.DAOs.Persistence.Configurations
+namespace Agora.DAOs.Persistence.Configurations
 {
     public class CommentDeclineInfoConfiguration : AuditableEntityTypeConfiguration<CommentDeclineInfoEntity>
     {
@@ -20,7 +20,7 @@ namespace BallerupKommune.DAOs.Persistence.Configurations
 
             builder.Property(content => content.DeclineReason).HasMaxLength(500).HasConversion(_encryptionValueConverterFactory.GetStringEncryptionConverter());
             builder.Property(content => content.DeclinerInitials).HasMaxLength(500).HasConversion(_encryptionValueConverterFactory.GetStringEncryptionConverter());
-                
+
         }
     }
 }

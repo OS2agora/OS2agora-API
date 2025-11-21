@@ -1,13 +1,13 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
+using Agora.Models.Common;
 
-namespace BallerupKommune.Operations.Resolvers
+namespace Agora.Operations.Resolvers
 {
     /// <summary>
     /// This resolver interface is in charge of the FieldSystem in the ER diagram in our SAD(software architetcure document)
@@ -17,7 +17,7 @@ namespace BallerupKommune.Operations.Resolvers
     {
         public Task<List<HearingTemplate>> GetFieldSystem();
 
-        public Task<List<int>> GetFieldsIds(params BallerupKommune.Models.Enums.FieldType[] fieldtypes);
+        public Task<List<int>> GetFieldsIds(params Agora.Models.Enums.FieldType[] fieldtypes);
     }
 
     
@@ -48,7 +48,7 @@ namespace BallerupKommune.Operations.Resolvers
         /// </summary>
         /// <param name="fieldtypes"> List of different fieldtypes that will be searched for in query</param>
         /// <returns> The fields id's corresponding to the "fieldtypes" that the user has requested</returns>
-        public async Task<List<int>> GetFieldsIds(params BallerupKommune.Models.Enums.FieldType[] fieldtypes)
+        public async Task<List<int>> GetFieldsIds(params Agora.Models.Enums.FieldType[] fieldtypes)
         {
             await EnsureLoaded();
             IEnumerable<Field> result = _cachedFieldSystem

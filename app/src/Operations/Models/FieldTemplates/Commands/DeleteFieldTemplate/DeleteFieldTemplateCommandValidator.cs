@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace BallerupKommune.Operations.Models.FieldTemplates.Commands.DeleteFieldTemplate
+namespace Agora.Operations.Models.FieldTemplates.Commands.DeleteFieldTemplate
 {
     public class DeleteFieldTemplateCommandValidator : AbstractValidator<DeleteFieldTemplateCommand>
     {

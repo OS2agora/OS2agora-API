@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BallerupKommune.Models.Models.Multiparts
+namespace Agora.Models.Models.Multiparts
 {
     public class MultiPartField
     {

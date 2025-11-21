@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using BallerupKommune.DAOs.Esdh.Sbsip.DTOs;
+using Agora.DAOs.Esdh.Sbsip.DTOs;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.DAOs.Esdh.Sbsip.V12.Interface
+namespace Agora.DAOs.Esdh.Sbsip.V12.Interface
 {
     public interface IDocumentServiceV12
     {

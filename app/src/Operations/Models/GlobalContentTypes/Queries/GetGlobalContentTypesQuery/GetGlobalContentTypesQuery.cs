@@ -1,12 +1,12 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using MediatR;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
+using Agora.Models.Common;
 
-namespace BallerupKommune.Operations.Models.GlobalContentTypes.Queries.GetGlobalContentTypesQuery
+namespace Agora.Operations.Models.GlobalContentTypes.Queries.GetGlobalContentTypesQuery
 {
     public class GetGlobalContentTypesQuery : IRequest<List<GlobalContentType>>
     {

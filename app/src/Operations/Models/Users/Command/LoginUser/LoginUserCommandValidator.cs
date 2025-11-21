@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace BallerupKommune.Operations.Models.Users.Command.LoginUser
+namespace Agora.Operations.Models.Users.Command.LoginUser
 {
     public class LoginUserCommandValidator : AbstractValidator<LoginUserCommand>
     {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BallerupKommune.Models.Common
+namespace Agora.Models.Common
 {
     /// <summary>
     /// Composite object for include data.
@@ -11,11 +11,11 @@ namespace BallerupKommune.Models.Common
         private readonly List<string> _requestIncludes;
         private readonly List<string> _systemIncludes;
         private readonly List<string> _defaultIncludes;
-
+        
         public IEnumerable<string> RequestIncludes => _requestIncludes;
         public IEnumerable<string> AllIncludes =>
             _requestIncludes.Concat(_systemIncludes).Concat(_defaultIncludes).Distinct();
-
+        
         public IncludeProperties(List<string> requestIncludes = null, List<string> systemIncludes = null, List<string> defaultIncludes = null)
         {
             _requestIncludes = requestIncludes ?? new List<string>();
@@ -45,7 +45,7 @@ namespace BallerupKommune.Models.Common
         {
             return new IncludeProperties(requestIncludes, systemIncludes, GetDefaultIncludePropertyNames<TModel>());
         }
-
+        
         public bool IsSystemInclude(string include) => _systemIncludes.Contains(include);
         public void AddSystemInclude(string include)
         {
@@ -55,7 +55,7 @@ namespace BallerupKommune.Models.Common
         {
             _systemIncludes.AddRange(includes);
         }
-
+        
         private static List<string> GetDefaultIncludePropertyNames<TModel>() where TModel : BaseModel
         {
             return typeof(TModel).GetProperty("DefaultIncludes")?.GetValue(null) as List<string> ?? new List<string>();

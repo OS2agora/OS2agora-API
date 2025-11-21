@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using BallerupKommune.Entities.Attributes;
-using BallerupKommune.Entities.Common;
+using Agora.Entities.Attributes;
+using Agora.Entities.Common;
 
-namespace BallerupKommune.Entities.Entities
+namespace Agora.Entities.Entities
 {
     public class HearingEntity : AuditableEntity
     {
         public bool ClosedHearing { get; set; }
 
         public bool ShowComments { get; set; }
+
+        public bool AutoApproveComments { get; set; }
 
         public string ContactPersonDepartmentName { get; set; }
 
@@ -29,6 +31,8 @@ namespace BallerupKommune.Entities.Entities
 
         public DateTime? StartDate { get; set; }
 
+        public DateTime? ConcludedDate { get; set; }
+
         // Many-to-one relationship with HearingStatus
         public int? HearingStatusId { get; set; }
         public HearingStatusEntity HearingStatus { get; set; }
@@ -41,6 +45,10 @@ namespace BallerupKommune.Entities.Entities
         public int? SubjectAreaId { get; set; }
         public SubjectAreaEntity SubjectArea { get; set; }
 
+        // Many-to-one relationship with CityArea
+        public int? CityAreaId { get; set; }
+        public CityAreaEntity CityArea { get; set; }
+
         // Many-to-one relationship with KleHierarchy
         public int? KleHierarchyId { get; set; }
         public KleHierarchyEntity KleHierarchy { get; set; }
@@ -50,11 +58,12 @@ namespace BallerupKommune.Entities.Entities
         public JournalizedStatusEntity JournalizedStatus { get; set; }
 
         // One-to-many relationship with UserHearingRoleEntity
+        [AllowRequestInclude(maxNavigationPathLength: 2)]
         public ICollection<UserHearingRoleEntity> UserHearingRoles { get; set; } = new List<UserHearingRoleEntity>();
 
         // One-to-many relationship with CompanyHearingRoleEntity
-        public ICollection<CompanyHearingRoleEntity> CompanyHearingRoles { get; set; } =
-            new List<CompanyHearingRoleEntity>();
+        [AllowRequestInclude(maxNavigationPathLength: 2)]
+        public ICollection<CompanyHearingRoleEntity> CompanyHearingRoles { get; set; } = new List<CompanyHearingRoleEntity>();
 
         // One-to-many relationship with Notification
         public ICollection<NotificationEntity> Notifications { get; set; } = new List<NotificationEntity>();
@@ -65,5 +74,11 @@ namespace BallerupKommune.Entities.Entities
         // One-to-many relationship with Content
         [AllowRequestInclude(maxNavigationPathLength: 2)]
         public ICollection<ContentEntity> Contents { get; set; } = new List<ContentEntity>();
+
+        // One-to-many relationship with Event
+        public ICollection<EventEntity> Events { get; set; } = new List<EventEntity>();
+
+        // One-to-many relationship with NotificationContentSpecification
+        public ICollection<NotificationContentSpecificationEntity> NotificationContentSpecifications { get; set; } = new List<NotificationContentSpecificationEntity>();
     }
 }

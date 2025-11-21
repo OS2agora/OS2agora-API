@@ -1,4 +1,4 @@
-﻿namespace BallerupKommune.Api.Models.Enums
+﻿namespace Agora.Api.Models.Enums
 {
     public enum CommentType
     {

@@ -1,17 +1,17 @@
 ﻿using AutoMapper;
-using BallerupKommune.DAOs.Persistence;
-using BallerupKommune.DAOs.Statistics;
-using BallerupKommune.Entities.Entities;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+using Agora.DAOs.Persistence;
+using Agora.DAOs.Statistics;
+using Agora.Entities.Entities;
+using Agora.Models.Common;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GlobalContentType = BallerupKommune.Models.Enums.GlobalContentType;
+using GlobalContentType = Agora.Models.Enums.GlobalContentType;
 
-namespace BallerupKommune.DAOs.Models
+namespace Agora.DAOs.Models
 {
     public class GlobalContentDao : BaseDao<GlobalContentEntity, GlobalContent>, IGlobalContentDao
     {
@@ -39,7 +39,7 @@ namespace BallerupKommune.DAOs.Models
             var globalContents = await GetAllAsync(includes);
             var globalContentsOfType = globalContents.Where(x => x.GlobalContentType.Type == type).ToList();
             var latestVersion = globalContentsOfType.Max(x => x.Version);
-            var globalContent = globalContents.SingleOrDefault(x => x.Version == latestVersion);
+            var globalContent = globalContentsOfType.SingleOrDefault(x => x.Version == latestVersion);
             return globalContent;
         }
 

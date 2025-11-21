@@ -1,0 +1,83 @@
+{
+  "Novataris": {
+    "General": {
+      "Name": "Novataris",
+      "MunicipalityName": "Novataris' Kommune"
+    },
+    "AddedAsReviewer": {
+      "Reviewer": "gennemlæser"
+    },
+    "FileGeneration": {
+      "TitlePrefix": "Agora_Eksport_"
+    },
+    "PdfGeneration": {
+      "FullHearingReportSubject": "Høringsrapport",
+      "HearingReportSubject": "Rapport over høringssvar",
+      "CaseNumber": "Sagsnummer",
+      "DocumentHeader": "Høringsjournal",
+      "TitlePrefix": "Agora_Eksport_",
+      "DeclinedResponseText": "Høringssvaret efterlever ikke Kommunens retningslinjer for høringssvar",
+      "LogoPath": "novataris/mainLogo.png"
+    }
+  },
+  "OS2": {
+    "General": {
+      "Name": "OS2agora",
+      "MunicipalityName": "Kommunen"
+    },
+    "AddedAsReviewer": {
+      "Reviewer": "reviewer"
+    },
+    "FileGeneration": {
+      "TitlePrefix": "OS2agora_Eksport_"
+    },
+    "PdfGeneration": {
+      "FullHearingReportSubject": "Høringsrapport",
+      "HearingReportSubject": "Rapport over høringssvar",
+      "CaseNumber": "Sagsnummer",
+      "DocumentHeader": "Høringsjournal",
+      "DeclinedResponseText": "Høringssvaret efterlever ikke Kommunens retningslinjer for høringssvar",
+      "LogoPath": "os2/mainLogo.png"
+    }
+  },
+  "Kobenhavn": {
+    "General": {
+      "Name": "København",
+      "MunicipalityName": "Københavns Kommune"
+    },
+    "AddedAsReviewer": {
+      "Reviewer": "gennemlæser"
+    },
+    "FileGeneration": {
+      "TitlePrefix": "BlivHoert_Eksport_"
+    },
+    "PdfGeneration": {
+      "FullHearingReportSubject": "Høringsrapport",
+      "HearingReportSubject": "Rapport over høringssvar",
+      "CaseNumber": "Sagsnummer",
+      "DocumentHeader": "Høringsjournal",
+      "DeclinedResponseText": "Høringssvaret efterlever ikke KK's retningslinjer for høringssvar",
+      "LogoPath": "kobenhavn/mainLogo.png"
+    }
+  },
+  "Ballerup": {
+    "General": {
+      "Name": "Ballerup",
+      "MunicipalityName": "Ballerup Kommune"
+    },
+    "AddedAsReviewer": {
+      "Reviewer": "reviewer"
+    },
+    "FileGeneration": {
+      "TitlePrefix": "Agora_BALK_Eksport_"
+    },
+    "PdfGeneration": {
+      "FullHearingReportSubject": "Høringsrapport",
+      "HearingReportSubject": "Rapport over høringssvar",
+      "CaseNumber": "Sagsnummer",
+      "DocumentHeader": "Høringsjournal",
+      "DeclinedResponseText": "Høringssvaret efterlever ikke Ballerup Kommunes retningslinjer for høringssvar",
+      "LogoPath": "ballerup/mainLogo.png"
+    }
+  }
+}

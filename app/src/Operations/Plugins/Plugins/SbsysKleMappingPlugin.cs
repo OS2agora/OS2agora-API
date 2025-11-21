@@ -1,16 +1,16 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.ApplicationOptions;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Models;
+using Agora.Operations.ApplicationOptions;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Common.Interfaces.DAOs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using InvalidOperationException = BallerupKommune.Operations.Common.Exceptions.InvalidOperationException;
+using InvalidOperationException = Agora.Operations.Common.Exceptions.InvalidOperationException;
 
-namespace BallerupKommune.Operations.Plugins.Plugins
+namespace Agora.Operations.Plugins.Plugins
 {
     public class SbsysKleMappingPlugin : PluginBase
     {

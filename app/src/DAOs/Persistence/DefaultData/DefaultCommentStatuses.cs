@@ -1,23 +1,24 @@
-﻿using BallerupKommune.Entities.Entities;
-using BallerupKommune.Entities.Enums;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using CommentStatusEntity = Agora.Entities.Entities.CommentStatusEntity;
+using CommentType = Agora.Entities.Enums.CommentType;
+using CommentStatus = Agora.Entities.Enums.CommentStatus;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
-namespace BallerupKommune.DAOs.Persistence.DefaultData
+namespace Agora.DAOs.Persistence.DefaultData
 {
     public class DefaultCommentStatus : DefaultDataSeeder<CommentStatusEntity>
     {
         private static async Task<List<CommentStatusEntity>> GetDefaultEntities(ApplicationDbContext context)
         {
             var hearingResponseCommentType =
-                    await context.CommentTypes.FirstOrDefaultAsync(cType => cType.Type == CommentType.HEARING_RESPONSE);
+                    await context.CommentTypes.FirstOrDefaultAsync(x => x.Type == CommentType.HEARING_RESPONSE);
             var hearingReviewCommentType =
-                await context.CommentTypes.FirstOrDefaultAsync(cType => cType.Type == CommentType.HEARING_REVIEW);
+                await context.CommentTypes.FirstOrDefaultAsync(x => x.Type == CommentType.HEARING_REVIEW);
             var hearingResponseReplyCommentType =
-                await context.CommentTypes.FirstOrDefaultAsync(cType => cType.Type == CommentType.HEARING_RESPONSE_REPLY);
+                await context.CommentTypes.FirstOrDefaultAsync(x => x.Type == CommentType.HEARING_RESPONSE_REPLY);
 
             return new List<CommentStatusEntity>
             {
@@ -56,20 +57,21 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
         {
         }
 
-        public static async Task SeedData(ApplicationDbContext context)
+        public static async Task SeedData(ApplicationDbContext context, List<CommentStatusEntity> municipalitySpecificEntities = null)
         {
             List<CommentStatusEntity> defaultEntities = await GetDefaultEntities(context);
-            var seeder = new DefaultCommentStatus(context, defaultEntities);
+            var seeder = new DefaultCommentStatus(context, municipalitySpecificEntities ?? defaultEntities);
             await seeder.SeedEntitiesAsync();
         }
 
-        public override List<CommentStatusEntity> FetchEntitiesToUpdate(List<CommentStatusEntity> existingEntities, List<CommentStatusEntity> defaultEntities)
+        public override List<CommentStatusEntity> GetUpdatedEntities(List<CommentStatusEntity> existingEntities, List<CommentStatusEntity> defaultEntities)
         {
             var updatedEntities = new List<CommentStatusEntity>();
 
             foreach (var entity in existingEntities)
             {
                 var defaultEntity = defaultEntities.FirstOrDefault(e => _comparer(e, entity));
+
                 if (defaultEntity == null)
                 {
                     continue;

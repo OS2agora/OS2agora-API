@@ -1,7 +1,7 @@
-﻿using BallerupKommune.Operations.Common.Interfaces.Plugins;
+﻿using Agora.Operations.Common.Interfaces.Plugins;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.Operations.Plugins.Service
+namespace Agora.Operations.Plugins.Service
 {
     public partial class PluginService
     {

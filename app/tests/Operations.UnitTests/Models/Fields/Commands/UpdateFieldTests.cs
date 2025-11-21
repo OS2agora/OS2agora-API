@@ -1,6 +1,6 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Models.Fields.Commands.UpdateFields;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Models.Fields.Commands.UpdateFields;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
@@ -9,7 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.Operations.UnitTests.Models.Fields.Commands
+namespace Agora.Operations.UnitTests.Models.Fields.Commands
 {
     public class UpdateFieldTests : ModelsTestBase<UpdateFieldsCommand, List<Content>>
     {

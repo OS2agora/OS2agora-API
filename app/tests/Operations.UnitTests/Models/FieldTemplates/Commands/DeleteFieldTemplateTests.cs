@@ -1,13 +1,13 @@
 ﻿using System.Threading;
-using BallerupKommune.Operations.Common.Constants;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Models.FieldTemplates.Commands.DeleteFieldTemplate;
+using Agora.Operations.Common.Constants;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Models.FieldTemplates.Commands.DeleteFieldTemplate;
 using FluentAssertions;
 using MediatR;
 using Moq;
 using NUnit.Framework;
 
-namespace BallerupKommune.Operations.UnitTests.Models.FieldTemplates.Commands
+namespace Agora.Operations.UnitTests.Models.FieldTemplates.Commands
 {
     public class DeleteFieldTemplateTests : ModelsTestBase<DeleteFieldTemplateCommand, Unit>
     {

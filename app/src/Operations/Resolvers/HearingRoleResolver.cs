@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using Microsoft.Extensions.Logging;
-using HearingRoleEnum = BallerupKommune.Models.Enums.HearingRole;
+using HearingRoleEnum = Agora.Models.Enums.HearingRole;
 
-namespace BallerupKommune.Operations.Resolvers
+namespace Agora.Operations.Resolvers
 {
     /// <summary>
     /// Resolver for getting <see cref="HearingRole"/>s.

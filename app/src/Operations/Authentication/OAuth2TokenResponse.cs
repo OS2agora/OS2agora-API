@@ -1,4 +1,4 @@
-﻿namespace BallerupKommune.Operations.Authentication
+﻿namespace Agora.Operations.Authentication
 {
     public class OAuth2TokenResponse
     {

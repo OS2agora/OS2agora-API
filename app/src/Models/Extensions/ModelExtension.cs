@@ -1,14 +1,12 @@
-﻿using BallerupKommune.Models.Common;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Agora.Models.Common;
 
-namespace Models.Extension
+namespace Agora.Models.Extensions
 {
     public static class ModelExtension
     {
-
-
         /// <summary>
         /// Gets all the properties in a BaseModel that are references to other BaseModel types
         /// </summary>

@@ -1,12 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using Agora.Models.Common;
+using Agora.Models.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
 
-namespace BallerupKommune.Operations.Common.Interfaces.DAOs
+namespace Agora.Operations.Common.Interfaces.DAOs
 {
     public interface INotificationTypeDao
     {
-        Task<List<NotificationType>> GetAllAsync(IncludeProperties includes = null);
+        Task<NotificationType> GetAsync(int id, IncludeProperties includes = null);
+        Task<List<NotificationType>> GetAllAsync(IncludeProperties includes = null, Expression<Func<NotificationType, bool>> filter = null);
+        Task<NotificationType> CreateAsync(NotificationType model, IncludeProperties includes = null);
+        Task<List<NotificationType>> CreateRangeAsync(List<NotificationType> models, IncludeProperties includes = null);
+        Task<NotificationType> UpdateAsync(NotificationType model, IncludeProperties includes = null);
+        Task DeleteAsync(int id);
     }
 }

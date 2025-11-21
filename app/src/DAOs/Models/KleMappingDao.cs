@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using BallerupKommune.DAOs.Persistence;
-using BallerupKommune.Entities.Entities;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+using Agora.DAOs.Persistence;
+using Agora.Entities.Entities;
+using Agora.Models.Common;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using BallerupKommune.DAOs.Statistics;
+using Agora.DAOs.Statistics;
 
-namespace BallerupKommune.DAOs.Models
+namespace Agora.DAOs.Models
 {
     public class KleMappingDao : BaseDao<KleMappingEntity, KleMapping>, IKleMappingDao
     {

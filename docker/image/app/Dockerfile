@@ -22,7 +22,8 @@ RUN echo "Setting version -> $buildNumber"
 RUN echo "Building dotnet projects with configuration -> $vsconfig"
 COPY app/ /app
 
-RUN dotnet restore "/app/src/Api/Api.csproj"
+# must use --disable-parallel when restoring packages to avoid connection issues with nuget server...
+RUN dotnet restore "/app/src/Api/Api.csproj" --disable-parallel
 WORKDIR /app/src/Api
 RUN dotnet build "Api.csproj" -c $vsconfig
 RUN dotnet publish "Api.csproj" -c $vsconfig -o /app/publish --version-suffix $buildNumber
@@ -30,4 +31,6 @@ RUN dotnet publish "Api.csproj" -c $vsconfig -o /app/publish --version-suffix $b
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "BallerupKommune.Api.dll"]
+COPY docker/image/app/entrypoint.sh /app/
+RUN chmod 755 /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]

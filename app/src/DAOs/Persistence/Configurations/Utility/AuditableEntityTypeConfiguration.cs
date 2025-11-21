@@ -1,8 +1,8 @@
-﻿using BallerupKommune.Entities.Common;
+﻿using Agora.Entities.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BallerupKommune.DAOs.Persistence.Configurations.Utility
+namespace Agora.DAOs.Persistence.Configurations.Utility
 {
     public abstract class AuditableEntityTypeConfiguration<TEntity> : IEntityTypeConfiguration<TEntity>
         where TEntity : AuditableEntity

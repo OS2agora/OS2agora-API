@@ -1,12 +1,13 @@
-﻿using BallerupKommune.Models.Common;
+﻿using Agora.Models.Common;
+using System.Collections.Generic;
 
-namespace BallerupKommune.Models.Models
+namespace Agora.Models.Models
 {
     public class Notification : AuditableModel
     {
-        public bool IsSendToQueue { get; set; }
+        public bool IsSentToQueue { get; set; }
 
-        public int HearingId { get; set; }
+        public int? HearingId { get; set; }
         public Hearing Hearing { get; set; }
 
         public int? CommentId { get; set; }
@@ -15,7 +16,6 @@ namespace BallerupKommune.Models.Models
         public int NotificationTypeId { get; set; }
         public NotificationType NotificationType { get; set; }
 
-        public int? NotificationQueueId { get; set; }
         public NotificationQueue NotificationQueue { get; set; }
 
         public int? UserId { get; set; }
@@ -23,5 +23,7 @@ namespace BallerupKommune.Models.Models
 
         public int? CompanyId { get; set; }
         public Company Company { get; set; }
+
+        public ICollection<EventMapping> EventMappings { get; set; } = new List<EventMapping>();
     }
 }

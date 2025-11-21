@@ -2,14 +2,14 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
-using BallerupKommune.Operations.Models.HearingTemplates.Queries.GetHearingTemplates;
+using Agora.Models.Common;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
+using Agora.Operations.Models.HearingTemplates.Queries.GetHearingTemplates;
 using Moq;
 using NUnit.Framework;
 
-namespace BallerupKommune.Operations.UnitTests.Models.HearingTemplates.Queries
+namespace Agora.Operations.UnitTests.Models.HearingTemplates.Queries
 {
     public class GetHearingTemplatesTests : ModelsTestBase<GetHearingTemplatesQuery, List<HearingTemplate>>
     {

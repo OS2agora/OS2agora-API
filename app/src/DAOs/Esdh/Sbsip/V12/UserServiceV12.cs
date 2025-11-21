@@ -4,14 +4,14 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using BallerupKommune.DAOs.Esdh.Sbsip.DTOs;
-using BallerupKommune.DAOs.Esdh.Sbsip.V12.Interface;
-using BallerupKommune.Operations.ApplicationOptions;
+using Agora.DAOs.Esdh.Sbsip.DTOs;
+using Agora.DAOs.Esdh.Sbsip.V12.Interface;
+using Agora.Operations.ApplicationOptions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
-namespace BallerupKommune.DAOs.Esdh.Sbsip.V12
+namespace Agora.DAOs.Esdh.Sbsip.V12
 {
     public class UserServiceV12 : BaseService, IUserServiceV12
     {

@@ -1,23 +1,23 @@
 ﻿using AutoMapper;
-using BallerupKommune.DAOs.Persistence;
-using BallerupKommune.DAOs.Statistics;
-using BallerupKommune.Entities.Entities;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+using Agora.DAOs.Persistence;
+using Agora.DAOs.Statistics;
+using Agora.Entities.Entities;
+using Agora.Models.Common;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using BallerupKommune.DAOs.Mappings;
+using Agora.DAOs.Mappings;
 
-namespace BallerupKommune.DAOs.Models
+namespace Agora.DAOs.Models
 {
     public class UserHearingRoleDao: BaseDao<UserHearingRoleEntity, UserHearingRole>, IUserHearingRoleDao
     {
-        public UserHearingRoleDao(IApplicationDbContext db, ILogger<BaseDao<UserHearingRoleEntity, UserHearingRole>> logger, IMapper mapper, ICommandCountStatistics commandCountStatistics) : 
+        public UserHearingRoleDao(IApplicationDbContext db, ILogger<BaseDao<UserHearingRoleEntity, UserHearingRole>> logger, IMapper mapper, ICommandCountStatistics commandCountStatistics) :
             base(db, logger, mapper, commandCountStatistics)
         {
         }

@@ -1,8 +1,8 @@
-﻿using BallerupKommune.DAOs.Persistence.Configurations.Utility;
-using BallerupKommune.Entities.Entities;
+﻿using Agora.DAOs.Persistence.Configurations.Utility;
+using Agora.Entities.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BallerupKommune.DAOs.Persistence.Configurations
+namespace Agora.DAOs.Persistence.Configurations
 {
     public class NotificationTemplateConfiguration : AuditableEntityTypeConfiguration<NotificationTemplateEntity>
     {
@@ -10,9 +10,8 @@ namespace BallerupKommune.DAOs.Persistence.Configurations
         {
             base.Configure(builder);
 
-            builder.Property(content => content.NotificationTemplateText).HasMaxLength(1000);
-
-            builder.Property(content => content.SubjectTemplate).HasMaxLength(100);
+            builder.Property(entity => entity.Name).HasMaxLength(100);
+            builder.Property(entity => entity.TextContent).HasMaxLength(4000);
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 
-namespace BallerupKommune.DAOs.Identity
+namespace Agora.DAOs.Identity
 {
     public class ApplicationUser : IdentityUser
     {

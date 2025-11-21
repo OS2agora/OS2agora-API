@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BallerupKommune.Models.Common
+namespace Agora.Models.Common
 {
     public abstract class AuditableModel : BaseModel
     {

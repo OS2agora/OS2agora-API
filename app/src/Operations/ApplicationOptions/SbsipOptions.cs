@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BallerupKommune.Operations.ApplicationOptions
+namespace Agora.Operations.ApplicationOptions
 {
     public class SbsipOptions
     {
@@ -18,5 +18,7 @@ namespace BallerupKommune.Operations.ApplicationOptions
         public string TokenRequestUri { get; set; }
 
         public Dictionary<string,int> SbsysTemplateIds { get; set; }
+
+        public bool Disabled { get; set; }
     }
 }

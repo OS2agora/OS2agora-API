@@ -1,8 +1,8 @@
+using Agora.DAOs.Identity;
+using Agora.DAOs.Persistence;
+using Agora.Operations.ApplicationOptions;
+using Agora.Operations.Common.Interfaces;
 using AutoMapper;
-using BallerupKommune.DAOs.Identity;
-using BallerupKommune.DAOs.Persistence;
-using BallerupKommune.Operations.ApplicationOptions;
-using BallerupKommune.Operations.Common.Interfaces;
 using dotenv.net;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -14,10 +14,11 @@ using Microsoft.Extensions.Options;
 using Serilog;
 using System;
 using System.IO;
-using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using Environment = System.Environment;
 
-namespace BallerupKommune.Api
+namespace Agora.Api
 {
     public class Program
     {
@@ -38,19 +39,34 @@ namespace BallerupKommune.Api
             string appSettingsProfile = Environment.GetEnvironmentVariable(Primitives.Constants.EnvironmentVariables.AppSettingsProfile);
             if (appSettingsProfile != null)
             {
-                configurationBuilder.AddJsonFile($"appsettings.{appSettingsProfile}.json", optional: false);
+                // is optional because it can be injected through environment variables instead of appsettings file
+                configurationBuilder.AddJsonFile($"appsettings.{appSettingsProfile}.json", optional: true);
             }
             
             configurationBuilder
+                .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
                 .AddEnvironmentVariables()
                 .AddKeyPerFile(DockerSecretsDir, true)
                 .AddCommandLine(args);
             IConfigurationRoot configuration = configurationBuilder.Build();
 
             // create logger
-            Log.Logger = new LoggerConfiguration()
+            var consoleOutputTemplate = configuration.GetValue<string>("App:Logging:ConsoleOutputTemplate");
+            var loggerConfig = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration)
-                .CreateLogger();
+                .WriteTo.Console(outputTemplate: consoleOutputTemplate);
+
+            var disableLogEnrichment = configuration.GetValue<bool>("App:Logging:DisableLogEnrichment");
+
+            if (!disableLogEnrichment)
+            {
+                loggerConfig.Enrich.FromLogContext()
+                    .Enrich.WithMachineName()
+                    .Enrich.WithProcessId()
+                    .Enrich.WithThreadId();
+            }
+
+            Log.Logger = loggerConfig.CreateLogger();
 
             try
             {
@@ -66,6 +82,7 @@ namespace BallerupKommune.Api
                         var context = services.GetRequiredService<ApplicationDbContext>();
                         var appOptions = services.GetRequiredService<IOptions<AppOptions>>();
                         var shouldUseDevelopmentDatabaseSeed = appOptions.Value.UseDevelopmentDatabase;
+                        var ensureRequiredDataExist = appOptions.Value.EnsureRequiredDataExist;
 
                         if (context.Database.IsMySql())
                         {
@@ -78,15 +95,17 @@ namespace BallerupKommune.Api
                         var mapper = services.GetRequiredService<IMapper>();
 
                         await ApplicationDbContextSeed.SeedDefaultRolesAsync(roleManager);
+                        await ApplicationDbContextSeed.SeedDefaultDataAsync(context, kleService, mapper);
+
                         if (shouldUseDevelopmentDatabaseSeed)
                         {
                             await ApplicationDbContextSeed.SeedDefaultUsers(userManager);
-                            await ApplicationDbContextSeed.SeedSampleDataAsync(context, userManager, kleService,
-                                mapper);
+                            await ApplicationDbContextSeed.SeedSampleDataAsync(context, userManager, kleService, mapper);
                         }
-                        else
+
+                        if (ensureRequiredDataExist)
                         {
-                            await ApplicationDbContextSeed.SeedDefaultDataAsync(context, kleService, mapper);
+                            await ApplicationDbContextEnsureRequiredData.SeedRequiredData(context);
                         }
                     }
                     catch (Exception ex)

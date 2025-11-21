@@ -1,7 +1,7 @@
-﻿using BallerupKommune.DTOs.Common;
+﻿using Agora.DTOs.Common;
 using System.Collections.Generic;
 
-namespace BallerupKommune.DTOs.Models
+namespace Agora.DTOs.Models
 {
     public class CommentDto : AuditableDto<CommentDto>
     {
@@ -11,6 +11,7 @@ namespace BallerupKommune.DTOs.Models
         public bool ContainsSensitiveInformation { get; set; }
 
         public string OnBehalfOf { get; set; }
+        
         public BaseDto<CommentDeclineInfoDto> CommentDeclineInfo { get; set; }
 
         public BaseDto<UserDto> User { get; set; }

@@ -1,14 +1,14 @@
-﻿using BallerupKommune.Operations.Common.Interfaces.DAOs;
-using BallerupKommune.Operations.Resolvers;
+﻿using Agora.Operations.Common.Interfaces.DAOs;
+using Agora.Operations.Resolvers;
 using Moq;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces;
-using HearingRoleEnum = BallerupKommune.Models.Enums.HearingRole;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces;
+using HearingRoleEnum = Agora.Models.Enums.HearingRole;
 
-namespace BallerupKommune.Operations.UnitTests.Resolvers
+namespace Agora.Operations.UnitTests.Resolvers
 {
     internal class UserHearingRoleResolverTest
     {

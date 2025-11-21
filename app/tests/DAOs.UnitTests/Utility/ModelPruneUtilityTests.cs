@@ -1,13 +1,13 @@
 ﻿using System.Collections;
-using BallerupKommune.DAOs.Utility;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
+using Agora.DAOs.Utility;
+using Agora.Models.Common;
+using Agora.Models.Models;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace BallerupKommune.DAOs.UnitTests.Utility
+namespace Agora.DAOs.UnitTests.Utility
 {
     public class ModelPruneUtilityTests
     {
@@ -42,7 +42,7 @@ namespace BallerupKommune.DAOs.UnitTests.Utility
                 },
                 HearingStatus = new HearingStatus(),
                 HearingType = new HearingType(),
-                KleHierarchy = new BallerupKommune.Models.Models.KleHierarchy()
+                KleHierarchy = new Agora.Models.Models.KleHierarchy()
             };
 
             var prunedModel = ModelPruneUtility.PruneIncludes(model, includes);
@@ -186,6 +186,5 @@ namespace BallerupKommune.DAOs.UnitTests.Utility
         {
             public MainModel MainModel { get; set; }
         }
-
     }
 }

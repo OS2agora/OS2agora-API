@@ -1,7 +1,8 @@
 ﻿using System;
-using BallerupKommune.Operations.Common.Enums;
+using System.Collections.Generic;
+using Agora.Operations.Common.Enums;
 
-namespace BallerupKommune.Operations.Common.Interfaces
+namespace Agora.Operations.Common.Interfaces
 {
     public interface ICurrentUserService
     {
@@ -13,5 +14,7 @@ namespace BallerupKommune.Operations.Common.Interfaces
         string EmployeeName { get; }
         int? CompanyId { get; }
         DateTime ExpirationDate { get; }
+        DateTime MainSessionExpiration { get; }
+        List<string> Roles {get; }
     }
 }

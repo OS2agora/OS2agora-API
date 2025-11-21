@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using BallerupKommune.DTOs.Common;
+using Agora.DTOs.Common;
 
-namespace BallerupKommune.DTOs.Models
+namespace Agora.DTOs.Models
 {
     public class HearingRoleDto : AuditableDto<HearingRoleDto>
     {
@@ -11,6 +11,7 @@ namespace BallerupKommune.DTOs.Models
 
         public ICollection<UserHearingRoleDto> UserHearingRoles { get; set; } = new List<UserHearingRoleDto>();
 
-        public ICollection<CompanyHearingRoleDto> CompanyHearingRoles { get; set; } = new List<CompanyHearingRoleDto>();
+        public ICollection<CompanyHearingRoleDto> CompanyHearingRoles { get; set; } =
+            new List<CompanyHearingRoleDto>();
     }
 }

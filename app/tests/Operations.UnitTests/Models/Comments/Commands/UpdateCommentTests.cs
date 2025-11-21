@@ -1,6 +1,6 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Models.Comments.Commands.UpdateComment;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Models.Comments.Commands.UpdateComment;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
@@ -9,7 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.Operations.UnitTests.Models.Comments.Commands
+namespace Agora.Operations.UnitTests.Models.Comments.Commands
 {
     public class UpdateCommentTests : ModelsTestBase<UpdateCommentCommand, Comment>
     {

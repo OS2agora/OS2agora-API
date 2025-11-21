@@ -1,16 +1,16 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Common.Interfaces;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
-using BallerupKommune.Operations.Common.Interfaces.Security;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Common.Interfaces.DAOs;
+using Agora.Operations.Common.Interfaces.Security;
 using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
+using Agora.Models.Common;
+using Agora.Operations.Common.Interfaces.Files;
 
-namespace BallerupKommune.Operations.Models.Contents.Queries.DownloadFile
+namespace Agora.Operations.Models.Contents.Queries.DownloadFile
 {
     public class DownloadFileQuery : IRequest<FileDownload>
     {

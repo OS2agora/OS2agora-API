@@ -2,15 +2,15 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Constants;
-using BallerupKommune.Operations.Models.Hearings.Queries.GetHearing;
+using Agora.Models.Models;
+using Agora.Operations.Common.Constants;
+using Agora.Operations.Models.Hearings.Queries.GetHearing;
 using Moq;
 using NUnit.Framework;
-using HearingRole = BallerupKommune.Models.Enums.HearingRole;
-using HearingStatus = BallerupKommune.Models.Enums.HearingStatus;
+using HearingRole = Agora.Models.Enums.HearingRole;
+using HearingStatus = Agora.Models.Enums.HearingStatus;
 
-namespace BallerupKommune.Operations.UnitTests.Models.Hearings.Queries
+namespace Agora.Operations.UnitTests.Models.Hearings.Queries
 {
     public class GetHearingQueryTests : ModelsTestBase<GetHearingQuery, Hearing>
     {
@@ -188,7 +188,7 @@ namespace BallerupKommune.Operations.UnitTests.Models.Hearings.Queries
             var result =
                 await SecurityBehaviour.Handle(request, CancellationToken.None, RequestHandlerDelegateMock.Object);
 
-            if (!isEmployee || !isPublished || !isInternal || isClosed)
+            if (!isEmployee || !isPublished || isClosed)
             {
                 Assert.IsNull(result);
             }
@@ -196,7 +196,6 @@ namespace BallerupKommune.Operations.UnitTests.Models.Hearings.Queries
             {
                 Assert.IsTrue(result.UserHearingRoles == null
                               && !result.ClosedHearing
-                              && result.HearingType.IsInternalHearing
                               && result.HearingType.FieldTemplates == null
                               && result.HearingType.HearingTemplate.Fields.All(f =>
                                   f.FieldTemplates == null && f.FieldType != null));
@@ -319,7 +318,7 @@ namespace BallerupKommune.Operations.UnitTests.Models.Hearings.Queries
                 Id = 1,
                 ClosedHearing = isClosed,
                 KleHierarchy = new KleHierarchy(),
-                HearingStatus = new BallerupKommune.Models.Models.HearingStatus
+                HearingStatus = new Agora.Models.Models.HearingStatus
                 {
                     Status = isPublished?HearingStatus.ACTIVE:HearingStatus.DRAFT
                 },
@@ -349,7 +348,7 @@ namespace BallerupKommune.Operations.UnitTests.Models.Hearings.Queries
                 {
                     new UserHearingRole
                     {
-                        HearingRole = new BallerupKommune.Models.Models.HearingRole
+                        HearingRole = new Agora.Models.Models.HearingRole
                         {
                             Role = HearingRole.HEARING_OWNER
                         },
@@ -360,7 +359,7 @@ namespace BallerupKommune.Operations.UnitTests.Models.Hearings.Queries
                     },
                     new UserHearingRole
                     {
-                        HearingRole = new BallerupKommune.Models.Models.HearingRole
+                        HearingRole = new Agora.Models.Models.HearingRole
                         {
                             Role = HearingRole.HEARING_INVITEE
                         },
@@ -371,7 +370,7 @@ namespace BallerupKommune.Operations.UnitTests.Models.Hearings.Queries
                     },
                     new UserHearingRole
                     {
-                        HearingRole = new BallerupKommune.Models.Models.HearingRole
+                        HearingRole = new Agora.Models.Models.HearingRole
                         {
                             Role = HearingRole.HEARING_REVIEWER
                         },

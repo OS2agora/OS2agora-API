@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using BallerupKommune.Entities.Common;
-using BallerupKommune.Models.Common;
-using TypeExtensions = BallerupKommune.Models.Extensions.TypeExtensions;
+using Agora.Entities.Common;
+using Agora.Models.Common;
+using TypeExtensions = Agora.Models.Extensions.TypeExtensions;
 
-namespace BallerupKommune.DAOs.Mappings
+namespace Agora.DAOs.Mappings
 {
     public static class EntityMappingExtensions
     {

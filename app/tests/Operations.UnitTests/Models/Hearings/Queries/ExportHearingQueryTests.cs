@@ -1,14 +1,14 @@
-﻿using BallerupKommune.Models.Enums;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Models.Hearings.Queries.ExportHearing;
+﻿using Agora.Models.Enums;
+using Agora.Models.Models;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Models.Hearings.Queries.ExportHearing;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.Operations.UnitTests.Models.Hearings.Queries
+namespace Agora.Operations.UnitTests.Models.Hearings.Queries
 {
     public class ExportHearingQueryTests : ModelsTestBase<ExportHearingQuery, FileDownload>
     {

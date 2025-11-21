@@ -1,11 +1,11 @@
-﻿using AutoMapper;
-using BallerupKommune.DAOs.KleHierarchy.DTOs;
-using BallerupKommune.DAOs.KleHierarchy.Mappings;
+﻿using Agora.DAOs.KleHierarchy.DTOs;
+using Agora.DAOs.KleHierarchy.Mappings;
+using AutoMapper;
 using NUnit.Framework;
 using System;
 using System.Runtime.Serialization;
 
-namespace BallerupKommune.DAOs.UnitTests.KleHierarchy.Mappings
+namespace Agora.DAOs.UnitTests.KleHierarchy.Mappings
 {
     public class MappingTests
     {
@@ -25,9 +25,9 @@ namespace BallerupKommune.DAOs.UnitTests.KleHierarchy.Mappings
         }
 
         [Test]
-        [TestCase(typeof(KleMainGroupDto), typeof(BallerupKommune.Models.Models.KleHierarchy))]
-        [TestCase(typeof(KleGroupDto), typeof(BallerupKommune.Models.Models.KleHierarchy))]
-        [TestCase(typeof(KleTopicDto), typeof(BallerupKommune.Models.Models.KleHierarchy))]
+        [TestCase(typeof(KleMainGroupDto), typeof(Agora.Models.Models.KleHierarchy))]
+        [TestCase(typeof(KleGroupDto), typeof(Agora.Models.Models.KleHierarchy))]
+        [TestCase(typeof(KleTopicDto), typeof(Agora.Models.Models.KleHierarchy))]
         public void TestMappingFromSourceToDestination(Type source, Type destination)
         {
             var sourceInstance = GetInstanceOf(source);

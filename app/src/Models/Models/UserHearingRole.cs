@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using BallerupKommune.Models.Common;
+using Agora.Models.Common;
 
-namespace BallerupKommune.Models.Models
+namespace Agora.Models.Models
 {
     public class UserHearingRole : AuditableModel
     {
@@ -13,6 +13,9 @@ namespace BallerupKommune.Models.Models
 
         public int UserId { get; set; }
         public User User { get; set; }
+
+        public ICollection<InvitationSourceMapping> InvitationSourceMappings { get; set; } =
+            new List<InvitationSourceMapping>();
 
         public static List<string> DefaultIncludes => new List<string>
         {

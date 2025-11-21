@@ -1,9 +1,9 @@
-﻿using BallerupKommune.Operations.Models.Contents.Queries.DownloadFile;
+﻿using Agora.Operations.Models.Contents.Queries.DownloadFile;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using BallerupKommune.Operations.Models.Contents.Queries.DownloadFiles;
+using Agora.Operations.Models.Contents.Queries.DownloadFiles;
 
-namespace BallerupKommune.Api.Controllers
+namespace Agora.Api.Controllers
 {
     public class ContentController : ApiController
     {

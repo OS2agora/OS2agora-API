@@ -1,12 +1,12 @@
-﻿using BallerupKommune.Operations.Common.Behaviours;
-using BallerupKommune.Operations.Common.Interfaces.Security;
+﻿using Agora.Operations.Common.Behaviours;
+using Agora.Operations.Common.Interfaces.Security;
 using MediatR;
 using Moq;
 using NovaSec;
 using NovaSec.Compiler;
 using NovaSec.Compiler.Resolvers;
 
-namespace BallerupKommune.Operations.UnitTests.Models
+namespace Agora.Operations.UnitTests.Models
 {
     public abstract class ModelsTestBase<TRequest, TResponse> where TRequest : IRequest<TResponse>
     {

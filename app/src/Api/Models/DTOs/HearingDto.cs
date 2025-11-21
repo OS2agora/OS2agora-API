@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using BallerupKommune.Api.Models.Common;
-using BallerupKommune.Api.Models.JsonApi;
+using Agora.Api.Models.Common;
+using Agora.Api.Models.JsonApi;
 
-namespace BallerupKommune.Api.Models.DTOs
+namespace Agora.Api.Models.DTOs
 {
     public class HearingDto : BaseDto<HearingDto.HearingAttributeDto>
     {
         public override List<DtoRelationship> AllowedRelationships => new List<DtoRelationship>
         {
             new DtoRelationship("subjectArea"),
+            new DtoRelationship("cityArea"),
             new DtoRelationship("hearingStatus"),
             new DtoRelationship("kleHierarchy"),
             new DtoRelationship("hearingType")
@@ -19,6 +20,7 @@ namespace BallerupKommune.Api.Models.DTOs
         {
             private bool _closedHearing;
             private bool _showComments;
+            private bool _autoApproveComments;
             private string _contactPersonDepartmentName;
             private string _contactPersonEmail;
             private string _contactPersonName;
@@ -39,6 +41,12 @@ namespace BallerupKommune.Api.Models.DTOs
             {
                 get => _showComments;
                 set { _showComments = value; PropertyUpdated(); }
+            }
+
+            public bool AutoApproveComments
+            {
+                get => _autoApproveComments;
+                set { _autoApproveComments = value; PropertyUpdated(); }
             }
 
             public string ContactPersonDepartmentName

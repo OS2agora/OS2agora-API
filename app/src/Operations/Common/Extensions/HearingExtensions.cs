@@ -2,16 +2,32 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Resolvers;
-using ContentType = BallerupKommune.Models.Enums.ContentType;
-using FieldType = BallerupKommune.Models.Enums.FieldType;
-using HearingRole = BallerupKommune.Models.Enums.HearingRole;
+using Agora.Models.Models;
+using Agora.Operations.Resolvers;
+using ContentType = Agora.Models.Enums.ContentType;
+using FieldType = Agora.Models.Enums.FieldType;
+using HearingRole = Agora.Models.Enums.HearingRole;
+using HearingStatusEmum = Agora.Models.Enums.HearingStatus;
 
-namespace BallerupKommune.Operations.Common.Extensions
+namespace Agora.Operations.Common.Extensions
 {
     public static class HearingExtensions
     {
+        /// <summary>
+        /// Determines whether the hearing is considered published.
+        /// A hearing is published if its status is not Created, Draft, or AwaitingStartDate.
+        /// </summary>
+        /// <param name="hearing">
+        /// The hearing instance to evaluate. The include <c>"HearingStatus"</c> is required on the hearing.
+        /// </param>
+        /// <returns>True if the hearing is published; otherwise, false.</returns>
+        public static bool IsPublished(this Hearing hearing)
+        {
+            return hearing.HearingStatus.Status != HearingStatusEmum.CREATED &&
+                   hearing.HearingStatus.Status != HearingStatusEmum.DRAFT &&
+                   hearing.HearingStatus.Status != HearingStatusEmum.AWAITING_STARTDATE;
+        }
+
         /// <summary>
         /// Gets the hearing owner of the hearing.
         /// </summary>
@@ -85,7 +101,7 @@ namespace BallerupKommune.Operations.Common.Extensions
                 .Select(companyHearingRole => companyHearingRole.Company)
                 .ToList();
         }
-        
+
         /// <summary>
         /// Gets the text content of specified field type.
         /// </summary>

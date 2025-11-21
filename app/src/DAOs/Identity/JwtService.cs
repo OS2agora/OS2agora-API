@@ -1,10 +1,10 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.ApplicationOptions;
-using BallerupKommune.Operations.Authentication;
-using BallerupKommune.Operations.Common.Constants;
-using BallerupKommune.Operations.Common.Enums;
-using BallerupKommune.Operations.Common.Interfaces;
-using BallerupKommune.Operations.Models.Users.Command.LoginUser;
+﻿using Agora.Models.Models;
+using Agora.Operations.ApplicationOptions;
+using Agora.Operations.Authentication;
+using Agora.Operations.Common.Constants;
+using Agora.Operations.Common.Enums;
+using Agora.Operations.Common.Interfaces;
+using Agora.Operations.Models.Users.Command.LoginUser;
 using MediatR;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -15,110 +15,89 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.DAOs.Identity
+namespace Agora.DAOs.Identity
 {
+    internal static class ClaimsPrincipalExtensions
+    {
+        public static string GetClaimValueByType(this ClaimsPrincipal principal, string type) =>
+            principal.Claims.SingleOrDefault(claim => claim.Type == type)?.Value;
+
+        public static string GetApplicationUserId(this ClaimsPrincipal principal) =>
+            principal.GetClaimValueByType(ClaimTypes.NameIdentifier);
+
+        public static string GetMainSessionExpiration(this ClaimsPrincipal principal) =>
+            principal.GetClaimValueByType(JWT.Claims.MainSessionExpiration);
+
+        public static string GetAuthenticationMethod(this ClaimsPrincipal principal) =>
+            principal.GetClaimValueByType(JWT.Claims.AuthenticationMethod);
+
+        public static string GetEmployeeDisplayName(this ClaimsPrincipal principal) =>
+            principal.GetClaimValueByType(JWT.Claims.EmployeeDisplayName);
+
+        public static string GetName(this ClaimsPrincipal principal) => 
+            principal.GetClaimValueByType(JWT.Claims.Name);
+
+        public static string GetDatabaseUserId(this ClaimsPrincipal principal) =>
+            principal.GetClaimValueByType(JWT.Claims.DatabaseUserId);
+
+        public static string GetCompanyId(this ClaimsPrincipal principal) =>
+            principal.GetClaimValueByType(JWT.Claims.CompanyId);
+    }
+
     public class JwtService : IJwtService
     {
         private readonly IOptions<JwtSettingsOptions> _jwtSettingsOptions;
+        private readonly IOptions<AuthenticationOptions> _authOptions;
         private readonly IIdentityService _identityService;
         private readonly ISender _mediator;
         private readonly IRefreshTokenDao _refreshTokenDao;
         private readonly ICurrentUserService _currentUserService;
 
-        public JwtService(IOptions<JwtSettingsOptions> jwtSettingsOptions, IIdentityService identityService,
+        public JwtService(IOptions<JwtSettingsOptions> jwtSettingsOptions, IOptions<AuthenticationOptions> authOptions, IIdentityService identityService,
             ISender mediator, IRefreshTokenDao refreshTokenDao, ICurrentUserService currentUserService)
         {
             _jwtSettingsOptions = jwtSettingsOptions;
+            _authOptions = authOptions;
             _identityService = identityService;
             _mediator = mediator;
             _refreshTokenDao = refreshTokenDao;
             _currentUserService = currentUserService;
         }
 
-        public async Task<string> RenewAccessToken(string accessToken, string refreshToken)
+        public async Task<JwtTokenPayload> LoginAndGenerateAccessToken(TokenUser tokenUser)
         {
-            // Find refreshToken
-            var token = await _refreshTokenDao.Get(refreshToken);
-
-            // Validate refresh token (isExpired, isRevoked etc.)
-            var isTokenValid = ValidateRefreshToken(token, _currentUserService.UserId, _currentUserService.RefreshToken);
-
-            if (!isTokenValid)
-            {
-                throw new Exception("Refresh token was not valid");
-            }
-
-            // Invalidate old refresh token
-            await _refreshTokenDao.Invalidate(token);
-
-            // Generate new refresh Token
-            var refreshTokenExpiration = _jwtSettingsOptions.Value.SecondsToRefreshTokenExpiration;
-            var newRefreshToken = await _refreshTokenDao.GenerateNew(_currentUserService.UserId, refreshTokenExpiration);
-
-            var tokenUser = new TokenUser
-            {
-                Name = _currentUserService.Name,
-                EmployeeDisplayName = _currentUserService.EmployeeName,
-                ApplicationUserId = _currentUserService.UserId,
-                AuthMethod = (AuthenticationMethod)_currentUserService?.AuthenticationMethod
-            };
-
-            // Generate new access Token
-            var expiration = _jwtSettingsOptions.Value.SecondsToAccessTokenExpiration;
-            var accessTokenDescriptor = CreateSecurityTokenDescriptor(
-                tokenUser,
-                expiration, 
-                newRefreshToken.Token);
-
-            var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-            var createToken = jwtSecurityTokenHandler.CreateToken(accessTokenDescriptor);
-            var newAccessToken = jwtSecurityTokenHandler.WriteToken(createToken);
-
-            return newAccessToken;
-        }
-
-        public async Task RevokeRefreshToken()
-        {
-            var refreshTokenFromClaim = _currentUserService.RefreshToken;
-
-            var refreshToken = await _refreshTokenDao.Get(refreshTokenFromClaim);
-
-            if (refreshToken != null)
-            {
-                await _refreshTokenDao.Invalidate(refreshToken);
-            }
-        }
-
-        public async Task<JwtTokenPayload> ExchangeExternalToken(ClaimsPrincipal userReadFromToken)
-        {
-            var tokenUser = await GetTokenUser(userReadFromToken);
-
-            var expiration = _jwtSettingsOptions.Value.SecondsToAccessTokenExpiration;
+            // Find the matching user in the application or create it
+            tokenUser.ApplicationUserId = await _identityService.FindUserOrCreateUser(tokenUser.PersonalIdentifier);
 
             // Generate new refresh Token
             var refreshTokenExpiration = _jwtSettingsOptions.Value.SecondsToRefreshTokenExpiration;
             var refreshToken = await _refreshTokenDao.GenerateNew(tokenUser.ApplicationUserId, refreshTokenExpiration);
+            var expiration = _jwtSettingsOptions.Value.SecondsToAccessTokenExpiration;
+            var mainSessionExpiresIn = _jwtSettingsOptions.Value.SecondsToMainSessionExpiration;
+
+            var mainSessionExpiration = DateTime.Now.AddSeconds(long.Parse(mainSessionExpiresIn)).ToLocalTime();
 
             // Create token descriptor to hold the JWT payload
-            var securityTokenDescriptor = CreateSecurityTokenDescriptor(tokenUser, expiration, refreshToken.Token);
+            var securityTokenDescriptor =
+                CreateSecurityTokenDescriptor(tokenUser, expiration, refreshToken.Token, mainSessionExpiration);
 
             // Add roles from external IdP to the application
             if (tokenUser.PossibleRoles.Any())
             {
-                if (tokenUser.PossibleRoles.Any(r => r.Value == ExternalIdP.Groups.Admin))
+                if (tokenUser.PossibleRoles.Any(r => r.Value == _authOptions.Value.Roles.Admin))
                 {
                     await _identityService.AddUserToRole(tokenUser.ApplicationUserId, JWT.Roles.Admin);
                     securityTokenDescriptor.Subject.AddClaim(new Claim(type: ClaimTypes.Role, JWT.Roles.Admin));
                 }
 
-                if (tokenUser.PossibleRoles.Any(r => r.Value == ExternalIdP.Groups.CanCreateHearing))
+                if (tokenUser.PossibleRoles.Any(r => r.Value == _authOptions.Value.Roles.HearingCreator))
                 {
                     await _identityService.AddUserToRole(tokenUser.ApplicationUserId, JWT.Roles.HearingCreator);
                     securityTokenDescriptor.Subject.AddClaim(new Claim(type: ClaimTypes.Role,
                         JWT.Roles.HearingCreator));
                 }
             }
-            
+
             // Populate the return object with some extra goodies for ease of use
             var isAdministrator = securityTokenDescriptor.Subject.HasClaim(ClaimTypes.Role, JWT.Roles.Admin);
             var isHearingOwner = securityTokenDescriptor.Subject.HasClaim(ClaimTypes.Role, JWT.Roles.HearingCreator);
@@ -150,83 +129,125 @@ namespace BallerupKommune.DAOs.Identity
             };
         }
 
-        private async Task<TokenUser> GetTokenUser(ClaimsPrincipal token)
+        public async Task<DateTime> GetRefreshTokenExpirationDate(string refreshToken)
         {
-            var tokenUser = new TokenUser
+            var token = await _refreshTokenDao.Get(refreshToken);
+            return token.ExpirationDate;
+        }
+
+        private ClaimsPrincipal GetApplicationUserIdFromExpiredAccessToken(string accessToken)
+        {
+            var tokenValidationParameters = new TokenValidationParameters
             {
-                Cpr = token.FindFirstValue(ExternalIdP.Claims.CprNumberIdentifier),
-                Cvr = token.FindFirstValue(ExternalIdP.Claims.CvrNumberIdentifier),
-                Email = token.FindFirstValue(ExternalIdP.Claims.Email),
-                Pid = token.FindFirstValue(ExternalIdP.Claims.PidNumberIdentifier),
-                PossibleRoles = token.FindAll(ExternalIdP.Claims.Roles).ToList(),
-                CompanyName = token.FindFirstValue(ExternalIdP.Claims.CompanyNameIdentifier)
+                ValidateAudience = false,
+                ValidateIssuer = false,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtSettingsOptions.Value.Secret)),
+                ValidateLifetime = false
             };
 
-            SetAuthenticationMethod(tokenUser);
-            SetEmployeeDisplayName(tokenUser, token);
-            SetPersonalIdentifier(tokenUser);
-            SetName(tokenUser, token);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var principal = tokenHandler.ValidateToken(accessToken, tokenValidationParameters, out SecurityToken securityToken);
+            if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                throw new Exception("Invalid access token");
 
-            tokenUser.ApplicationUserId = await _identityService.FindUserOrCreateUser(tokenUser.PersonalIdentifier);
-
-            return tokenUser;
+            return principal;
         }
 
-
-        private void SetAuthenticationMethod(TokenUser user)
+        public async Task<string> RenewAccessToken(string accessToken, string refreshToken)
         {
-            if (user.Cvr != null)
+            // Validate the expired access token and extract the associated user id
+            var claimsPrincipal = GetApplicationUserIdFromExpiredAccessToken(accessToken);
+            var applicationUserId = claimsPrincipal.GetApplicationUserId();
+
+            // Find refreshToken
+            var token = await _refreshTokenDao.Get(refreshToken, applicationUserId);
+
+            // Validate refresh token (isExpired, isRevoked etc.)
+            var isTokenValid = ValidateRefreshToken(token, applicationUserId);
+
+            if (!isTokenValid)
             {
-                user.AuthMethod = AuthenticationMethod.MitIdErhverv;
+                throw new Exception("Refresh token invalid");
             }
-            else if (user.Pid == null)
+
+            // Invalidate old refresh token
+            await _refreshTokenDao.Invalidate(token);
+
+            var authenticationMethodAsString = claimsPrincipal.GetAuthenticationMethod();
+            if (!Enum.TryParse(authenticationMethodAsString, false, out AuthenticationMethod authenticationMethod))
             {
-                user.AuthMethod = AuthenticationMethod.AdfsEmployee;
+                throw new Exception("Refresh token invalid");
             }
-            else
+            
+            var validateMainSession = authenticationMethod != AuthenticationMethod.AdfsEmployee;
+            var mainSessionExpirationAsString = claimsPrincipal.GetMainSessionExpiration();
+
+            var mainSessionExpiration = DateTime.MinValue;
+            if (!string.IsNullOrWhiteSpace(mainSessionExpirationAsString))
             {
-                user.AuthMethod = AuthenticationMethod.MitIdCitizen;
+                mainSessionExpiration = DateTime.Parse(mainSessionExpirationAsString);
             }
+
+            if (!validateMainSession)
+            {   
+                // If we do not need to validateMainSession, we just update the value as if a new session was started
+                var mainSessionExpiresIn = _jwtSettingsOptions.Value.SecondsToMainSessionExpiration;
+                mainSessionExpiration = DateTime.Now.AddSeconds(long.Parse(mainSessionExpiresIn)).ToLocalTime();
+            }
+
+            if (mainSessionExpiration < DateTime.Now)
+            {
+                throw new Exception("Main session is expired");
+            }
+
+            // Generate new refresh Token
+            var refreshTokenExpiration = _jwtSettingsOptions.Value.SecondsToRefreshTokenExpiration;
+            var newRefreshToken = await _refreshTokenDao.GenerateNew(applicationUserId, refreshTokenExpiration);
+
+            var tokenUser = new TokenUser
+            {
+                Name = claimsPrincipal.GetName(),
+                EmployeeDisplayName = claimsPrincipal.GetEmployeeDisplayName(),
+                ApplicationUserId = applicationUserId,
+                AuthMethod = authenticationMethod
+            };
+
+            // Generate new access Token
+            var expiration = _jwtSettingsOptions.Value.SecondsToAccessTokenExpiration;
+            var accessTokenDescriptor = CreateSecurityTokenDescriptor(tokenUser, expiration, newRefreshToken.Token, mainSessionExpiration);
+            
+            var isAdministrator = await _identityService.IsUserInRole(applicationUserId, JWT.Roles.Admin);
+            if (isAdministrator)
+            {
+                accessTokenDescriptor.Subject.AddClaim(new Claim(type: ClaimTypes.Role, JWT.Roles.Admin));
+            }
+
+            var isHearingCreator = await _identityService.IsUserInRole(applicationUserId, JWT.Roles.HearingCreator);
+            if (isHearingCreator)
+            {
+                accessTokenDescriptor.Subject.AddClaim(new Claim(type: ClaimTypes.Role, JWT.Roles.HearingCreator));
+            }
+
+            accessTokenDescriptor.Subject.AddClaim(new Claim(type: JWT.Claims.DatabaseUserId, claimsPrincipal.GetDatabaseUserId()));
+            accessTokenDescriptor.Subject.AddClaim(new Claim(type: JWT.Claims.CompanyId, claimsPrincipal.GetCompanyId()));
+
+            var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            var createToken = jwtSecurityTokenHandler.CreateToken(accessTokenDescriptor);
+            var newAccessToken = jwtSecurityTokenHandler.WriteToken(createToken);
+
+            return newAccessToken;
         }
 
-        private void SetEmployeeDisplayName(TokenUser user, ClaimsPrincipal token)
+        public async Task RevokeRefreshToken()
         {
+            var refreshTokenFromClaim = _currentUserService.RefreshToken;
 
-            if (user.AuthMethod == AuthenticationMethod.AdfsEmployee)
-            {
-                user.EmployeeDisplayName = token.FindFirstValue(ExternalIdP.Claims.DisplayName);
-            }
-        }
+            var refreshToken = await _refreshTokenDao.Get(refreshTokenFromClaim);
 
-        private void SetPersonalIdentifier(TokenUser user)
-        {
-            switch (user.AuthMethod)
+            if (refreshToken != null)
             {
-                case AuthenticationMethod.MitIdErhverv:
-                    user.PersonalIdentifier = $"{user.Cvr}-{user.Cpr}";
-                    return;
-                case AuthenticationMethod.MitIdCitizen:
-                    user.PersonalIdentifier = user.Cpr;
-                    return;
-                case AuthenticationMethod.AdfsEmployee:
-                    user.PersonalIdentifier = user.Email;
-                    return;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(user.AuthMethod), user.AuthMethod, null);
-            }
-        }
-
-        private void SetName(TokenUser user, ClaimsPrincipal token)
-        {
-            if (user.AuthMethod == AuthenticationMethod.AdfsEmployee)
-            {
-                var firstName = token.FindFirstValue(ExternalIdP.Claims.FirstName);
-                var lastName = token.FindFirstValue(ExternalIdP.Claims.LastName);
-                user.Name = $"{firstName} {lastName}";
-            }
-            else
-            {
-                user.Name = token.FindFirstValue(ExternalIdP.Claims.FullName);
+                await _refreshTokenDao.Invalidate(refreshToken);
             }
         }
 
@@ -237,24 +258,32 @@ namespace BallerupKommune.DAOs.Identity
             return new ClaimsPrincipal(new ClaimsIdentity(claims));
         }
 
-        private SecurityTokenDescriptor CreateSecurityTokenDescriptor(TokenUser tokenUser,
-            string expiresIn, string refreshToken)
+        private SecurityTokenDescriptor CreateSecurityTokenDescriptor(TokenUser tokenUser, string expiresIn, string refreshToken, DateTime mainSessionExpiration)
         {
             var expiration = DateTime.Now.AddSeconds(long.Parse(expiresIn)).ToLocalTime();
             var key = Encoding.ASCII.GetBytes(_jwtSettingsOptions.Value.Secret);
+
+            var subject = new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, tokenUser.ApplicationUserId),
+                new Claim(JWT.Claims.Name, tokenUser.Name),
+                new Claim(JWT.Claims.AuthenticationMethod, tokenUser.AuthMethod.ToString()),
+                new Claim(JWT.Claims.RefreshToken, refreshToken),
+                new Claim(ClaimTypes.Expiration, expiration.ToString()),
+                new Claim(JWT.Claims.MainSessionExpiration, mainSessionExpiration.ToString())
+            });
+
+            // Add any additional claims to the identity
+            if (tokenUser.AdditionalClaims != null && tokenUser.AdditionalClaims.Any())
+            {
+                subject.AddClaims(tokenUser.AdditionalClaims);
+            }
 
             // This must be signed with the same key as registered in DependencyInjection.cs
             // This is to ensure the automatic authentication pipeline can validate the token issued
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, tokenUser.ApplicationUserId),
-                    new Claim(JWT.Claims.Name, tokenUser.Name),
-                    new Claim(JWT.Claims.AuthenticationMethod, tokenUser.AuthMethod.ToString()), 
-                    new Claim(JWT.Claims.RefreshToken, refreshToken), 
-                    new Claim(ClaimTypes.Expiration, expiration.ToString()), 
-                }),
+                Subject = subject,
                 Expires = expiration,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature),
@@ -278,13 +307,14 @@ namespace BallerupKommune.DAOs.Identity
             });
         }
 
-        private bool ValidateRefreshToken(RefreshToken token, string userId, string tokenFromClaim)
+
+        private static bool ValidateRefreshToken(RefreshToken token, string userId)
         {
-            if (token.Token != tokenFromClaim)
+            if (token == null)
             {
                 return false;
             }
-
+            
             if (token.ExpirationDate < DateTime.Now)
             {
                 return false;

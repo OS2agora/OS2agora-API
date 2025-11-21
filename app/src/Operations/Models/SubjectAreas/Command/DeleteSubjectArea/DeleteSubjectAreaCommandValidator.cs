@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace BallerupKommune.Operations.Models.SubjectAreas.Command.DeleteSubjectArea
+namespace Agora.Operations.Models.SubjectAreas.Command.DeleteSubjectArea
 {
     public class DeleteSubjectAreaCommandValidator : AbstractValidator<DeleteSubjectAreaCommand>
     {

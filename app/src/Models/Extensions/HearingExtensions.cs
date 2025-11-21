@@ -1,6 +1,6 @@
-﻿using BallerupKommune.Models.Models;
+﻿using Agora.Models.Models;
 
-namespace BallerupKommune.Models.Extensions
+namespace Agora.Models.Extensions
 {
     public static class HearingExtensions
     {

@@ -1,4 +1,4 @@
-﻿namespace BallerupKommune.DAOs.Messages.EBoks.DTOs
+﻿namespace Agora.DAOs.Messages.EBoks.DTOs
 {
     internal class LeverandoerDto
     {

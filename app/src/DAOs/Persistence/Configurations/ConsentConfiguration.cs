@@ -1,7 +1,7 @@
-﻿using BallerupKommune.DAOs.Persistence.Configurations.Utility;
-using BallerupKommune.Entities.Entities;
+﻿using Agora.DAOs.Persistence.Configurations.Utility;
+using Agora.Entities.Entities;
 
-namespace BallerupKommune.DAOs.Persistence.Configurations
+namespace Agora.DAOs.Persistence.Configurations
 {
     public class ConsentConfiguration : AuditableEntityTypeConfiguration<ConsentEntity>
     {

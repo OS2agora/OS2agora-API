@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace BallerupKommune.Operations.Models.UserHearingRoles.Commands.CreateUserHearingRole
+namespace Agora.Operations.Models.UserHearingRoles.Commands.CreateUserHearingRole
 {
     public class CreateUserHearingRoleCommandValidator : AbstractValidator<CreateUserHearingRoleCommand>
     {

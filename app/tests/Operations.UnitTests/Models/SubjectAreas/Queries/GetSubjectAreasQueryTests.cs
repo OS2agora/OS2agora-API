@@ -2,15 +2,15 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Constants;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Models.SubjectAreas.Queries.GetSubjectAreas;
+using Agora.Models.Models;
+using Agora.Operations.Common.Constants;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Models.SubjectAreas.Queries.GetSubjectAreas;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 
-namespace BallerupKommune.Operations.UnitTests.Models.SubjectAreas.Queries
+namespace Agora.Operations.UnitTests.Models.SubjectAreas.Queries
 {
     public class GetSubjectAreasTests : ModelsTestBase<GetSubjectAreasQuery, List<SubjectArea>>
     {

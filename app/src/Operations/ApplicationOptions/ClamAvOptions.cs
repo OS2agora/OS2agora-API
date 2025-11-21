@@ -1,4 +1,4 @@
-﻿namespace BallerupKommune.Operations.ApplicationOptions
+﻿namespace Agora.Operations.ApplicationOptions
 {
     public class ClamAvOptions
     {

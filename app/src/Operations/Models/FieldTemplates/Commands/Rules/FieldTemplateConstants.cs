@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BallerupKommune.Operations.Models.FieldTemplates.Commands.Rules
+namespace Agora.Operations.Models.FieldTemplates.Commands.Rules
 {
     public static class FieldTemplateConstants
     {

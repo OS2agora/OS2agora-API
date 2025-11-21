@@ -1,9 +1,9 @@
-﻿using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
+﻿using Agora.Models.Common;
+using Agora.Models.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.Operations.Common.Interfaces.DAOs
+namespace Agora.Operations.Common.Interfaces.DAOs
 {
     public interface IGlobalContentTypeDao
     {

@@ -1,4 +1,4 @@
-﻿namespace BallerupKommune.DAOs.KleHierarchy.DTOs
+﻿namespace Agora.DAOs.KleHierarchy.DTOs
 {
     public class KleTopicDto
     {

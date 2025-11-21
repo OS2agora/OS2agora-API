@@ -1,5 +1,5 @@
-﻿using BallerupKommune.DAOs.Messages.EBoks.DTOs;
-using BallerupKommune.Operations.ApplicationOptions;
+﻿using Agora.DAOs.Messages.EBoks.DTOs;
+using Agora.Operations.ApplicationOptions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -11,7 +11,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.DAOs.Messages.EBoks
+namespace Agora.DAOs.Messages.EBoks
 {
     public class EBoksClient
     {
@@ -49,11 +49,15 @@ namespace BallerupKommune.DAOs.Messages.EBoks
             _options = options;
         }
 
-        public async Task<bool> Send(string documentTitle, string personalIdentifier, string fileName, string fileContent)
+        public async Task<SentReceiptDto> Send(string documentTitle, string personalIdentifier, string fileName, string fileContent)
         {
             if (_options.Value.Disabled)
             {
-                return false;
+                return new SentReceiptDto
+                {
+                    IsSent = false,
+                    Error = "EboksService is disabled"
+                };
             }
 
             var isCprNumber = personalIdentifier.Length == 10;
@@ -143,11 +147,14 @@ namespace BallerupKommune.DAOs.Messages.EBoks
             {
                 response = await HttpClient.PostAsync(string.Empty, postContent);
                 response.EnsureSuccessStatusCode();
-                return true;
+                return new SentReceiptDto
+                {
+                    IsSent = true
+                };
             }
             catch (Exception e)
             {
-                _logger.LogError($"EBoksClient: Exception caught: {e.Message}");
+                _logger.LogError(e, $"EBoksClient: Exception caught: {e.Message}");
                 if (response?.Content != null)
                 {
                     _logger.LogError($"request_body: {await response.Content.ReadAsStringAsync()}");

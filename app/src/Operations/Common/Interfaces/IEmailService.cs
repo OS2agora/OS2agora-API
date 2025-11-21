@@ -1,9 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using Agora.Operations.Common.Messages;
+using System.Threading.Tasks;
 
-namespace BallerupKommune.Operations.Common.Interfaces
+namespace Agora.Operations.Common.Interfaces
 {
     public interface IEmailService
     {
-        Task<bool> SendMessage(string subject, string content, string recipient);
+        Task<NotificationSentReceipt> SendMessage(string subject, string content, string recipient);
     }
 }

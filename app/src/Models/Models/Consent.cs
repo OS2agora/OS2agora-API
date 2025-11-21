@@ -1,6 +1,6 @@
-﻿using BallerupKommune.Models.Common;
+﻿using Agora.Models.Common;
 
-namespace BallerupKommune.Models.Models
+namespace Agora.Models.Models
 {
     public class Consent : AuditableModel
     {

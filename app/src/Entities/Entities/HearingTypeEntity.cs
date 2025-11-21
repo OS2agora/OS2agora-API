@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using BallerupKommune.Entities.Common;
+using Agora.Entities.Common;
 
-namespace BallerupKommune.Entities.Entities
+namespace Agora.Entities.Entities
 {
     public class HearingTypeEntity : AuditableEntity
     {
@@ -23,5 +23,8 @@ namespace BallerupKommune.Entities.Entities
 
         // One-to-many relationship with HearingType
         public ICollection<FieldTemplateEntity> FieldTemplates { get; set; } = new List<FieldTemplateEntity>();
+
+        // One-to-many relationship with InvitationGroupMapping
+        public ICollection<InvitationGroupMappingEntity> InvitationGroupMappings { get; set; } = new List<InvitationGroupMappingEntity>();
     }
 }

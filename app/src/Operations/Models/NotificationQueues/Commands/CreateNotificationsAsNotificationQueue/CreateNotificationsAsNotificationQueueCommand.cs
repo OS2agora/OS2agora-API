@@ -1,278 +1,127 @@
-﻿using BallerupKommune.Models.Enums;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Common;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
+using Agora.Operations.Common.Interfaces.Notifications;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using Markdig;
-using Microsoft.Extensions.Logging;
-using HearingStatus = BallerupKommune.Models.Enums.HearingStatus;
-using UserCapacity = BallerupKommune.Models.Enums.UserCapacity;
-using NotificationType = BallerupKommune.Models.Models.NotificationType;
 
-namespace BallerupKommune.Operations.Models.NotificationQueues.Commands.CreateNotificationsAsNotificationQueue
+namespace Agora.Operations.Models.NotificationQueues.Commands.CreateNotificationsAsNotificationQueue
 {
     public class CreateNotificationsAsNotificationQueueCommand : IRequest<Unit>
     {
-        public NotificationFrequency Frequency { get; set; }
-
-        public class
-            CreateNotificationsAsNotificationQueueCommandHandler : IRequestHandler<
-                CreateNotificationsAsNotificationQueueCommand, Unit>
+        public class CreateNotificationsAsNotificationQueueCommandHandler : IRequestHandler<CreateNotificationsAsNotificationQueueCommand, Unit>
         {
             private readonly INotificationDao _notificationDao;
-            private readonly INotificationQueueDao _notificationQueueDao;
-            private readonly IPdfService _pdfService;
-            private readonly ILogger<CreateNotificationsAsNotificationQueueCommandHandler> _logger;
-            private readonly INotificationContentBuilder _notificationContentBuilder;
+            private readonly INotificationService _notificationService;
+            private readonly ILogger<CreateNotificationsAsNotificationQueueCommand> _logger;
 
-            public CreateNotificationsAsNotificationQueueCommandHandler(INotificationDao notificationDao,
-                INotificationQueueDao notificationQueueDao, IPdfService pdfService, 
-                ILogger<CreateNotificationsAsNotificationQueueCommandHandler> logger,
-                INotificationContentBuilder notificationContentBuilder)
+            public CreateNotificationsAsNotificationQueueCommandHandler(INotificationDao notificationDao, INotificationService notificationService, ILogger<CreateNotificationsAsNotificationQueueCommand> logger)
             {
                 _notificationDao = notificationDao;
-                _notificationQueueDao = notificationQueueDao;
-                _pdfService = pdfService;
+                _notificationService = notificationService;
                 _logger = logger;
-                _notificationContentBuilder = notificationContentBuilder;
             }
 
-            public async Task<Unit> Handle(CreateNotificationsAsNotificationQueueCommand request,
-                CancellationToken cancellationToken)
+            public async Task<Unit> Handle(CreateNotificationsAsNotificationQueueCommand request, CancellationToken cancellationToken)
             {
-                var notificationIncludes = IncludeProperties.Create<Notification>(null,
-                    new List<string>
-                    {
-                        nameof(Notification.Hearing),
-                        $"{nameof(Notification.Hearing)}.{nameof(Hearing.HearingType)}",
-                        $"{nameof(Notification.Hearing)}.{nameof(Hearing.HearingStatus)}",
+                var notificationsToHandle = await _notificationDao.GetAllAsync(NotificationIncludes, n => !n.IsSentToQueue, asNoTracking: false);
 
-                        $"{nameof(Notification.Hearing)}.{nameof(Hearing.Contents)}",
-                        $"{nameof(Notification.Hearing)}.{nameof(Hearing.Contents)}.{nameof(Content.ContentType)}",
-
-                        nameof(Notification.Comment),
-                        $"{nameof(Notification.Comment)}.{nameof(Comment.User)}",
-
-                        $"{nameof(Notification.Hearing)}.{nameof(Hearing.UserHearingRoles)}",
-                        $"{nameof(Notification.Hearing)}.{nameof(Hearing.UserHearingRoles)}.{nameof(UserHearingRole.User)}",
-
-                        nameof(Notification.User),
-                        $"{nameof(Notification.User)}.{nameof(User.UserCapacity)}",
-                        nameof(Notification.Company),
-
-                        nameof(Notification.NotificationType),
-                        $"{nameof(Notification.NotificationType)}.{nameof(NotificationType.NotificationTemplate)}"
-                    });
-
-                List<Notification> notificationsToHandle =
-                    await _notificationDao.GetAllAsync(notificationIncludes, GetRequestFilter(request.Frequency));
-
-                if (request.Frequency == NotificationFrequency.DAILY)
+                if (!notificationsToHandle.Any())
                 {
-                    await HandleDailyNotifications(notificationsToHandle);
+                    return Unit.Value;
                 }
 
-                if (request.Frequency == NotificationFrequency.INSTANT)
+                foreach (var notification in notificationsToHandle)
                 {
-                    foreach (var notification in notificationsToHandle)
+                    try
                     {
-                        try
-                        {
-                            await HandleInstantNotification(notification);
-                        }
-                        catch (Exception exception)
-                        {
-                            _logger.LogError(exception.Message);
-                        }
+                        await HandleNotification(notification);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to Create NotificationQueue for notification with Id {Id}", notification.Id);
                     }
                 }
 
                 return Unit.Value;
             }
 
-            private async Task HandleDailyNotifications(List<Notification> notifications)
+            private async Task HandleNotification(Notification notification)
             {
-                var groupedByUser = notifications.GroupBy(notification => notification.User.Id);
-
-                foreach (var userGroup in groupedByUser)
+                if (notification.NotificationQueue != null)
                 {
-                    try
-                    {
-                        var notificationsForUser = userGroup.ToList();
-                        var user = notificationsForUser.First().User;
-
-                        var content = await _notificationContentBuilder.BuildStatusNotificationContent(notificationsForUser, user);
-                        var subject = "Høringsportalen: Det seneste døgns aktiviteter";
-
-                        await SendNotifications(notificationsForUser, new List<string>{ content }, subject);
-                    }
-                    catch (Exception exception)
-                    {
-                        _logger.LogError(exception.Message);
-                    }
-                }
-            }
-
-            private async Task HandleInstantNotification(Notification notification)
-            {
-                var isInvitationNotification = notification.NotificationType.Type ==
-                                               BallerupKommune.Models.Enums.NotificationType.INVITED_TO_HEARING;
-                var isHearingPublished = notification.Hearing.HearingStatus.Status != HearingStatus.DRAFT &&
-                                      notification.Hearing.HearingStatus.Status != HearingStatus.CREATED;
-
-                if (isInvitationNotification && !isHearingPublished)
-                {
+                    notification.IsSentToQueue = true;
+                    notification.PropertiesUpdated = new List<string> { nameof(Notification.IsSentToQueue) };
+                    await _notificationDao.UpdateAsync(notification);
                     return;
                 }
 
-                var subject = notification.NotificationType.NotificationTemplate.SubjectTemplate;
-                var content = await _notificationContentBuilder.BuildNotificationContent(notification);
-                await SendNotifications(new List<Notification> { notification }, content, subject);
-            }
-
-            private async Task SendNotifications(List<Notification> notifications, List<string> content, string subject)
-            {
-                if (notifications.First().Company != null)
+                switch (notification.NotificationType.Type)
                 {
-                    await SendCompanyNotifications(notifications, content, subject);
-                }
-                else if (notifications.First().User != null)
-                {
-                    await SendUserNotifications(notifications, content, subject);
-                }
-
-                throw new Exception($"Failed to send notifications. The notifications did not have a valid recipient");
-            }
-
-            private async Task SendUserNotifications(List<Notification> notifications, List<string> content, string subject)
-            {
-                var user = notifications.First().User;
-                var messageChannel = GetNotificationChannel(user.UserCapacity.Capacity);
-
-                switch (messageChannel)
-                {
-                    case NotificationMessageChannel.EMAIL:
-                        if (string.IsNullOrEmpty(user.Email))
-                        {
-                            throw new Exception(
-                                $"Cannot send notification as email to User with id {user.Id}. User does not have an email");
-                        }
-                        await SendEmailNotifications(user.Email, notifications, content, subject);
+                    case Agora.Models.Enums.NotificationType.ADDED_AS_REVIEWER:
+                        await _notificationService.CreateAddedAsReviewerNotificationQueue(notification);
                         break;
-                    case NotificationMessageChannel.EBOKS:
-                        var recipientAddress = user.Cpr;
-                        if (user.UserCapacity.Capacity == UserCapacity.COMPANY)
-                        {
-                            _logger.LogWarning($"User with id {user.Id} has UserCapacity {nameof(UserCapacity.COMPANY)}. Changing recipientAddress for notification to CVR.");
-                            recipientAddress = user.Cvr;
-                        }
-
-                        if (string.IsNullOrEmpty(recipientAddress))
-                        {
-                            throw new Exception(
-                                $"Cannot send notification via eboks to User with id {user.Id}. User does not have a valid recipientAddress");
-                        }
-
-                        await SendEboksNotifications(recipientAddress, notifications, content, subject);
+                    case Agora.Models.Enums.NotificationType.INVITED_TO_HEARING:
+                        await _notificationService.CreateInvitedToHearingNotificationQueue(notification);
                         break;
+                    case Agora.Models.Enums.NotificationType.HEARING_ANSWER_RECEIPT:
+                        await _notificationService.CreateHearingAnswerReceiptNotificationQueue(notification);
+                        break;
+                    case Agora.Models.Enums.NotificationType.HEARING_CONCLUSION_PUBLISHED:
+                        await _notificationService.CreateHearingConclusionPublishedNotificationQueue(notification);
+                        break;
+                    case Agora.Models.Enums.NotificationType.HEARING_CHANGED:
+                        await _notificationService.CreateHearingChangedNotificationQueue(notification);
+                        break;
+                    case Agora.Models.Enums.NotificationType.HEARING_RESPONSE_DECLINED:
+                        await _notificationService.CreateHearingResponseDeclinedNotificationQueue(notification);
+                        break;
+                    case Agora.Models.Enums.NotificationType.DAILY_STATUS:
+                        await _notificationService.CreateDailyStatusNotificationQueue(notification);
+                        break;
+                    case Agora.Models.Enums.NotificationType.NEWSLETTER:
+                        await _notificationService.CreateNewsLetterNotificationQueue(notification);
+                        break;
+                    case Agora.Models.Enums.NotificationType.NONE:
                     default:
-                        throw new Exception(
-                            $"Cannot send notification to User with Id {user.Id}. Invalid messageChannel.");
-                }
-            }
-
-            private async Task SendCompanyNotifications(List<Notification> notifications, List<string> content, string subject)
-            {
-                var company = notifications.First().Company;
-                await SendEboksNotifications(company.Cvr, notifications, content, subject);
-            }
-
-            private async Task SendEmailNotifications(string email, List<Notification> notifications, List<string> content, string subject)
-            {
-                var contentStringBuilder = new StringBuilder();
-
-                foreach (var singleContent in content)
-                {
-                    contentStringBuilder.AppendLine(Markdown.ToHtml(singleContent));
+                        _logger.LogWarning("Unknown notification type encountered: '{NotificationType}'. Can't create notification.", notification.NotificationType.Type);
+                        break;
                 }
 
-                var createdNotificationQueue = await CreateNotificationQueue(subject,
-                    contentStringBuilder.ToString(), email, NotificationMessageChannel.EMAIL);
-                await UpdateNotifications(notifications, createdNotificationQueue);
+                notification.IsSentToQueue = true;
+                notification.PropertiesUpdated = new List<string> { nameof(Notification.IsSentToQueue) };
+                await _notificationDao.UpdateAsync(notification);
             }
 
-            private async Task SendEboksNotifications(string recipientAddress, List<Notification> notifications, List<string> content, string subject)
+            private static IncludeProperties NotificationIncludes
             {
-                var pdfContent = _pdfService.CreateTextPdf(content, subject, subject);
-                var pdfContentAsBase64String = Convert.ToBase64String(pdfContent);
-
-                var createdNotificationQueue = await CreateNotificationQueue(subject, pdfContentAsBase64String,
-                    recipientAddress, NotificationMessageChannel.EBOKS);
-                await UpdateNotifications(notifications, createdNotificationQueue);
-            }
-
-            private async Task UpdateNotifications(List<Notification> notifications,
-                NotificationQueue createdNotificationQueue)
-            {
-                foreach (var notification in notifications)
+                get
                 {
-                    var updatedNotification = notification;
-                    updatedNotification.IsSendToQueue = true;
-                    updatedNotification.NotificationQueueId = createdNotificationQueue.Id;
-                    updatedNotification.NotificationQueue = createdNotificationQueue;
-                    updatedNotification.PropertiesUpdated = new List<string> {nameof(Notification.IsSendToQueue)};
-
-                    await _notificationDao.UpdateAsync(updatedNotification);
+                    var notificationIncludes = IncludeProperties.Create<Notification>(null,
+                        new List<string>
+                        {
+                            // Requirements for this handler
+                            nameof(Notification.NotificationQueue),
+                            nameof(Notification.NotificationType),
+                            $"{nameof(Notification.NotificationType)}.{nameof(NotificationType.SubjectTemplate)}",
+                            $"{nameof(Notification.NotificationType)}.{nameof(NotificationType.HeaderTemplate)}",
+                            $"{nameof(Notification.NotificationType)}.{nameof(NotificationType.BodyTemplate)}",
+                            $"{nameof(Notification.NotificationType)}.{nameof(NotificationType.FooterTemplate)}",
+                            nameof(Notification.User),
+                            $"{nameof(Notification.User)}.{nameof(User.UserCapacity)}",
+                            nameof(Notification.Company),
+                            nameof(Notification.Hearing),
+                            $"{nameof(Notification.Hearing)}.{nameof(Hearing.HearingType)}",
+                            $"{nameof(Notification.Hearing)}.{nameof(Hearing.Contents)}",
+                            $"{nameof(Notification.Hearing)}.{nameof(Hearing.Contents)}.{nameof(Content.ContentType)}",
+                        });
+                    return notificationIncludes;
                 }
-            }
-
-            private async Task<NotificationQueue> CreateNotificationQueue(string subject, string content,
-                string recipientAddress, NotificationMessageChannel messageChannel)
-            {
-                return await _notificationQueueDao.CreateAsync(
-                    new NotificationQueue
-                    {
-                        Content = content,
-                        MessageChannel = messageChannel,
-                        RecipientAddress = recipientAddress,
-                        Subject = subject,
-                    });
-            }
-
-            public NotificationMessageChannel GetNotificationChannel(UserCapacity userCapacity)
-            {
-                switch (userCapacity)
-                {
-                    case UserCapacity.CITIZEN:
-                    case UserCapacity.COMPANY:
-                        return NotificationMessageChannel.EBOKS;
-                    case UserCapacity.EMPLOYEE:
-                        return NotificationMessageChannel.EMAIL;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-
-            private static Expression<Func<Notification, bool>> GetRequestFilter(NotificationFrequency frequency)
-            {
-                return frequency switch
-                {
-                    NotificationFrequency.INSTANT => notification =>
-                        !notification.IsSendToQueue &&
-                        notification.NotificationType.Frequency == NotificationFrequency.INSTANT,
-                    NotificationFrequency.DAILY => notification =>
-                        !notification.IsSendToQueue &&
-                        notification.NotificationType.Frequency == NotificationFrequency.DAILY,
-                    _ => throw new ArgumentOutOfRangeException(nameof(frequency))
-                };
             }
         }
     }

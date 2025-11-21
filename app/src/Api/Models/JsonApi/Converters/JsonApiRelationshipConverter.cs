@@ -1,10 +1,10 @@
-﻿using BallerupKommune.Api.Models.JsonApi.Interfaces;
+﻿using Agora.Api.Models.JsonApi.Interfaces;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 
-namespace BallerupKommune.Api.Models.JsonApi.Converters
+namespace Agora.Api.Models.JsonApi.Converters
 {
     public class JsonApiRelationshipConverter : JsonConverter
     {

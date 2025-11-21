@@ -1,133 +1,84 @@
-﻿using BallerupKommune.DAOs.Files.Pdf.Forms;
-using BallerupKommune.Models.Models.Records;
-using BallerupKommune.Operations.Common.Interfaces;
-using MigraDocCore.Rendering;
-using System;
+﻿using Agora.Models.Models.Records;
+using Agora.Operations.Common.Interfaces.Files.Pdf;
+using MigraDoc.Rendering;
 using System.Collections.Generic;
 using System.IO;
 
-namespace BallerupKommune.DAOs.Files.Pdf
+namespace Agora.DAOs.Files.Pdf
 {
     public class PdfService : IPdfService
     {
-        public byte[] CreateHearingPdf(string hearingTitle, string hearingSummary, string hearingBodyInformation,
-            string esdhNumber, string hearingType, string subjectArea, DateTime startDate, DateTime deadline)
+        private readonly IPdfTheme _pdfTheme;
+        public PdfService(IPdfTheme pdfTheme)
         {
-            var form = new HearingForm
-            {
-                Title = hearingTitle,
-                Summary = hearingSummary,
-                Description = hearingBodyInformation,
-                CaseNumber = esdhNumber,
-                HearingType = hearingType,
-                SubjectArea = subjectArea,
-                StartDate = startDate,
-                EndDate = deadline
-            };
+            _pdfTheme = pdfTheme;
+        }
+
+        public byte[] CreateHearingPdf(HearingRecord hearingRecord)
+        {
+            var form = _pdfTheme.GetHearingForm(hearingRecord);
+
             return GeneratePdfFromForm(form);
         }
 
-        public byte[] CreateConclusionPdf(string esdhNumber, string hearingSummary, string hearingType,
-            string subjectArea, string conclusionText, DateTime conclusionDate)
+        public byte[] CreateConclusionPdf(HearingRecord hearingRecord)
         {
-            var form = new ConclusionForm
-            {
-                CaseNumber = esdhNumber,
-                ConclusionBody = conclusionText,
-                ConclusionDate = conclusionDate,
-                Summary = hearingSummary,
-                SubjectArea = subjectArea,
-                HearingType = hearingType
-            };
+            var form = _pdfTheme.GetConclusionForm(hearingRecord); 
+
             return GeneratePdfFromForm(form);
         }
 
-        public byte[] CreateCommentPdf(string hearingTitle, string commentWriterName, string commentText, string esdhNumber, string hearingType,
-            string subjectArea, DateTime created)
+        public byte[] CreateCommentPdf(CommentRecord commentRecord, HearingRecord hearingRecord)
         {
-            var form = new CommentForm
-            {
-                ResponseWriterName = commentWriterName,
-                ResponseBody = commentText,
-                CaseNumber = esdhNumber,
-                HearingType = hearingType,
-                ResponseDate = created,
-                SubjectArea = subjectArea,
-                Title = hearingTitle
-            };
+            var form = _pdfTheme.GetCommentForm(commentRecord, hearingRecord);
+
             return GeneratePdfFromForm(form);
         }
 
-        public byte[] CreateHearingReport(string hearingTitle, string esdhNumber, List<CommentRecord> commentRecords)
+        public byte[] CreateHearingReport(HearingRecord hearingRecord)
         {
-            var form = new HearingReportForm
-            {
-                Title = hearingTitle,
-                Subject = "Rapport over høringssvar",
-                CommentRecords = commentRecords,
-                BaseData = !string.IsNullOrEmpty(esdhNumber) ? new List<KeyValuePair<string, string>>
-                {
-                    new KeyValuePair<string, string>("Sagsnummer", esdhNumber),
-                } : new List<KeyValuePair<string, string>>()
-            };
+            var form = _pdfTheme.GetHearingReportForm(hearingRecord); 
+
+            return GeneratePdfFromForm(form);
+        }
+
+        public byte[] CreateFullHearingReport(HearingRecord hearingRecord)
+        {
+            var form = _pdfTheme.GetFullHearingReportForm(hearingRecord);
+
             return GeneratePdfFromForm(form);
         }
 
         public byte[] CreateTextPdf(List<string> content, string title, string subject)
         {
-            var form = new TextForm
-            {
-                Title = title,
-                Subject = subject,
-                TextRecords = content
-            };
+            var form = _pdfTheme.GetTextForm(content, title, subject);  
+
             return GeneratePdfFromForm(form);
         }
 
-        private byte[] GeneratePdfFromForm(BaseForm form)
+        private byte[] GeneratePdfFromForm(IPdfForm form)
         {
-            var document = form.CreateDocument();
-            document.UseCmykColor = true;
+            byte[] result;
+            try
+            {
+                var document = form.GenerateContent();
 
-            var pdfRenderer = new PdfDocumentRenderer(true) { Document = document };
+                var pdfRenderer = new PdfDocumentRenderer(true) { Document = document };
 
-            pdfRenderer.RenderDocument();
+                pdfRenderer.RenderDocument();
 
-            using var ms = new MemoryStream();
-            pdfRenderer.Save(ms, false);
-            var result = ms.ToArray();
+                using var ms = new MemoryStream();
+                pdfRenderer.Save(ms, false);
+                result = ms.ToArray();
 
-            return result;
-        }
-
-        private byte[] GeneratePdfFromForm(HearingReportForm form)
-        {
-            var document = form.CreateDocument();
-            document.UseCmykColor = true;
-
-            var pdfRenderer = new PdfDocumentRenderer(true) { Document = document };
-
-            pdfRenderer.RenderDocument();
-
-            using var ms = new MemoryStream();
-            pdfRenderer.Save(ms, false);
-            var result = ms.ToArray();
-
-            return result;
-        }
-
-        private byte[] GeneratePdfFromForm(TextForm form)
-        {
-            var document = form.CreateDocument();
-            document.UseCmykColor = true;
-
-            var pdfRenderer = new PdfDocumentRenderer(true) { Document = document };
-
-            pdfRenderer.RenderDocument();
-
-            using var ms = new MemoryStream();
-            pdfRenderer.Save(ms, false);
-            var result = ms.ToArray();
+                form.CleanUp();
+            }
+            catch
+            {
+                form.CleanUp();
+                throw;
+            }
+            
 
             return result;
         }

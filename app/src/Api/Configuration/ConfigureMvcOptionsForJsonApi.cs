@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
-namespace BallerupKommune.Api.Configuration
+namespace Agora.Api.Configuration
 {
     // Shamelessly taken from this issue: https://github.com/codecutout/JsonApiSerializer/issues/115
     // AddJsonApi will insert a new output formatter for NewtonsoftJson

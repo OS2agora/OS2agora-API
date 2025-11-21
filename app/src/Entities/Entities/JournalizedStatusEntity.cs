@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using BallerupKommune.Entities.Common;
+using Agora.Entities.Common;
 
-namespace BallerupKommune.Entities.Entities
+namespace Agora.Entities.Entities
 {
     public class JournalizedStatusEntity : AuditableEntity
     {

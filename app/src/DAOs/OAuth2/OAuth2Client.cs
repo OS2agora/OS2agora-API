@@ -1,4 +1,4 @@
-﻿using BallerupKommune.Operations.Authentication;
+﻿using Agora.Operations.Authentication;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
@@ -8,7 +8,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.DAOs.OAuth2
+namespace Agora.DAOs.OAuth2
 {
     public class OAuth2Client
     {
@@ -22,7 +22,7 @@ namespace BallerupKommune.DAOs.OAuth2
         }
 
         public async Task<OAuth2TokenResponse> RequestAccessTokenCode(string code, string codeVerifier,
-            Operations.ApplicationOptions.OAuth2Client oauthClientOptions)
+            Operations.ApplicationOptions.OAuth2ClientOptions oauthClientOptions)
         {
             var tokenEndpoint = new Uri(oauthClientOptions.TokenEndpoint);
             var redirectUri = new Uri(oauthClientOptions.RedirectUri);
@@ -56,7 +56,7 @@ namespace BallerupKommune.DAOs.OAuth2
             }
             catch (Exception e)
             {
-                _logger.LogError($"OAauth2Client: Exception caught: {e.Message}");
+                _logger.LogError(e, $"OAauth2Client: Exception caught: {e.Message}");
                 if (response?.Content != null)
                 {
                     _logger.LogError($"request_body: {await response.Content.ReadAsStringAsync()}");

@@ -1,17 +1,17 @@
 ﻿using System.Collections.Generic;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces;
+using Agora.Operations.Common.Interfaces.DAOs;
 using MediatR;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Operations.Common.Exceptions;
+using Agora.Models.Common;
+using Agora.Operations.Common.Exceptions;
 using NovaSec.Attributes;
-using HearingStatus = BallerupKommune.Models.Enums.HearingStatus;
+using HearingStatus = Agora.Models.Enums.HearingStatus;
 
-namespace BallerupKommune.Operations.Models.Users.Queries.GetMe
+namespace Agora.Operations.Models.Users.Queries.GetMe
 {
     [PostFilter("true", "UserHearingRoles.Hearing, UserHearingRoles.Hearing.HearingStatus")]
     public class GetMeQuery : IRequest<User>

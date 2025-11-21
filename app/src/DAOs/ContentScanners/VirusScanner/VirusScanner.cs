@@ -1,9 +1,9 @@
-﻿using BallerupKommune.Operations.Common.Enums;
-using BallerupKommune.Operations.Common.Interfaces;
+﻿using Agora.Operations.Common.Enums;
+using Agora.Operations.Common.Interfaces;
 using nClam;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.DAOs.ContentScanners.VirusScanner
+namespace Agora.DAOs.ContentScanners.VirusScanner
 {
     public sealed class VirusScanner : IVirusScanner
     {

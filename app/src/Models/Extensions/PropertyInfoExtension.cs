@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Extensions;
+﻿using System.Reflection;
+using Agora.Models.Common;
 
-namespace Models.Extension
+namespace Agora.Models.Extensions
 {
     internal static class PropertyInfoExtension
     {

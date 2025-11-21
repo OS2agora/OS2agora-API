@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace BallerupKommune.Operations.Models.Fields.Commands.UpdateFields
+namespace Agora.Operations.Models.Fields.Commands.UpdateFields
 {
     public class UpdateFieldsCommandValidator : AbstractValidator<UpdateFieldsCommand>
     {

@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace BallerupKommune.Operations.Common.Telemetry
+namespace Agora.Operations.Common.Telemetry
 {
     public static class Instrumentation
     {

@@ -1,6 +1,6 @@
-﻿using BallerupKommune.Models.Extensions;
+﻿using Agora.Models.Extensions;
 
-namespace BallerupKommune.Api.Models.JsonApi
+namespace Agora.Api.Models.JsonApi
 {
     /// <summary>
     /// Custom DTO Relationship primarily used for 'Allowed Relationships' which

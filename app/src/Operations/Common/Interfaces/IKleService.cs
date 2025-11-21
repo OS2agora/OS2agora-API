@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Models;
+using Agora.Models.Models;
 
-namespace BallerupKommune.Operations.Common.Interfaces
+namespace Agora.Operations.Common.Interfaces
 {
     public interface IKleService
     {

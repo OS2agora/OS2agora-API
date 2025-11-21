@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace BallerupKommune.DAOs.Persistence.Configurations.Utility
+namespace Agora.DAOs.Persistence.Configurations.Utility
 {
     /// <summary>
     /// Factory service for generating <see cref="ValueConverter"/>s used for encrypting/decrypting database fields.

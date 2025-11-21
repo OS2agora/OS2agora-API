@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using BallerupKommune.DTOs.Common;
-using BallerupKommune.DTOs.Enums;
+using Agora.DTOs.Common;
+using Agora.DTOs.Enums;
 
-namespace BallerupKommune.DTOs.Models
+namespace Agora.DTOs.Models
 {
     public class CommentStatusDto : AuditableDto<CommentStatusDto>
     {

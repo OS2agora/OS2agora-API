@@ -1,21 +1,21 @@
-﻿using AutoMapper;
-using BallerupKommune.DAOs.Persistence;
-using BallerupKommune.DAOs.Statistics;
-using BallerupKommune.DAOs.Utility;
-using BallerupKommune.Entities.Common;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Operations.Common.Telemetry;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using AutoMapper;
+using Agora.DAOs.Persistence;
+using Agora.DAOs.Statistics;
+using Agora.DAOs.Utility;
+using Agora.Entities.Common;
+using Agora.Models.Common;
+using Agora.Operations.Common.Telemetry;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
-namespace BallerupKommune.DAOs.Models
+namespace Agora.DAOs.Models
 {
     public abstract class BaseDao<TEntity, TModel>
         where TEntity : BaseEntity
@@ -35,37 +35,37 @@ namespace BallerupKommune.DAOs.Models
             _commandCountStatistics = commandCountStatistics;
         }
 
-        protected async Task<TModel> GetAsync(int id, IncludeProperties includes = null)
+        protected async Task<TModel> GetAsync(int id, IncludeProperties includes = null, bool asNoTracking = false)
         {
-            using Activity activity = StartDaoActivity(includes);
+            using Activity activity = StartDaoActivity(includes, asNoTracking: asNoTracking);
             try
             {
                 includes?.ValidateRequestIncludes<TEntity>();
                 var allIncludes = includes?.AllIncludes.ToList() ?? new List<string>();
 
                 Logger.LogDebug($"GetAsync doing {typeof(TEntity).Name} call with {allIncludes.Count} includes: ({string.Join(',', allIncludes)})");
-                var result = await _db.GetEntityAsync<TEntity>(id, allIncludes);
+                var result = await _db.GetEntityAsync<TEntity>(id, allIncludes, asNoTracking: asNoTracking);
                 Logger.LogDebug($"GetAsync did {typeof(TEntity).Name} call {_commandCountStatistics.CommandCount} EF commands executed.");
                 string[] projections = allIncludes.ToArray();
-
+                
                 TModel model;
                 using (Activity projectionActivity = StartProjectionActivity(projections))
                 {
                     model = await _mapper.ProjectTo<TModel>(result, null, projections).SingleOrDefaultAsync();
                 }
-
+                
                 return model;
             }
             catch (Exception e)
             {
-                Logger.LogError($"An error occurred while fetching entity: {typeof(TEntity).Name}", e);
+                Logger.LogError(e, $"An error occurred while fetching entity: {typeof(TEntity).Name}");
                 throw;
             }
         }
 
-        protected async Task<List<TModel>> GetAllAsync(IncludeProperties includes = null, Expression<Func<TEntity, bool>> filter = null)
+        protected async Task<List<TModel>> GetAllAsync(IncludeProperties includes = null, Expression<Func<TEntity, bool>> filter = null, int? limit = null, bool asNoTracking = false)
         {
-            using Activity activity = StartDaoActivity(includes, filter);
+            using Activity activity = StartDaoActivity(includes, filter, limit, asNoTracking);
             try
             {
                 includes?.ValidateRequestIncludes<TEntity>();
@@ -73,7 +73,7 @@ namespace BallerupKommune.DAOs.Models
 
                 // debug message
                 Logger.LogDebug($"GetAllAsync doing {typeof(TEntity).Name} call with {allIncludes.Count} includes: ({string.Join(',', allIncludes)})");
-                var result = await _db.GetEntitiesAsync<TEntity>(includes: allIncludes, filter: filter);
+                var result = await _db.GetEntitiesAsync<TEntity>(includes: allIncludes, filter: filter, limit: limit, asNoTracking: asNoTracking);
                 string[] projections = allIncludes.ToArray();
 
                 List<TModel> models;
@@ -81,13 +81,13 @@ namespace BallerupKommune.DAOs.Models
                 {
                     models = await _mapper.ProjectTo<TModel>(result, null, projections).ToListAsync();
                 }
-
+                
                 Logger.LogDebug($"GetAllAsync did {typeof(TEntity).Name} call {_commandCountStatistics.CommandCount} EF commands executed.");
                 return models;
             }
             catch (Exception e)
             {
-                Logger.LogError($"An error occurred while fetching entities: {typeof(TEntity).Name}", e);
+                Logger.LogError(e, $"An error occurred while fetching entities: {typeof(TEntity).Name}");
                 throw;
             }
         }
@@ -104,7 +104,7 @@ namespace BallerupKommune.DAOs.Models
             }
             catch (Exception e)
             {
-                Logger.LogError($"An error occurred while creating entity: {typeof(TEntity).Name}", e);
+                Logger.LogError(e, $"An error occurred while creating entity: {typeof(TEntity).Name}");
                 throw;
             }
         }
@@ -121,7 +121,7 @@ namespace BallerupKommune.DAOs.Models
             }
             catch (Exception e)
             {
-                Logger.LogError($"An error occurred while creating entities: {typeof(TEntity).Name}", e);
+                Logger.LogError(e, $"An error occurred while creating entities: {typeof(TEntity).Name}");
                 throw;
             }
         }
@@ -138,7 +138,7 @@ namespace BallerupKommune.DAOs.Models
             }
             catch (Exception e)
             {
-                Logger.LogError($"An error occurred while updating entity: {typeof(TEntity).Name}", e);
+                Logger.LogError(e, $"An error occurred while updating entity: {typeof(TEntity).Name}");
                 throw;
             }
         }
@@ -152,7 +152,7 @@ namespace BallerupKommune.DAOs.Models
             }
             catch (Exception e)
             {
-                Logger.LogError($"An error occurred while deleting entity: {typeof(TEntity).Name}", e);
+                Logger.LogError(e, $"An error occurred while deleting entity: {typeof(TEntity).Name}");
                 throw;
             }
         }
@@ -166,7 +166,7 @@ namespace BallerupKommune.DAOs.Models
             }
             catch (Exception e)
             {
-                Logger.LogError($"An error occurred while deleting entities: {typeof(TEntity).Name}", e);
+                Logger.LogError(e, $"An error occurred while deleting entities: {typeof(TEntity).Name}");
                 throw;
             }
         }
@@ -182,15 +182,17 @@ namespace BallerupKommune.DAOs.Models
         }
 
         private static Activity StartDaoActivity(IncludeProperties includes = null,
-            Expression<Func<TEntity, bool>> filter = null, [CallerMemberName] string methodName = "")
+            Expression<Func<TEntity, bool>> filter = null, int? limit = null, bool asNoTracking = false, [CallerMemberName] string methodName = "")
         {
             Activity activity = Instrumentation.Source.StartActivity($"{methodName}: {typeof(TModel).Name}");
             activity?.SetTag("dao.includes", includes?.AllIncludes.ToArray() ?? Array.Empty<string>());
             activity?.SetTag("dao.filter", filter?.ToString());
+            activity?.SetTag("limit", limit);
+            activity?.SetTag("AsNoTracking", asNoTracking);
             activity?.SetTag("dao.entity.type", typeof(TEntity).Name);
             return activity;
         }
-
+        
         private static Activity StartProjectionActivity(string[] projections)
         {
             Activity activity = Instrumentation.Source.StartActivity("Automapper projection");

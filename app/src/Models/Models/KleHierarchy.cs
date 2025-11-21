@@ -1,7 +1,7 @@
-﻿using BallerupKommune.Models.Common;
+﻿using Agora.Models.Common;
 using System.Collections.Generic;
 
-namespace BallerupKommune.Models.Models
+namespace Agora.Models.Models
 {
     public class KleHierarchy : AuditableModel
     {

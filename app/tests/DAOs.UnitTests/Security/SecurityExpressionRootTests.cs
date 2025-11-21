@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Linq;
 using System.Security.Claims;
-using BallerupKommune.DAOs.Security;
-using BallerupKommune.Operations.Common.Enums;
-using BallerupKommune.Operations.Common.Interfaces;
-using BallerupKommune.Operations.Resolvers;
+using Agora.DAOs.Security;
+using Agora.Operations.Common.Enums;
+using Agora.Operations.Common.Interfaces;
+using Agora.Operations.Resolvers;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using NovaSec.Compiler;
 using NUnit.Framework;
 
-namespace BallerupKommune.DAOs.UnitTests.Security
+namespace Agora.DAOs.UnitTests.Security
 {
     public class SecurityExpressionRootTests
     {
@@ -32,7 +32,6 @@ namespace BallerupKommune.DAOs.UnitTests.Security
 
         private Mock<IHttpContextAccessor> _httpContextAccessorMock;
         private Mock<ICurrentUserService> _currentUserServiceMock;
-        private Mock<IIdentityService> _identityServiceMock;
         private Mock<IUserHearingRoleResolver> _userHearingRoleResolverMock;
         private Mock<ICompanyHearingRoleResolver> _companyHearingRoleResolverMock;
         private ISecurityExpressionRoot _securityExpressionRoot;
@@ -42,11 +41,10 @@ namespace BallerupKommune.DAOs.UnitTests.Security
         {
             _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
             _currentUserServiceMock = new Mock<ICurrentUserService>();
-            _identityServiceMock = new Mock<IIdentityService>();
             _userHearingRoleResolverMock = new Mock<IUserHearingRoleResolver>();
             _companyHearingRoleResolverMock = new Mock<ICompanyHearingRoleResolver>();
-            _securityExpressionRoot = new SecurityExpressionRoot(_currentUserServiceMock.Object, _identityServiceMock.Object, 
-                _httpContextAccessorMock.Object, _userHearingRoleResolverMock.Object, _companyHearingRoleResolverMock.Object);
+            _securityExpressionRoot = new SecurityExpressionRoot(_currentUserServiceMock.Object, _httpContextAccessorMock.Object, 
+                _userHearingRoleResolverMock.Object, _companyHearingRoleResolverMock.Object);
 
             _currentUserServiceMock.Setup(service => service.UserId)
                 .Returns(string.Empty);
@@ -72,7 +70,7 @@ namespace BallerupKommune.DAOs.UnitTests.Security
             var claims = userRolesArray.Select(role => new Claim(ClaimTypes.Role, role)).ToArray();
 
             TestPrincipal currentPrincipal = new TestPrincipal(claims);
-            _httpContextAccessorMock.SetupProperty(httpContextAccessor => httpContextAccessor.HttpContext.User,currentPrincipal);
+            _httpContextAccessorMock.SetupProperty(httpContextAccessor => httpContextAccessor.HttpContext.User, currentPrincipal);
             var result = _securityExpressionRoot.HasRole(roleToTest);
             Assert.That(result, Is.EqualTo(shouldSucceed));
         }

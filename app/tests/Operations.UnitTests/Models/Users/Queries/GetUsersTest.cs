@@ -1,5 +1,5 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Models.Users.Queries.GetUsers;
+﻿using Agora.Models.Models;
+using Agora.Operations.Models.Users.Queries.GetUsers;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Operations.Common.Exceptions;
+using Agora.Operations.Common.Exceptions;
 
-namespace BallerupKommune.Operations.UnitTests.Models.Users.Queries
+namespace Agora.Operations.UnitTests.Models.Users.Queries
 {
     public class GetUsersTest : ModelsTestBase<GetUsersQuery, List<User>>
     {

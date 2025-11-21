@@ -1,7 +1,7 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Constants;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Models.KleMappings.Commands.UpdateKleMappings;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Constants;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Models.KleMappings.Commands.UpdateKleMappings;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.Operations.UnitTests.Models.KleMappings.Commands
+namespace Agora.Operations.UnitTests.Models.KleMappings.Commands
 {
     public class UpdateKleMappingsTest : ModelsTestBase<UpdateKleMappingsCommand, List<KleMapping>>
     {

@@ -1,4 +1,4 @@
-namespace BallerupKommune.Entities.Enums
+namespace Agora.Entities.Enums
 {
     public enum JournalizedStatus
     {

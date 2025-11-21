@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using BallerupKommune.DAOs.Mappings;
-using BallerupKommune.Entities.Entities;
-using BallerupKommune.Models.Models;
+using Agora.DAOs.Mappings;
+using Agora.Entities.Entities;
+using Agora.Models.Models;
 using NUnit.Framework;
 
-namespace BallerupKomune.Entities.UnitTest.Mappings
+namespace Agora.Entities.UnitTest.Mappings
 {
     public class EntityMappingExtensionsTests
     {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using BallerupKommune.Entities.Common;
+using Agora.Entities.Common;
 
-namespace BallerupKommune.Entities.Entities
+namespace Agora.Entities.Entities
 {
     public class HearingRoleEntity : AuditableEntity
     {
@@ -12,6 +12,7 @@ namespace BallerupKommune.Entities.Entities
         // One-to-many relationship with UserHearingRole
         public ICollection<UserHearingRoleEntity> UserHearingRoles { get; set; } = new List<UserHearingRoleEntity>();
 
+        // One-to-many relationship with CompanyHearingRole
         public ICollection<CompanyHearingRoleEntity> CompanyHearingRoles { get; set; } =
             new List<CompanyHearingRoleEntity>();
     }

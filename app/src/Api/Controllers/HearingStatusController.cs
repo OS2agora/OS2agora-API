@@ -1,14 +1,14 @@
-﻿using BallerupKommune.Api.Models.DTOs;
-using BallerupKommune.Api.Models.JsonApi;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Models.HearingStatuses.Queries.GetHearingStatus;
+﻿using Agora.Api.Models.DTOs;
+using Agora.Api.Models.JsonApi;
+using Agora.Models.Models;
+using Agora.Operations.Models.HearingStatuses.Queries.GetHearingStatus;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.Api.Controllers
+namespace Agora.Api.Controllers
 {
     public class HearingStatusController : ApiController
     {

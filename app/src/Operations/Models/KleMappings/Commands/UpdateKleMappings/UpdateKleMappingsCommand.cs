@@ -1,16 +1,16 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Common.Interfaces.DAOs;
 using MediatR;
 using NovaSec.Attributes;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Operations.Common.Interfaces.Plugins;
+using Agora.Models.Common;
+using Agora.Operations.Common.Interfaces.Plugins;
 
-namespace BallerupKommune.Operations.Models.KleMappings.Commands.UpdateKleMappings
+namespace Agora.Operations.Models.KleMappings.Commands.UpdateKleMappings
 {
     [PreAuthorize("HasRole('Administrator')")]
     public class UpdateKleMappingsCommand : IRequest<List<KleMapping>>
@@ -36,7 +36,11 @@ namespace BallerupKommune.Operations.Models.KleMappings.Commands.UpdateKleMappin
 
             public async Task<List<KleMapping>> Handle(UpdateKleMappingsCommand request, CancellationToken cancellationToken)
             {
-                var hearingTypeIncludes = IncludeProperties.Create<HearingType>(null, new List<string> {nameof(HearingType.KleMappings), $"{nameof(HearingType.KleMappings)}.{nameof(KleMapping.KleHierarchy)}"});
+                var hearingTypeIncludes = IncludeProperties.Create<HearingType>(null, new List<string>
+                {
+                    nameof(HearingType.KleMappings),
+                    $"{nameof(HearingType.KleMappings)}.{nameof(KleMapping.KleHierarchy)}"
+                });
                 var hearingType = await _hearingTypeDao.GetAsync(request.HearingTypeId, hearingTypeIncludes);
 
                 var kleHierarchies = await _kleHierarchyDao.GetAllAsync();
@@ -69,9 +73,13 @@ namespace BallerupKommune.Operations.Models.KleMappings.Commands.UpdateKleMappin
                 await _kleMappingDao.DeleteRangeAsync(idsToDelete);
 
                 // Create kleMappings
-                var includes = IncludeProperties.Create<KleMapping>(null, new List<string> {nameof(KleMapping.HearingType), nameof(KleMapping.KleHierarchy)});
+                var kleMappingIncludes = IncludeProperties.Create<KleMapping>(null, new List<string>
+                {
+                    nameof(KleMapping.HearingType),
+                    nameof(KleMapping.KleHierarchy)
+                });
 
-                var allKleMappings = await _kleMappingDao.CreateRangeAsync(kleMappingsToCreate, includes);
+                var allKleMappings = await _kleMappingDao.CreateRangeAsync(kleMappingsToCreate, kleMappingIncludes);
                 var allKleMappingsForHearingType = allKleMappings.Where(x => x.HearingTypeId == request.HearingTypeId);
 
                 return allKleMappingsForHearingType.ToList();

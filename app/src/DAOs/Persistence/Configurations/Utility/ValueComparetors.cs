@@ -2,7 +2,7 @@
 using System.Linq;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace BallerupKommune.DAOs.Persistence.Configurations.Utility
+namespace Agora.DAOs.Persistence.Configurations.Utility
 {
     internal static class ValueComparetors
     {

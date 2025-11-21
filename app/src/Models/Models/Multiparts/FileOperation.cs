@@ -1,7 +1,7 @@
-﻿using BallerupKommune.Models.Enums;
-using BallerupKommune.Models.Models.Files;
+﻿using Agora.Models.Enums;
+using Agora.Models.Models.Files;
 
-namespace BallerupKommune.Models.Models.Multiparts
+namespace Agora.Models.Models.Multiparts
 {
     public class FileOperation
     {

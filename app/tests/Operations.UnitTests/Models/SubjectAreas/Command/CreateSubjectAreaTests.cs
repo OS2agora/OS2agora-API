@@ -1,7 +1,7 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Constants;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Models.SubjectAreas.Command.CreateSubjectArea;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Constants;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Models.SubjectAreas.Command.CreateSubjectArea;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
@@ -10,11 +10,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.Operations.UnitTests.Models.SubjectAreas.Command
+namespace Agora.Operations.UnitTests.Models.SubjectAreas.Command
 {
-    public class CreateSubjectAreaTests : ModelsTestBase<CreateSubjectAreaCommand, SubjectArea>
+    public class CreateCityAreaTests : ModelsTestBase<CreateSubjectAreaCommand, SubjectArea>
     {
-        public CreateSubjectAreaTests()
+        public CreateCityAreaTests()
         {
             RequestHandlerDelegateMock
                 .Setup(x => x())

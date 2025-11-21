@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Models.Models.Files;
-using BallerupKommune.Models.Models.Multiparts;
+using Agora.Models.Models;
+using Agora.Models.Models.Files;
+using Agora.Models.Models.Multiparts;
 using System.Threading.Tasks;
-using HearingStatus = BallerupKommune.Models.Enums.HearingStatus;
+using HearingStatus = Agora.Models.Enums.HearingStatus;
 
-namespace BallerupKommune.Operations.Common.Interfaces.Plugins
+namespace Agora.Operations.Common.Interfaces.Plugins
 {
     public interface IPlugin
     {

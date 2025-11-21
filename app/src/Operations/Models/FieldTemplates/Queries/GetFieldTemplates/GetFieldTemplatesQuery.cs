@@ -1,14 +1,14 @@
-﻿using BallerupKommune.Models.Extensions;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Extensions;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using MediatR;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
+using Agora.Models.Common;
 using NovaSec.Attributes;
 
-namespace BallerupKommune.Operations.Models.FieldTemplates.Queries.GetFieldTemplates
+namespace Agora.Operations.Models.FieldTemplates.Queries.GetFieldTemplates
 {
     [PreAuthorize("HasRole('Administrator')")]
     public class GetFieldTemplatesQuery : IRequest<List<FieldTemplate>>

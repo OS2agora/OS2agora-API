@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BallerupKommune.DTOs.Common
+namespace Agora.DTOs.Common
 {
     public abstract class AuditableDto<T> : BaseDto<T>
     {

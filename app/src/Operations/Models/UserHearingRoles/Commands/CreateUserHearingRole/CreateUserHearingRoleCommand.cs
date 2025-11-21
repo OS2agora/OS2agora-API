@@ -1,17 +1,17 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
-using BallerupKommune.Operations.Common.Interfaces.Plugins;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Common.Interfaces.DAOs;
+using Agora.Operations.Common.Interfaces.Plugins;
 using MediatR;
 using NovaSec.Attributes;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using HearingRole = BallerupKommune.Models.Enums.HearingRole;
+using Agora.Models.Common;
+using HearingRole = Agora.Models.Enums.HearingRole;
 
-namespace BallerupKommune.Operations.Models.UserHearingRoles.Commands.CreateUserHearingRole
+namespace Agora.Operations.Models.UserHearingRoles.Commands.CreateUserHearingRole
 {
     [PreAuthorize("@Security.IsHearingOwnerByHearingId(#request.HearingId) && !@Security.IsHearingOwnerRole(#request.UserHearingRole.HearingRoleId)")]
     [PreAuthorize("HasRole('Administrator') && @Security.IsHearingOwnerRole(#request.UserHearingRole.HearingRoleId)")]
@@ -40,7 +40,7 @@ namespace BallerupKommune.Operations.Models.UserHearingRoles.Commands.CreateUser
                 IncludeProperties hearingIncludes = IncludeProperties.Create<Hearing>(null, new List<string>
                 {
                     nameof(Hearing.UserHearingRoles),
-                    $"{nameof(Hearing.UserHearingRoles)}.{nameof(BallerupKommune.Models.Models.UserHearingRole.HearingRole)}"
+                    $"{nameof(Hearing.UserHearingRoles)}.{nameof(Agora.Models.Models.UserHearingRole.HearingRole)}"
                 });
                 var hearing = await _hearingDao.GetAsync(request.HearingId, hearingIncludes);
 
@@ -64,7 +64,7 @@ namespace BallerupKommune.Operations.Models.UserHearingRoles.Commands.CreateUser
                     await _userHearingRoleDao.DeleteAsync(existingHearingOwner.Id);
                 }
 
-                var includesForPlugin = IncludeProperties.Create<UserHearingRole>(null, new List<string> { nameof(BallerupKommune.Models.Models.UserHearingRole.Hearing), nameof(BallerupKommune.Models.Models.UserHearingRole.HearingRole) });
+                var includesForPlugin = IncludeProperties.Create<UserHearingRole>(null, new List<string> { nameof(Agora.Models.Models.UserHearingRole.Hearing), nameof(Agora.Models.Models.UserHearingRole.HearingRole) });
                 var userHearingRole = await _userHearingRoleDao.CreateAsync(request.UserHearingRole, includesForPlugin);
 
                 var defaultIncludes = IncludeProperties.Create<UserHearingRole>();

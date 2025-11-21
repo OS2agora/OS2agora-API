@@ -1,6 +1,6 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Constants;
-using BallerupKommune.Operations.Models.Comments.Queries.GetComments;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Constants;
+using Agora.Operations.Models.Comments.Queries.GetComments;
 using Moq;
 using NUnit.Framework;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.Operations.UnitTests.Models.Comments.Queries
+namespace Agora.Operations.UnitTests.Models.Comments.Queries
 {
     public class GetCommentQueryTests : ModelsTestBase<GetCommentsQuery, List<Comment>>
     {
@@ -85,28 +85,32 @@ namespace BallerupKommune.Operations.UnitTests.Models.Comments.Queries
         }
 
         [Test]
-        [TestCase(false, false, false, true)]
-        [TestCase(false, false, true, true)]
-        [TestCase(false, true, false, true)]
-        [TestCase(false, true, true, true)]
-        [TestCase(true, false, false, true)]
-        [TestCase(true, false, true, true)]
-        [TestCase(true, true, false, true)]
-        [TestCase(true, true, true, true)]
-        [TestCase(false, false, false, false)]
-        [TestCase(false, false, true, false)]
-        [TestCase(false, true, false, false)]
-        [TestCase(false, true, true, false)]
-        [TestCase(true, false, false, false)]
-        [TestCase(true, false, true, false)]
-        [TestCase(true, true, false, false)]
-        [TestCase(true, true, true, false)]
-        public async Task GetComment_Citizen_Employee_Anonymous(bool isCommentApproved, bool isACommentDeleted, bool hearingAllowsCommentsToBeSeen, bool isCommentResponseReply)
+        [TestCase(false, false, false, true, false)]
+        [TestCase(false, false, true, true, false)]
+        [TestCase(false, true, false, true, false)]
+        [TestCase(false, true, true, true, false)]
+        [TestCase(true, false, false, true, false)]
+        [TestCase(true, false, true, true, false)]
+        [TestCase(true, true, false, true, false)]
+        [TestCase(true, true, true, true, false)]
+        [TestCase(false, false, false, false, false)]
+        [TestCase(false, false, true, false, false)]
+        [TestCase(false, true, false, false, false)]
+        [TestCase(false, true, true, false, false)]
+        [TestCase(true, false, false, false, false)]
+        [TestCase(true, false, true, false, false)]
+        [TestCase(true, true, false, false, false)]
+        [TestCase(true, true, true, false, false)]
+        [TestCase(true, false, true, false, true)]
+        public async Task GetComment_Citizen_Employee_Anonymous(bool isCommentApproved, bool isACommentDeleted, bool hearingAllowsCommentsToBeSeen, bool isCommentResponseReply, bool isCommentReview)
         {
             var comments = GetHandlerResult(deletedComment: isACommentDeleted);
 
             SecurityExpressionsMock.Setup(x => x.IsCommentApproved(It.IsAny<Comment>()))
                 .Returns(isCommentApproved);
+
+            SecurityExpressionsMock.Setup(x => x.IsCommentReview(It.IsAny<Comment>()))
+                .Returns(isCommentReview);
 
             SecurityExpressionRoot.Setup(x => x.HasRole(It.IsAny<string>()))
                 .Returns((string role) => role == Security.Roles.Anonymous || role == Security.Roles.Citizen || role == Security.Roles.Employee);
@@ -125,7 +129,7 @@ namespace BallerupKommune.Operations.UnitTests.Models.Comments.Queries
             var result =
                     await SecurityBehaviour.Handle(request, CancellationToken.None, RequestHandlerDelegateMock.Object);
 
-            if (!isCommentApproved || !hearingAllowsCommentsToBeSeen || isCommentResponseReply)
+            if (!isCommentApproved || !hearingAllowsCommentsToBeSeen || isCommentResponseReply || isCommentReview)
             {
                 Assert.IsEmpty(result);
             }
@@ -143,6 +147,9 @@ namespace BallerupKommune.Operations.UnitTests.Models.Comments.Queries
                     Assert.IsTrue(result.All(x => x.Hearing != null && !x.ContainsSensitiveInformation
                                                                     && x.Contents.Any() && x.CommentType != null));
                 }
+
+                // assert redactions
+                Assert.IsTrue(result.All(x => x.User?.Name == null && x.User?.Company?.Cvr == null && x.CommentChildren == null));
             }
         }
 
@@ -243,6 +250,9 @@ namespace BallerupKommune.Operations.UnitTests.Models.Comments.Queries
                     Assert.IsTrue(result.All(x => x.Hearing != null && !x.ContainsSensitiveInformation
                                                                      && x.CommentType != null));
                 }
+
+                // assert redactions
+                Assert.IsTrue(result.All(x => x.User?.Name == null && x.User?.Company?.Cvr == null && x.CommentChildren == null));
             }
             else
             {
@@ -266,8 +276,8 @@ namespace BallerupKommune.Operations.UnitTests.Models.Comments.Queries
                     CommentStatus = new CommentStatus
                     {
                         Status = approved
-                            ? BallerupKommune.Models.Enums.CommentStatus.APPROVED
-                            : BallerupKommune.Models.Enums.CommentStatus.AWAITING_APPROVAL
+                            ? Agora.Models.Enums.CommentStatus.APPROVED
+                            : Agora.Models.Enums.CommentStatus.AWAITING_APPROVAL
                     },
                     ContainsSensitiveInformation = false,
                     IsDeleted = deletedComment,
@@ -276,6 +286,14 @@ namespace BallerupKommune.Operations.UnitTests.Models.Comments.Queries
                         new Content()
                     },
                     CommentType = new CommentType(),
+                    User = new User
+                    {
+                        Name = "TestUserCompany",
+                        Company = new Company
+                        {
+                            Cvr = "1234"
+                        }
+                    }
                 },
                 new Comment()
                 {
@@ -287,8 +305,8 @@ namespace BallerupKommune.Operations.UnitTests.Models.Comments.Queries
                     CommentStatus = new CommentStatus
                     {
                         Status = approved
-                            ? BallerupKommune.Models.Enums.CommentStatus.APPROVED
-                            : BallerupKommune.Models.Enums.CommentStatus.AWAITING_APPROVAL
+                            ? Agora.Models.Enums.CommentStatus.APPROVED
+                            : Agora.Models.Enums.CommentStatus.AWAITING_APPROVAL
                     },
                     ContainsSensitiveInformation = false,
                     IsDeleted = false,
@@ -297,6 +315,10 @@ namespace BallerupKommune.Operations.UnitTests.Models.Comments.Queries
                         new Content()
                     },
                     CommentType = new CommentType(),
+                    User = new User
+                    {
+                        Name = "TestUser",
+                    }
                 },
                 new Comment()
                 {
@@ -308,8 +330,8 @@ namespace BallerupKommune.Operations.UnitTests.Models.Comments.Queries
                     CommentStatus = new CommentStatus
                     {
                         Status = approved
-                            ? BallerupKommune.Models.Enums.CommentStatus.APPROVED
-                            : BallerupKommune.Models.Enums.CommentStatus.AWAITING_APPROVAL
+                            ? Agora.Models.Enums.CommentStatus.APPROVED
+                            : Agora.Models.Enums.CommentStatus.AWAITING_APPROVAL
                     },
                     ContainsSensitiveInformation = false,
                     IsDeleted = false,
@@ -318,6 +340,14 @@ namespace BallerupKommune.Operations.UnitTests.Models.Comments.Queries
                         new Content()
                     },
                     CommentType = new CommentType(),
+                    User = new User
+                    {
+                        Name = "TestUser",
+                    },
+                    CommentChildren = new List<Comment>
+                    {
+                        new Comment()
+                    }
                 }
             };
         }

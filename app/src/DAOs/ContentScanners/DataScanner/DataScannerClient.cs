@@ -1,6 +1,6 @@
-﻿using BallerupKommune.DAOs.ContentScanners.DataScanner.DTOs;
-using BallerupKommune.Operations.ApplicationOptions;
-using BallerupKommune.Operations.Common.Enums;
+﻿using Agora.DAOs.ContentScanners.DataScanner.DTOs;
+using Agora.Operations.ApplicationOptions;
+using Agora.Operations.Common.Enums;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Serialization;
 
-namespace BallerupKommune.DAOs.ContentScanners.DataScanner
+namespace Agora.DAOs.ContentScanners.DataScanner
 {
     public class DataScannerClient
     {
@@ -82,23 +82,19 @@ namespace BallerupKommune.DAOs.ContentScanners.DataScanner
 
                 var result = await response.Content.ReadAsStringAsync();
 
-                _logger.LogInformation($"DataScanner: result: {result}");
                 // Result is not valid JSON, it could look like this {...}{...} and sometimes like this {...}\n{...}
                 // It is missing either [] + "," between objects or we need to split each object and treat them separately
                 var validJson = "[" + result.Replace("}{", "},{").Replace("}\n{", "},{") + "]";
 
                 var scanResult = JsonConvert.DeserializeObject<List<ScanResultDto>>(validJson, serializerSettings);
-                _logger.LogInformation($"DataScanner: deserialized data: {scanResult}");
 
                 if (scanResult == null)
                 {
-                    _logger.LogError($"DataScanner: No result");
                     return DataScannerResult.Error;
                 }
 
                 if (scanResult.Any(x => x.Matched))
                 {
-                    _logger.LogInformation($"DataScanner: found \"personal data\"");
                     return DataScannerResult.Dirty;
                 }
 
@@ -106,7 +102,7 @@ namespace BallerupKommune.DAOs.ContentScanners.DataScanner
             }
             catch (Exception e)
             {
-                _logger.LogError($"DataScanner: Unknown exception caught: {e.Message}");
+                _logger.LogError(e, $"DataScanner: Unknown exception caught: {e.Message}");
                 return DataScannerResult.Error;
             }
         }

@@ -2,22 +2,24 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.DAOs.Security;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
-using BallerupKommune.Operations.Common.Interfaces.Security;
-using BallerupKommune.Operations.Models.Hearings.Queries.GetHearing;
-using BallerupKommune.Operations.Resolvers;
+using Agora.Models.Common;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
+using Agora.Operations.Common.Interfaces.Security;
+using Agora.Operations.Common.Interfaces;
+using Agora.Operations.Models.Hearings.Queries.GetHearing;
+using Agora.Operations.Resolvers;
 using FluentAssertions;
 using MediatR;
 using Moq;
-using NovaSec.Compiler;
 using NUnit.Framework;
-using CommentType = BallerupKommune.Models.Enums.CommentType;
+using CommentType = Agora.Models.Enums.CommentType;
+using Agora.DAOs.Security;
+using Agora.Operations.ApplicationOptions;
+using Microsoft.Extensions.Options;
+using NovaSec.Compiler;
 
-namespace BallerupKommune.DAOs.UnitTests.Security
+namespace Agora.DAOs.UnitTests.Security
 {
     public class SecurityExpressionsTest
     {
@@ -28,11 +30,10 @@ namespace BallerupKommune.DAOs.UnitTests.Security
         private ISecurityExpressions _securityExpression;
         private Mock<ISender> _mediatRMock;
         private Mock<ICommentDao> _commentDaoMock;
-        private Mock<IHearingRoleResolver> _hearingRoleResovler;
-        private Mock<ISecurityExpressionRoot> _securityExpressionRootMock;
         private Mock<IHearingAccessResolver> _hearingAccessResolverMock;
         private Mock<IUserHearingRoleResolver> _userHearingRoleMock;
         private Mock<ICompanyHearingRoleResolver> _companyHearingRoleResolverMock;
+        private IOptions<SecurityOptions> _securityOptions;
 
         [SetUp]
         public void SetUp()
@@ -41,16 +42,16 @@ namespace BallerupKommune.DAOs.UnitTests.Security
             _userDaoMock = new Mock<IUserDao>();
             _hearingDaoMock = new Mock<IHearingDao>();
             _hearingRoleDaoMock = new Mock<IHearingRoleDao>();
-            _mediatRMock = new Mock<ISender>();
             _commentDaoMock = new Mock<ICommentDao>();
-            _hearingRoleResovler = new Mock<IHearingRoleResolver>();
-            _securityExpressionRootMock = new Mock<ISecurityExpressionRoot>();
+            _mediatRMock = new Mock<ISender>();
             _hearingAccessResolverMock = new Mock<IHearingAccessResolver>();
             _userHearingRoleMock = new Mock<IUserHearingRoleResolver>();
             _companyHearingRoleResolverMock = new Mock<ICompanyHearingRoleResolver>();
+            _securityOptions = Options.Create(new SecurityOptions());
+
             _securityExpression = new SecurityExpressions(_currentUserServiceMock.Object, _userDaoMock.Object,
                 _hearingDaoMock.Object, _hearingRoleDaoMock.Object, _commentDaoMock.Object, _hearingAccessResolverMock.Object,
-                _userHearingRoleMock.Object, _companyHearingRoleResolverMock.Object);
+                _userHearingRoleMock.Object, _companyHearingRoleResolverMock.Object, _securityOptions);
 
             _currentUserServiceMock.Setup(x => x.UserId)
                 .Returns(string.Empty);
@@ -97,7 +98,7 @@ namespace BallerupKommune.DAOs.UnitTests.Security
         [Test]
         [TestCase(1, 1)]
         [TestCase(2, 1)]
-        [TestCase(99,1)]
+        [TestCase(99, 1)]
         [TestCase(null, 1)]
         public void SecurityExpressions_IsCommentOwnerByCommentId(int? userId, int commentUserId)
         {
@@ -111,10 +112,10 @@ namespace BallerupKommune.DAOs.UnitTests.Security
                     Id = commentUserId
                 }
             };
-            
+
             _currentUserServiceMock.Setup(x => x.DatabaseUserId)
                 .Returns(userId);
-            
+
             _commentDaoMock.Setup(x => x.GetAsync(It.IsAny<int>(), It.IsAny<IncludeProperties>()))
                 .Returns(Task.FromResult(comment));
 
@@ -131,14 +132,14 @@ namespace BallerupKommune.DAOs.UnitTests.Security
 
             _userHearingRoleMock
                 .Setup(resolver =>
-                    resolver.IsHearingOwner(hearingId,null))
+                    resolver.IsHearingOwner(hearingId, null))
                 .ReturnsAsync(hasRole);
 
             bool result = _securityExpression.IsHearingOwner(hearingId);
-            
+
             Assert.That(result, Is.EqualTo(hasRole));
         }
-    
+
         [Test]
         [TestCase(true)]
         [TestCase(false)]
@@ -149,36 +150,36 @@ namespace BallerupKommune.DAOs.UnitTests.Security
 
             _userHearingRoleMock
                 .Setup(resolver =>
-                    resolver.IsHearingReviewer(hearingId ,null))
+                    resolver.IsHearingReviewer(hearingId, null))
                 .ReturnsAsync(hasRole);
 
-            bool result = _securityExpression.IsHearingReviewer( hearingId);
-            
+            bool result = _securityExpression.IsHearingReviewer(hearingId);
+
             Assert.That(result, Is.EqualTo(hasRole));
         }
-        
+
         [Test]
         public void SecurityExpressions_HasRoleOnAnyHearing_ReturnsCorrect(
             [Values(
-                BallerupKommune.Models.Enums.HearingRole.HEARING_OWNER,
-                BallerupKommune.Models.Enums.HearingRole.HEARING_INVITEE,
-                BallerupKommune.Models.Enums.HearingRole.HEARING_RESPONDER,
-                BallerupKommune.Models.Enums.HearingRole.HEARING_REVIEWER
-                )] BallerupKommune.Models.Enums.HearingRole role, 
+                Agora.Models.Enums.HearingRole.HEARING_OWNER,
+                Agora.Models.Enums.HearingRole.HEARING_INVITEE,
+                Agora.Models.Enums.HearingRole.HEARING_RESPONDER,
+                Agora.Models.Enums.HearingRole.HEARING_REVIEWER
+                )] Agora.Models.Enums.HearingRole role,
             [Values] bool hasRole)
         {
             _userHearingRoleMock
-                .Setup(resolver => resolver.UserHearingRoleExists(null, role ,null))
+                .Setup(resolver => resolver.UserHearingRoleExists(null, role, null))
                 .ReturnsAsync(hasRole);
 
             _companyHearingRoleResolverMock.Setup(resolver => resolver.CompanyHearingRoleExist(null, role, null))
                 .ReturnsAsync(hasRole);
 
             bool result = _securityExpression.HasRoleOnAnyHearing(role);
-            
+
             Assert.That(result, Is.EqualTo(hasRole));
         }
-        
+
         [Test]
         [TestCase(true, false)]
         [TestCase(false, false)]
@@ -187,25 +188,25 @@ namespace BallerupKommune.DAOs.UnitTests.Security
         public void SecurityExpressions_IsHearingInvitee_ReturnsCorrect(bool hasRole, bool companyHasRole)
         {
             const int hearingId = 7;
-            
-            var hearing = new Hearing {Id = hearingId};
+
+            var hearing = new Hearing { Id = hearingId };
 
             _userHearingRoleMock
                 .Setup(resolver =>
                     resolver.UserHearingRoleExists(hearing.Id,
-                        BallerupKommune.Models.Enums.HearingRole.HEARING_INVITEE, null)).ReturnsAsync(hasRole);
+                        Agora.Models.Enums.HearingRole.HEARING_INVITEE, null)).ReturnsAsync(hasRole);
             _companyHearingRoleResolverMock
                 .Setup(resolver => resolver.CompanyHearingRoleExist(hearing.Id,
-                    BallerupKommune.Models.Enums.HearingRole.HEARING_INVITEE, null)).ReturnsAsync(companyHasRole);
+                    Agora.Models.Enums.HearingRole.HEARING_INVITEE, null)).ReturnsAsync(companyHasRole);
 
 
             bool result = _securityExpression.IsHearingInvitee(hearing);
-            
+
             Assert.That(result, Is.EqualTo(hasRole || companyHasRole));
             _hearingDaoMock.Verify();
             _hearingDaoMock.VerifyNoOtherCalls();
         }
-        
+
         [Test]
         [TestCase(true, false)]
         [TestCase(false, false)]
@@ -214,48 +215,57 @@ namespace BallerupKommune.DAOs.UnitTests.Security
         public void SecurityExpressions_IsHearingResponder_ReturnsCorrect(bool hasRole, bool companyHasRole)
         {
             const int hearingId = 7;
-            
-            var hearing = new Hearing {Id = hearingId};
+
+            var hearing = new Hearing { Id = hearingId };
 
             _hearingDaoMock
-                .Setup(dao => dao.GetAsync(hearingId, It.IsAny<IncludeProperties>()))
+                .Setup(dao => dao.GetAsync(hearingId, It.IsAny<IncludeProperties>(), It.IsAny<bool>()))
                 .ReturnsAsync(hearing)
                 .Verifiable();
 
             _userHearingRoleMock
                 .Setup(resolver =>
                     resolver.UserHearingRoleExists(hearing.Id,
-                        BallerupKommune.Models.Enums.HearingRole.HEARING_RESPONDER, null)).ReturnsAsync(hasRole);
+                        Agora.Models.Enums.HearingRole.HEARING_RESPONDER, null)).ReturnsAsync(hasRole);
             _companyHearingRoleResolverMock
                 .Setup(resolver => resolver.CompanyHearingRoleExist(hearing.Id,
-                    BallerupKommune.Models.Enums.HearingRole.HEARING_RESPONDER, null)).ReturnsAsync(companyHasRole);
+                    Agora.Models.Enums.HearingRole.HEARING_RESPONDER, null)).ReturnsAsync(companyHasRole);
 
             bool result = _securityExpression.IsHearingResponder(hearingId);
-            
+
             Assert.That(result, Is.EqualTo(hasRole || companyHasRole));
             _hearingDaoMock.Verify();
             _hearingDaoMock.VerifyNoOtherCalls();
         }
 
         [Test]
-        [TestCase(BallerupKommune.Models.Enums.HearingStatus.ACTIVE)]
-        [TestCase(BallerupKommune.Models.Enums.HearingStatus.DRAFT)]
-        [TestCase(BallerupKommune.Models.Enums.HearingStatus.AWAITING_STARTDATE)]
-        [TestCase(BallerupKommune.Models.Enums.HearingStatus.ACTIVE)]
-        [TestCase(BallerupKommune.Models.Enums.HearingStatus.AWAITING_CONCLUSION)]
-        [TestCase(BallerupKommune.Models.Enums.HearingStatus.CONCLUDED)]
-        public void SecurityExpressions_IsHearingPublished_ExistingHearing(BallerupKommune.Models.Enums.HearingStatus statusToTest)
+        [TestCase(Agora.Models.Enums.HearingStatus.ACTIVE, true)]
+        [TestCase(Agora.Models.Enums.HearingStatus.DRAFT, true)]
+        [TestCase(Agora.Models.Enums.HearingStatus.AWAITING_STARTDATE, true)]
+        [TestCase(Agora.Models.Enums.HearingStatus.ACTIVE, true)]
+        [TestCase(Agora.Models.Enums.HearingStatus.AWAITING_CONCLUSION, true)]
+        [TestCase(Agora.Models.Enums.HearingStatus.CONCLUDED, true)]
+        [TestCase(Agora.Models.Enums.HearingStatus.ACTIVE, false)]
+        [TestCase(Agora.Models.Enums.HearingStatus.DRAFT, false)]
+        [TestCase(Agora.Models.Enums.HearingStatus.AWAITING_STARTDATE, false)]
+        [TestCase(Agora.Models.Enums.HearingStatus.ACTIVE, false)]
+        [TestCase(Agora.Models.Enums.HearingStatus.AWAITING_CONCLUSION, false)]
+        [TestCase(Agora.Models.Enums.HearingStatus.CONCLUDED, false)]
+        public void SecurityExpressions_IsHearingPublished_ExistingHearing(Agora.Models.Enums.HearingStatus statusToTest, bool includeAwaitingStartDate)
         {
+            _securityOptions.Value.IncludeAwaitingStartdate = includeAwaitingStartDate;
+
             var hearing = new Hearing
             {
-                HearingStatus = new BallerupKommune.Models.Models.HearingStatus
+                HearingStatus = new Agora.Models.Models.HearingStatus
                 {
                     Status = statusToTest
                 }
             };
 
-            var shouldFail = statusToTest == BallerupKommune.Models.Enums.HearingStatus.CREATED ||
-                             statusToTest == BallerupKommune.Models.Enums.HearingStatus.DRAFT;
+            var shouldFail = statusToTest == Agora.Models.Enums.HearingStatus.CREATED ||
+                             statusToTest == Agora.Models.Enums.HearingStatus.DRAFT ||
+                             (!includeAwaitingStartDate && statusToTest == Agora.Models.Enums.HearingStatus.AWAITING_STARTDATE);
 
             var result = _securityExpression.IsHearingPublished(hearing);
 
@@ -272,19 +282,19 @@ namespace BallerupKommune.DAOs.UnitTests.Security
         }
 
         [Test]
-        [TestCase(BallerupKommune.Models.Enums.HearingRole.HEARING_INVITEE)]
-        [TestCase(BallerupKommune.Models.Enums.HearingRole.HEARING_RESPONDER)]
-        [TestCase(BallerupKommune.Models.Enums.HearingRole.HEARING_REVIEWER)]
-        [TestCase(BallerupKommune.Models.Enums.HearingRole.HEARING_OWNER)]
-        public void SecurityExpressions_IsHearingOwnerRole_ExistingHearingRole(BallerupKommune.Models.Enums.HearingRole roleToReturn)
+        [TestCase(Agora.Models.Enums.HearingRole.HEARING_INVITEE)]
+        [TestCase(Agora.Models.Enums.HearingRole.HEARING_RESPONDER)]
+        [TestCase(Agora.Models.Enums.HearingRole.HEARING_REVIEWER)]
+        [TestCase(Agora.Models.Enums.HearingRole.HEARING_OWNER)]
+        public void SecurityExpressions_IsHearingOwnerRole_ExistingHearingRole(Agora.Models.Enums.HearingRole roleToReturn)
         {
             _hearingRoleDaoMock.Setup(x => x.GetAsync(It.IsAny<int>(), It.IsAny<IncludeProperties>()))
                 .Returns(Task.FromResult(new HearingRole
                 {
                     Role = roleToReturn
                 }));
-            
-            var expectedResult = roleToReturn == BallerupKommune.Models.Enums.HearingRole.HEARING_OWNER;
+
+            var expectedResult = roleToReturn == Agora.Models.Enums.HearingRole.HEARING_OWNER;
             var result = _securityExpression.IsHearingOwnerRole(10);
 
             Assert.IsTrue(expectedResult == result);
@@ -304,7 +314,7 @@ namespace BallerupKommune.DAOs.UnitTests.Security
         [Test]
         public void SecurityExpressions_IsInternalHearing_NoHearing_ShouldNotThrow()
         {
-            _hearingDaoMock.Setup(x => x.GetAsync(It.IsAny<int>(), It.IsAny<IncludeProperties>()))
+            _hearingDaoMock.Setup(x => x.GetAsync(It.IsAny<int>(), It.IsAny<IncludeProperties>(), It.IsAny<bool>()))
                 .Returns(Task.FromResult(default(Hearing)));
 
             FluentActions.Invoking(() => _securityExpression.IsInternalHearing(null)).Should().NotThrow();
@@ -313,7 +323,7 @@ namespace BallerupKommune.DAOs.UnitTests.Security
         [Test]
         public void SecurityExpressions_IsInternalHearing_NoHearingType_ShouldNotThrow()
         {
-            _hearingDaoMock.Setup(x => x.GetAsync(It.IsAny<int>(), It.IsAny<IncludeProperties>()))
+            _hearingDaoMock.Setup(x => x.GetAsync(It.IsAny<int>(), It.IsAny<IncludeProperties>(), It.IsAny<bool>()))
                 .Returns(Task.FromResult(new Hearing()));
 
             var hearing = new Hearing();
@@ -332,8 +342,8 @@ namespace BallerupKommune.DAOs.UnitTests.Security
                     IsInternalHearing = testResult
                 }
             };
-            
-            _hearingDaoMock.Setup(x => x.GetAsync(It.IsAny<int>(), It.IsAny<IncludeProperties>()))
+
+            _hearingDaoMock.Setup(x => x.GetAsync(It.IsAny<int>(), It.IsAny<IncludeProperties>(), It.IsAny<bool>()))
                 .Returns(Task.FromResult(hearing));
 
             var result = _securityExpression.IsInternalHearing(hearing);
@@ -380,16 +390,16 @@ namespace BallerupKommune.DAOs.UnitTests.Security
         }
 
         [Test]
-        [TestCase(BallerupKommune.Models.Enums.CommentStatus.APPROVED)]
-        [TestCase(BallerupKommune.Models.Enums.CommentStatus.AWAITING_APPROVAL)]
-        public void IsCommentApproved_Test(BallerupKommune.Models.Enums.CommentStatus commentStatus)
+        [TestCase(Agora.Models.Enums.CommentStatus.APPROVED)]
+        [TestCase(Agora.Models.Enums.CommentStatus.AWAITING_APPROVAL)]
+        public void IsCommentApproved_Test(Agora.Models.Enums.CommentStatus commentStatus)
         {
             var newComment = new Comment
             {
                 Id = 1,
                 Hearing = new Hearing(),
                 ContainsSensitiveInformation = false,
-                CommentType = new BallerupKommune.Models.Models.CommentType
+                CommentType = new Agora.Models.Models.CommentType
                 {
                     Type = CommentType.HEARING_RESPONSE
                 },
@@ -398,12 +408,12 @@ namespace BallerupKommune.DAOs.UnitTests.Security
                     Status = commentStatus
                 }
             };
-            
+
             _commentDaoMock.Setup(x => x.GetAsync(It.IsAny<int>(), It.IsAny<IncludeProperties>()))
                 .Returns(Task.FromResult(newComment));
 
             var result = _securityExpression.IsCommentApproved(newComment);
-            var isApproved = commentStatus == BallerupKommune.Models.Enums.CommentStatus.APPROVED;
+            var isApproved = commentStatus == Agora.Models.Enums.CommentStatus.APPROVED;
             var expected = isApproved == result;
 
             Assert.IsTrue(expected);
@@ -428,7 +438,7 @@ namespace BallerupKommune.DAOs.UnitTests.Security
         {
             var comment = new Comment
             {
-                CommentType = new BallerupKommune.Models.Models.CommentType
+                CommentType = new Agora.Models.Models.CommentType
                 {
                     Type = commentType
                 }
@@ -438,7 +448,7 @@ namespace BallerupKommune.DAOs.UnitTests.Security
             var expectedResult = commentType == CommentType.HEARING_RESPONSE_REPLY;
             Assert.IsTrue(result == expectedResult);
         }
-        
+
         [TestCase]
         public void IsCommentResponseReply_Test_NoCommentType_ShouldThrow()
         {

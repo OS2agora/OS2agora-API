@@ -1,11 +1,11 @@
-﻿using BallerupKommune.Entities.Entities;
-using BallerupKommune.Entities.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using HearingRoleEntity = Agora.Entities.Entities.HearingRoleEntity;
+using HearingRole = Agora.Entities.Enums.HearingRole;
+using System.Linq;
 
-namespace BallerupKommune.DAOs.Persistence.DefaultData
+namespace Agora.DAOs.Persistence.DefaultData
 {
     public class DefaultHearingRoles : DefaultDataSeeder<HearingRoleEntity>
     {
@@ -43,20 +43,21 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
         {
         }
 
-        public static async Task SeedData(ApplicationDbContext context)
+        public static async Task SeedData(ApplicationDbContext context, List<HearingRoleEntity> municipalitySpecificEntities = null)
         {
             var defaultEntities = GetDefaultEntities();
-            var seeder = new DefaultHearingRoles(context, defaultEntities);
+            var seeder = new DefaultHearingRoles(context, municipalitySpecificEntities ?? defaultEntities);
             await seeder.SeedEntitiesAsync();
         }
 
-        public override List<HearingRoleEntity> FetchEntitiesToUpdate(List<HearingRoleEntity> existingEntities, List<HearingRoleEntity> defaultEntities)
+        public override List<HearingRoleEntity> GetUpdatedEntities(List<HearingRoleEntity> existingEntities, List<HearingRoleEntity> defaultEntities)
         {
             var updatedEntities = new List<HearingRoleEntity>();
 
             foreach (var entity in existingEntities)
             {
                 var defaultEntity = defaultEntities.FirstOrDefault(e => _comparer(e, entity));
+
                 if (defaultEntity == null)
                 {
                     continue;

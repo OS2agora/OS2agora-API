@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace BallerupKommune.DAOs.Persistence.Configurations.Utility
+namespace Agora.DAOs.Persistence.Configurations.Utility
 {
     /// <summary>
     /// Implementation of <see cref="IEncryptionValueConverterFactory"/> with no encryption/decryption.

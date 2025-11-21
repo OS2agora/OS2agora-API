@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ElmahCore;
 
-namespace BallerupKommune.Api.Models.Elmah
+namespace Agora.Api.Models.Elmah
 {
     public class ElmahMemoryErrorLog : ErrorLog
     {

@@ -1,18 +1,18 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Common.Interfaces.DAOs;
 using MediatR;
 using NovaSec.Attributes;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Operations.Common.Interfaces.Plugins;
-using HearingRole = BallerupKommune.Models.Enums.HearingRole;
-using UserCapacity = BallerupKommune.Models.Enums.UserCapacity;
+using Agora.Models.Common;
+using Agora.Operations.Common.Interfaces.Plugins;
+using HearingRole = Agora.Models.Enums.HearingRole;
+using UserCapacity = Agora.Models.Enums.UserCapacity;
 
-namespace BallerupKommune.Operations.Models.Hearings.Command.UploadReviewers
+namespace Agora.Operations.Models.Hearings.Command.UploadReviewers
 {
     [PreAuthorize("@Security.IsHearingOwnerByHearingId(#request.Id)")]
     public class UploadReviewersCommand : IRequest<List<UserHearingRole>>

@@ -1,30 +1,28 @@
-﻿using BallerupKommune.Operations.Common.Enums;
-using BallerupKommune.Operations.Common.Interfaces;
-using BallerupKommune.Operations.Resolvers;
+﻿using Agora.Operations.Common.Enums;
+using Agora.Operations.Common.Interfaces;
+using Agora.Operations.Resolvers;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using NovaSec.Compiler;
-using HearingRole = BallerupKommune.Models.Enums.HearingRole;
-using SecurityConstants = BallerupKommune.Operations.Common.Constants.Security;
+using HearingRole = Agora.Models.Enums.HearingRole;
+using SecurityConstants = Agora.Operations.Common.Constants.Security;
 
-namespace BallerupKommune.DAOs.Security
+namespace Agora.DAOs.Security
 {
     public class SecurityExpressionRoot : ISecurityExpressionRoot
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ICurrentUserService _currentUserService;
-        private readonly IIdentityService _identityService;
         private readonly IUserHearingRoleResolver _userHearingRoleResolver;
         private readonly ICompanyHearingRoleResolver _companyHearingResolver;
 
-        public SecurityExpressionRoot(ICurrentUserService currentUserService, IIdentityService identityService, IHttpContextAccessor httpContextAccessor, 
+        public SecurityExpressionRoot(ICurrentUserService currentUserService, IHttpContextAccessor httpContextAccessor,
             IUserHearingRoleResolver userHearingRoleResolver, ICompanyHearingRoleResolver companyHearingResolver)
         {
             _currentUserService = currentUserService;
-            _identityService = identityService;
             _httpContextAccessor = httpContextAccessor;
             _userHearingRoleResolver = userHearingRoleResolver;
             _companyHearingResolver = companyHearingResolver;
@@ -43,9 +41,9 @@ namespace BallerupKommune.DAOs.Security
                 case SecurityConstants.Roles.HearingOwner:
                     return _userHearingRoleResolver.IsHearingOwner().Result;
                 case SecurityConstants.Roles.HearingResponder:
-                    return _userHearingRoleResolver.IsHearingResponder().Result || _companyHearingResolver.IsHearingResponder().Result;
+                    return _userHearingRoleResolver.IsHearingResponder().Result ||_companyHearingResolver.IsHearingResponder().Result;
                 case SecurityConstants.Roles.HearingInvitee:
-                    return _userHearingRoleResolver.IsHearingInvitee().Result || _companyHearingResolver.IsHearingInvitee().Result;
+                    return _userHearingRoleResolver.IsHearingInvitee().Result ||_companyHearingResolver.IsHearingInvitee().Result;
                 case SecurityConstants.Roles.HearingReviewer:
                     return _userHearingRoleResolver.IsHearingReviewer().Result;
                 // Login contextual roles
@@ -54,7 +52,7 @@ namespace BallerupKommune.DAOs.Security
                 case SecurityConstants.Roles.Citizen:
                     var currentAuthenticationMethod = _currentUserService.AuthenticationMethod;
                     return currentAuthenticationMethod == AuthenticationMethod.MitIdCitizen ||
-                           currentAuthenticationMethod == AuthenticationMethod.MitIdErhverv;
+                                currentAuthenticationMethod == AuthenticationMethod.MitIdErhverv;
                 case SecurityConstants.Roles.Employee:
                     return _currentUserService.AuthenticationMethod == AuthenticationMethod.AdfsEmployee;
                 default:

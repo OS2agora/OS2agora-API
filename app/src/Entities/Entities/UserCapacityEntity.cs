@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
-using BallerupKommune.Entities.Common;
+using Agora.Entities.Common;
 
-namespace BallerupKommune.Entities.Entities
+namespace Agora.Entities.Entities
 {
     public class UserCapacityEntity : AuditableEntity
     {
         public Enums.UserCapacity Capacity { get; set; }
 
-        // One-to-many relationship with Users
+        // One-to-many relationship with UserCapacityMapping
         public ICollection<UserEntity> Users { get; set; } = new List<UserEntity>();
     }
 }

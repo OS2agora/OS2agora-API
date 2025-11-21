@@ -1,19 +1,19 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
-using BallerupKommune.Operations.Common.Interfaces.Plugins;
-using BallerupKommune.Operations.Models.Hearings.Command.UpdateHearing.UpdateHearingFromCreatedStatus;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Common.Interfaces.DAOs;
+using Agora.Operations.Common.Interfaces.Plugins;
+using Agora.Operations.Models.Hearings.Command.UpdateHearing.UpdateHearingFromCreatedStatus;
 using MediatR;
 using NovaSec.Attributes;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using HearingStatus = BallerupKommune.Models.Enums.HearingStatus;
-using InvalidOperationException = BallerupKommune.Operations.Common.Exceptions.InvalidOperationException;
+using Agora.Models.Common;
+using HearingStatus = Agora.Models.Enums.HearingStatus;
+using InvalidOperationException = Agora.Operations.Common.Exceptions.InvalidOperationException;
 
-namespace BallerupKommune.Operations.Models.Hearings.Command.UpdateHearing
+namespace Agora.Operations.Models.Hearings.Command.UpdateHearing
 {
     [PreAuthorize("@Security.IsHearingOwnerByHearingId(#request.Hearing.Id)")]
     public class UpdateHearingCommand : IRequest<Hearing>
@@ -52,7 +52,7 @@ namespace BallerupKommune.Operations.Models.Hearings.Command.UpdateHearing
 
                 if (request.Hearing.HearingStatus == null)
                 {
-                    throw new NotFoundException(nameof(BallerupKommune.Models.Models.HearingStatus), request.Hearing.HearingStatus?.Id);
+                    throw new NotFoundException(nameof(Agora.Models.Models.HearingStatus), request.Hearing.HearingStatus?.Id);
                 }
 
                 request.Hearing = await _pluginService.BeforeHearingUpdate(request.Hearing, currentHearing.HearingStatus.Status);

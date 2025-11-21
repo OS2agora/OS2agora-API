@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Resolvers;
+using Agora.Models.Models;
+using Agora.Operations.Resolvers;
 using MediatR;
 using Moq;
 using NUnit.Framework;
 
-namespace BallerupKommune.Operations.UnitTests.Resolvers
+namespace Agora.Operations.UnitTests.Resolvers
 {
     internal class HearingAccessResolverTest
     {
@@ -83,6 +83,32 @@ namespace BallerupKommune.Operations.UnitTests.Resolvers
                     .Send(It.IsAny<IRequest<List<Hearing>>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(hearings);
             bool resolverResult = await _resolver.CanSeeHearingBySubjectAreaId(subjectareaId);
+            Assert.That(resolverResult.Equals(correctanswer));
+        }
+
+        [Test]
+        [TestCase(1, true)]
+        [TestCase(2, false)]
+        public async Task CanSeeCityAreaByHearingId(int cityAreaId, bool correctanswer)
+        {
+            var hearings = new List<Hearing>
+            {
+                new Hearing
+                {
+                    Id = 1,
+                    CityAreaId = 1
+                },
+                new Hearing
+                {
+                    Id = 2,
+                    CityAreaId = 1
+                }
+
+            };
+            _mediatorMock.Setup(mediator => mediator
+                    .Send(It.IsAny<IRequest<List<Hearing>>>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(hearings);
+            bool resolverResult = await _resolver.CanSeeHearingByCityAreaId(cityAreaId);
             Assert.That(resolverResult.Equals(correctanswer));
         }
     }

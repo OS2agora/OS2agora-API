@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace BallerupKommune.Models.Common
+namespace Agora.Models.Common
 {
     /// <summary>
     /// Property information for properties from a relationship property pair on <typeparamref name="T"/>.

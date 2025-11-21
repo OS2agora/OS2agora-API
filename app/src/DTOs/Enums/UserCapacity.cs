@@ -1,4 +1,4 @@
-﻿namespace BallerupKommune.DTOs.Enums
+﻿namespace Agora.DTOs.Enums
 {
     public enum UserCapacity
     {

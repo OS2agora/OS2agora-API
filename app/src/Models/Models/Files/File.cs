@@ -1,4 +1,4 @@
-﻿namespace BallerupKommune.Models.Models.Files
+﻿namespace Agora.Models.Models.Files
 {
     public class File
     {

@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Extensions;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+using Agora.Models.Common;
+using Agora.Models.Extensions;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using MediatR;
 using NovaSec.Attributes;
 
-namespace BallerupKommune.Operations.Models.SubjectAreas.Command.UpdateSubjectArea
+namespace Agora.Operations.Models.SubjectAreas.Command.UpdateSubjectArea
 {
     [PreAuthorize("HasRole('Administrator')")]
     public class UpdateSubjectAreaCommand : IRequest<SubjectArea>

@@ -1,14 +1,16 @@
-﻿using BallerupKommune.Operations.ApplicationOptions;
-using BallerupKommune.Operations.Common.Interfaces.Plugins;
+﻿using Agora.Operations.ApplicationOptions;
+using Agora.Operations.Common.Interfaces.Plugins;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using BallerupKommune.Operations.Plugins.Plugins;
+using Agora.Operations.Common.Telemetry;
+using Agora.Operations.Plugins.Plugins;
 
-namespace BallerupKommune.Operations.Plugins.Service
+namespace Agora.Operations.Plugins.Service
 {
     public partial class PluginService : IPluginService
     {
@@ -81,6 +83,7 @@ namespace BallerupKommune.Operations.Plugins.Service
                 var methodToCall = t.GetMethod(memberName);
                 if (methodToCall?.DeclaringType == t)
                 {
+                    using var activity = StartPluginActivity(t, methodToCall);
                     var classInstance = Activator.CreateInstance(t, _serviceProvider, GetPluginConfigurationFromType(t));
                     await (Task)methodToCall.Invoke(classInstance, args);
                 }
@@ -116,6 +119,14 @@ namespace BallerupKommune.Operations.Plugins.Service
 
                 await methodInvoker(type);
             }
+        }
+
+        private static Activity StartPluginActivity(Type type, MethodInfo methodInfo)
+        {
+            var activity = Instrumentation.Source.StartActivity("Invoke Plugin Activity");
+            activity?.SetTag("plugin.full.name", type.FullName);
+            activity?.SetTag("plugin.method.name", methodInfo.Name);
+            return activity;
         }
     }
 }

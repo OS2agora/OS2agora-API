@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 
-namespace BallerupKommune.DAOs.Statistics
+namespace Agora.DAOs.Statistics
 {
     public interface ICommandCountStatistics
     {

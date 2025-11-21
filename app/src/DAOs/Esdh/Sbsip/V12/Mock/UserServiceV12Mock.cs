@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
-using BallerupKommune.DAOs.Esdh.Sbsip.DTOs;
-using BallerupKommune.DAOs.Esdh.Sbsip.V12.Interface;
+using Agora.DAOs.Esdh.Sbsip.DTOs;
+using Agora.DAOs.Esdh.Sbsip.V12.Interface;
 
-namespace BallerupKommune.DAOs.Esdh.Sbsip.V12.Mock
+namespace Agora.DAOs.Esdh.Sbsip.V12.Mock
 {
     public class UserServiceV12Mock : IUserServiceV12
     {

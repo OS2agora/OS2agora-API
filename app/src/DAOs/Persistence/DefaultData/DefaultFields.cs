@@ -1,35 +1,35 @@
-﻿using BallerupKommune.Entities.Entities;
-using BallerupKommune.Entities.Enums;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using FieldEntity = Agora.Entities.Entities.FieldEntity;
+using Microsoft.EntityFrameworkCore;
+using FieldType = Agora.Entities.Enums.FieldType;
+using System.Linq;
 
-namespace BallerupKommune.DAOs.Persistence.DefaultData
+namespace Agora.DAOs.Persistence.DefaultData
 {
     public class DefaultFields : DefaultDataSeeder<FieldEntity>
     {
         private static async Task<List<FieldEntity>> GetDefaultEntities(ApplicationDbContext context)
         {
-            var titleFieldType = await context.FieldTypes.FirstOrDefaultAsync(fieldType => fieldType.Type == FieldType.TITLE);
+            var titleFieldType = await context.FieldTypes.FirstOrDefaultAsync(x => x.Type == FieldType.TITLE);
             var esdhTitleFieldType =
-                await context.FieldTypes.FirstOrDefaultAsync(fieldType => fieldType.Type == FieldType.ESDH_TITLE);
-            var imageFieldType = await context.FieldTypes.FirstOrDefaultAsync(fieldType => fieldType.Type == FieldType.IMAGE);
-            var summaryFieldType = await context.FieldTypes.FirstOrDefaultAsync(fieldType => fieldType.Type == FieldType.SUMMARY);
+                await context.FieldTypes.FirstOrDefaultAsync(x => x.Type == FieldType.ESDH_TITLE);
+            var imageFieldType = await context.FieldTypes.FirstOrDefaultAsync(x => x.Type == FieldType.IMAGE);
+            var summaryFieldType = await context.FieldTypes.FirstOrDefaultAsync(x => x.Type == FieldType.SUMMARY);
             var bodyInformationFieldType =
-                await context.FieldTypes.FirstOrDefaultAsync(fieldType => fieldType.Type == FieldType.BODYINFORMATION);
+                await context.FieldTypes.FirstOrDefaultAsync(x => x.Type == FieldType.BODYINFORMATION);
             var conclusionFieldType =
-                await context.FieldTypes.FirstOrDefaultAsync(fieldType => fieldType.Type == FieldType.CONCLUSION);
+                await context.FieldTypes.FirstOrDefaultAsync(x => x.Type == FieldType.CONCLUSION);
 
             var standardTemplate = await context.HearingTemplates.FirstOrDefaultAsync();
 
-            var titleValidationRule = await context.ValidationRules.FirstOrDefaultAsync(vRule => vRule.FieldType == FieldType.TITLE);
-            var esdhTitleValidationRule = await context.ValidationRules.FirstOrDefaultAsync(vRule => vRule.FieldType == FieldType.ESDH_TITLE);
-            var imageValidationRule = await context.ValidationRules.FirstOrDefaultAsync(vRule => vRule.FieldType == FieldType.IMAGE);
-            var summaryValidationRule = await context.ValidationRules.FirstOrDefaultAsync(vRule => vRule.FieldType == FieldType.SUMMARY);
-            var bodyInformationValidationRule = await context.ValidationRules.FirstOrDefaultAsync(vRule => vRule.FieldType == FieldType.BODYINFORMATION);
-            var conclusionValidationRule = await context.ValidationRules.FirstOrDefaultAsync(vRule  => vRule.FieldType == FieldType.CONCLUSION);
+            var titleValidationRule = await context.ValidationRules.FirstOrDefaultAsync(x => x.FieldType == FieldType.TITLE);
+            var esdhTitleValidationRule = await context.ValidationRules.FirstOrDefaultAsync(x => x.FieldType == FieldType.ESDH_TITLE);
+            var imageValidationRule = await context.ValidationRules.FirstOrDefaultAsync(x => x.FieldType == FieldType.IMAGE);
+            var summaryValidationRule = await context.ValidationRules.FirstOrDefaultAsync(x => x.FieldType == FieldType.SUMMARY);
+            var bodyInformationValidationRule = await context.ValidationRules.FirstOrDefaultAsync(x => x.FieldType == FieldType.BODYINFORMATION);
+            var conclusionValidationRule = await context.ValidationRules.FirstOrDefaultAsync(x => x.FieldType == FieldType.CONCLUSION);
 
             return new List<FieldEntity>
             {
@@ -80,7 +80,7 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
                 },
                 new FieldEntity
                 {
-                    Name = "Brød tekst",
+                    Name = "Brødtekst",
                     AllowTemplates = true,
                     DisplayOrder = 600,
                     FieldType = bodyInformationFieldType,
@@ -90,27 +90,28 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
             };
         }
 
-        private static Func<FieldEntity, FieldEntity, bool> comparer = (e1, e2) => (e1.Name == e2.Name && e1.FieldType.Type == e2.FieldType.Type);
+        private static Func<FieldEntity, FieldEntity, bool> comparer = (e1, e2) => (e1.FieldType.Type == e2.FieldType.Type && e1.HearingTemplate?.Id == e2.HearingTemplate?.Id);
 
         public DefaultFields(ApplicationDbContext context, List<FieldEntity> defaultEntities)
             : base(context, context.Fields, defaultEntities, comparer)
         {
         }
 
-        public static async Task SeedData(ApplicationDbContext context)
+        public static async Task SeedData(ApplicationDbContext context, List<FieldEntity> municipalitySpecificEntities = null)
         {
             var defaultEntities = await GetDefaultEntities(context);
-            var seeder = new DefaultFields(context, defaultEntities);
+            var seeder = new DefaultFields(context, municipalitySpecificEntities ?? defaultEntities);
             await seeder.SeedEntitiesAsync();
         }
 
-        public override List<FieldEntity> FetchEntitiesToUpdate(List<FieldEntity> existingEntities, List<FieldEntity> defaultEntities)
+        public override List<FieldEntity> GetUpdatedEntities(List<FieldEntity> existingEntities, List<FieldEntity> defaultEntities)
         {
             var updatedEntities = new List<FieldEntity>();
 
             foreach (var entity in existingEntities)
             {
                 var defaultEntity = defaultEntities.FirstOrDefault(e => _comparer(e, entity));
+
                 if (defaultEntity == null)
                 {
                     continue;

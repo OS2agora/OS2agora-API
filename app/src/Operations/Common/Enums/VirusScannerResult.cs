@@ -1,4 +1,4 @@
-﻿namespace BallerupKommune.Operations.Common.Enums
+﻿namespace Agora.Operations.Common.Enums
 {
     public enum VirusScannerResult
     {

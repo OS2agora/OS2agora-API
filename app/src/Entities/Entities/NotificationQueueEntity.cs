@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using BallerupKommune.Entities.Common;
-using BallerupKommune.Entities.Enums;
+﻿using Agora.Entities.Common;
+using Agora.Entities.Enums;
+using System;
 
-namespace BallerupKommune.Entities.Entities
+namespace Agora.Entities.Entities
 {
     public class NotificationQueueEntity : AuditableEntity
     {
@@ -13,17 +12,26 @@ namespace BallerupKommune.Entities.Entities
 
         public string Subject { get; set; }
 
-        public bool IsSend { get; set; }
+        public bool IsSent { get; set; }
 
         public string RecipientAddress { get; set; }
 
         public int RetryCount { get; set; }
 
-        public DateTime? SuccessfullSendDate { get; set; }
+        public DateTime? SuccessfulSentDate { get; set; }
+
+        public DateTime? SuccessfulDeliveryDate { get; set; }
+
+        public string MessageId { get; set; }
+
+        public NotificationDeliveryStatus DeliveryStatus { get; set; }
+
+        public NotificationSentAs SentAs { get; set; }
 
         public NotificationMessageChannel MessageChannel { get; set; }
 
-        // One-to-many relationship with Notification
-        public ICollection<NotificationEntity> Notifications { get; set; } = new List<NotificationEntity>();
+        // One-to-one relationship with Notification 
+        public int NotificationId { get; set; }
+        public NotificationEntity Notification { get; set; }
     }
 }

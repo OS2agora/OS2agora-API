@@ -1,15 +1,15 @@
-﻿using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Operations.Common.Interfaces.DAOs;
 using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
+using Agora.Models.Common;
 using NovaSec.Attributes;
-using BallerupKommune.Operations.Common.Exceptions;
-using HearingType = BallerupKommune.Models.Models.HearingType;
+using Agora.Operations.Common.Exceptions;
+using HearingType = Agora.Models.Models.HearingType;
 
-namespace BallerupKommune.Operations.Models.HearingTypes.Commands.DeleteHearingType
+namespace Agora.Operations.Models.HearingTypes.Commands.DeleteHearingType
 {
     [PreAuthorize("HasRole('Administrator')")]
     public class DeleteHearingTypeCommand : IRequest

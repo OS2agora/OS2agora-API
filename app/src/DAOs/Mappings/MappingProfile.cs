@@ -1,139 +1,152 @@
-﻿using AutoMapper;
-using BallerupKommune.Entities.Common;
-using BallerupKommune.Entities.Entities;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
-using Models.Extension;
+﻿using Agora.Entities.Common;
+using Agora.Entities.Entities;
+using Agora.Models.Common;
+using Agora.Models.Extensions;
+using Agora.Models.Models;
+using AutoMapper;
 
-namespace BallerupKommune.DAOs.Mappings
+namespace Agora.DAOs.Mappings
 {
     public class MappingProfile : Profile
     {
         public MappingProfile()
         {
-            CreateMap<BaseEntity, BaseModel>().ForMember(basemodel => basemodel.PropertiesUpdated, 
+            CreateMap<BaseEntity, BaseModel>().ForMember(basemodel => basemodel.PropertiesUpdated,
                     opt => opt.Ignore())
-                .Include<HearingEntity, Hearing>()
-                .Include<SubjectAreaEntity,SubjectArea>()
-                .Include<HearingStatusEntity,HearingStatus>()
-                .Include<HearingTypeEntity,HearingType>()
-                .Include<KleMappingEntity,KleMapping>()
-                .Include<KleHierarchyEntity,BallerupKommune.Models.Models.KleHierarchy>()
-                .Include<HearingTemplateEntity,HearingTemplate>()
-                .Include<FieldTemplateEntity,FieldTemplate>()
-                .Include<FieldEntity,Field>()
-                .Include<ValidationRuleEntity,ValidationRule>()
-                .Include<FieldTypeEntity,FieldType>()
-                .Include<FieldTypeSpecificationEntity,FieldTypeSpecification>()
-                .Include<ContentEntity,Content>()
-                .Include<ContentTypeEntity,ContentType>()
-                .Include<CommentEntity,Comment>()
-                .Include<CommentDeclineInfoEntity,CommentDeclineInfo>()
-                .Include<CommentTypeEntity,CommentType>()
-                .Include<CommentStatusEntity,CommentStatus>()
-                .Include<ConsentEntity,Consent>()
-                .Include<GlobalContentEntity,GlobalContent>()
-                .Include<GlobalContentTypeEntity,GlobalContentType>()
-                .Include<UserEntity,User>()
-                .Include<UserCapacityEntity,UserCapacity>()
-                .Include<UserHearingRoleEntity,UserHearingRole>()
-                .Include<HearingRoleEntity,HearingRole>()
-                .Include<NotificationEntity,Notification>()
-                .Include<NotificationTypeEntity,NotificationType>()
-                .Include<NotificationTemplateEntity,NotificationTemplate>()
-                .Include<NotificationQueueEntity,NotificationQueue>()
-                .Include<JournalizedStatusEntity, JournalizedStatus>()
+                .Include<CityAreaEntity, CityArea>()
+                .Include<CommentDeclineInfoEntity, CommentDeclineInfo>()
+                .Include<CommentEntity, Comment>()
+                .Include<CommentStatusEntity, CommentStatus>()
+                .Include<CommentTypeEntity, CommentType>()
                 .Include<CompanyEntity, Company>()
                 .Include<CompanyHearingRoleEntity, CompanyHearingRole>()
-                .ForAllMembers(opt => opt.ExplicitExpansion())
-                ;
+                .Include<ConsentEntity, Consent>()
+                .Include<ContentEntity, Content>()
+                .Include<ContentTypeEntity, ContentType>()
+                .Include<EventEntity, Event>()
+                .Include<EventMappingEntity, EventMapping>()
+                .Include<FieldEntity, Field>()
+                .Include<FieldTemplateEntity, FieldTemplate>()
+                .Include<FieldTypeEntity, FieldType>()
+                .Include<FieldTypeSpecificationEntity, FieldTypeSpecification>()
+                .Include<GlobalContentEntity, GlobalContent>()
+                .Include<GlobalContentTypeEntity, GlobalContentType>()
+                .Include<HearingEntity, Hearing>()
+                .Include<HearingRoleEntity, HearingRole>()
+                .Include<HearingStatusEntity, HearingStatus>()
+                .Include<HearingTemplateEntity, HearingTemplate>()
+                .Include<HearingTypeEntity, HearingType>()
+                .Include<InvitationGroupEntity, InvitationGroup>()
+                .Include<InvitationGroupMappingEntity, InvitationGroupMapping>()
+                .Include<InvitationKeyEntity, InvitationKey>()
+                .Include<InvitationSourceEntity, InvitationSource>()
+                .Include<InvitationSourceMappingEntity, InvitationSourceMapping>()
+                .Include<JournalizedStatusEntity, JournalizedStatus>()
+                .Include<KleHierarchyEntity, Agora.Models.Models.KleHierarchy>()
+                .Include<KleMappingEntity, KleMapping>()
+                .Include<NotificationContentEntity, NotificationContent>()
+                .Include<NotificationContentSpecificationEntity, NotificationContentSpecification>()
+                .Include<NotificationContentTypeEntity, NotificationContentType>()
+                .Include<NotificationEntity, Notification>()
+                .Include<NotificationQueueEntity, NotificationQueue>()
+                .Include<NotificationTemplateEntity, NotificationTemplate>()
+                .Include<NotificationTypeEntity, NotificationType>()
+                .Include<SubjectAreaEntity, SubjectArea>()
+                .Include<UserEntity, User>()
+                .Include<UserCapacityEntity, UserCapacity>()
+                .Include<UserHearingRoleEntity, UserHearingRole>()
+                .Include<ValidationRuleEntity, ValidationRule>()
+                .ForAllMembers(opt => opt.ExplicitExpansion());
 
             CreateEntityToModelMap<HearingEntity, Hearing>().ForMember(model => model.CommentAmount, options => options.Ignore());
-            CreateModelToEntityMap<Hearing,HearingEntity>();
-            
-            CreateEntityToModelMap<SubjectAreaEntity,SubjectArea>();
-            CreateModelToEntityMap<SubjectArea,SubjectAreaEntity>();
+            CreateModelToEntityMap<Hearing, HearingEntity>();
 
-            CreateEntityToModelMap<HearingStatusEntity,HearingStatus>();
-            CreateModelToEntityMap<HearingStatus,HearingStatusEntity>();
+            CreateEntityToModelMap<SubjectAreaEntity, SubjectArea>();
+            CreateModelToEntityMap<SubjectArea, SubjectAreaEntity>();
 
-            CreateEntityToModelMap<HearingTypeEntity,HearingType>();
-            CreateModelToEntityMap<HearingType,HearingTypeEntity>();
+            CreateEntityToModelMap<CityAreaEntity, CityArea>();
+            CreateModelToEntityMap<CityArea, CityAreaEntity>();
 
-            CreateEntityToModelMap<KleMappingEntity,KleMapping>();
-            CreateModelToEntityMap<KleMapping,KleMappingEntity>();
+            CreateEntityToModelMap<HearingStatusEntity, HearingStatus>();
+            CreateModelToEntityMap<HearingStatus, HearingStatusEntity>();
 
-            CreateEntityToModelMap<KleHierarchyEntity,BallerupKommune.Models.Models.KleHierarchy>();
-            CreateModelToEntityMap<BallerupKommune.Models.Models.KleHierarchy,KleHierarchyEntity>();
+            CreateEntityToModelMap<HearingTypeEntity, HearingType>();
+            CreateModelToEntityMap<HearingType, HearingTypeEntity>();
 
-            CreateEntityToModelMap<HearingTemplateEntity,HearingTemplate>();
-            CreateModelToEntityMap<HearingTemplate,HearingTemplateEntity>();
+            CreateEntityToModelMap<KleMappingEntity, KleMapping>();
+            CreateModelToEntityMap<KleMapping, KleMappingEntity>();
 
-            CreateEntityToModelMap<FieldTemplateEntity,FieldTemplate>();
-            CreateModelToEntityMap<FieldTemplate,FieldTemplateEntity>();
+            CreateEntityToModelMap<KleHierarchyEntity, Agora.Models.Models.KleHierarchy>();
+            CreateModelToEntityMap<Agora.Models.Models.KleHierarchy, KleHierarchyEntity>();
 
-            CreateEntityToModelMap<FieldEntity,Field>();
-            CreateModelToEntityMap<Field,FieldEntity>();
+            CreateEntityToModelMap<HearingTemplateEntity, HearingTemplate>();
+            CreateModelToEntityMap<HearingTemplate, HearingTemplateEntity>();
 
-            CreateEntityToModelMap<ValidationRuleEntity,ValidationRule>();
-            CreateModelToEntityMap<ValidationRule,ValidationRuleEntity>();
+            CreateEntityToModelMap<FieldTemplateEntity, FieldTemplate>();
+            CreateModelToEntityMap<FieldTemplate, FieldTemplateEntity>();
 
-            CreateEntityToModelMap<FieldTypeEntity,FieldType>();
-            CreateModelToEntityMap<FieldType,FieldTypeEntity>();
+            CreateEntityToModelMap<FieldEntity, Field>();
+            CreateModelToEntityMap<Field, FieldEntity>();
 
-            CreateEntityToModelMap<FieldTypeSpecificationEntity,FieldTypeSpecification>();
-            CreateModelToEntityMap<FieldTypeSpecification,FieldTypeSpecificationEntity>();
+            CreateEntityToModelMap<ValidationRuleEntity, ValidationRule>();
+            CreateModelToEntityMap<ValidationRule, ValidationRuleEntity>();
 
-            CreateEntityToModelMap<ContentEntity,Content>();
-            CreateModelToEntityMap<Content,ContentEntity>();
+            CreateEntityToModelMap<FieldTypeEntity, FieldType>();
+            CreateModelToEntityMap<FieldType, FieldTypeEntity>();
 
-            CreateEntityToModelMap<ContentTypeEntity,ContentType>();
-            CreateModelToEntityMap<ContentType,ContentTypeEntity>();
+            CreateEntityToModelMap<FieldTypeSpecificationEntity, FieldTypeSpecification>();
+            CreateModelToEntityMap<FieldTypeSpecification, FieldTypeSpecificationEntity>();
 
-            CreateEntityToModelMap<CommentEntity,Comment>();
-            CreateModelToEntityMap<Comment,CommentEntity>();
+            CreateEntityToModelMap<ContentEntity, Content>();
+            CreateModelToEntityMap<Content, ContentEntity>();
 
-            CreateEntityToModelMap<CommentDeclineInfoEntity,CommentDeclineInfo>();
+            CreateEntityToModelMap<ContentTypeEntity, ContentType>();
+            CreateModelToEntityMap<ContentType, ContentTypeEntity>();
+
+            CreateEntityToModelMap<CommentDeclineInfoEntity, CommentDeclineInfo>();
             CreateModelToEntityMap<CommentDeclineInfo, CommentDeclineInfoEntity>();
 
-            CreateEntityToModelMap<CommentTypeEntity,CommentType>();
-            CreateModelToEntityMap<CommentType,CommentTypeEntity>();
+            CreateEntityToModelMap<CommentEntity, Comment>();
+            CreateModelToEntityMap<Comment, CommentEntity>();
 
-            CreateEntityToModelMap<CommentStatusEntity,CommentStatus>();
-            CreateModelToEntityMap<CommentStatus,CommentStatusEntity>();
+            CreateEntityToModelMap<CommentTypeEntity, CommentType>();
+            CreateModelToEntityMap<CommentType, CommentTypeEntity>();
 
-            CreateEntityToModelMap<ConsentEntity,Consent>().ForMember(model => model.CommentId, options => options.Ignore()); ;
-            CreateModelToEntityMap<Consent,ConsentEntity>();
+            CreateEntityToModelMap<CommentStatusEntity, CommentStatus>();
+            CreateModelToEntityMap<CommentStatus, CommentStatusEntity>();
 
-            CreateEntityToModelMap<GlobalContentEntity,GlobalContent>();
-            CreateModelToEntityMap<GlobalContent,GlobalContentEntity>();
+            CreateEntityToModelMap<ConsentEntity, Consent>().ForMember(model => model.CommentId, options => options.Ignore());
+            CreateModelToEntityMap<Consent, ConsentEntity>();
+
+            CreateEntityToModelMap<GlobalContentEntity, GlobalContent>();
+            CreateModelToEntityMap<GlobalContent, GlobalContentEntity>();
 
             CreateEntityToModelMap<GlobalContentTypeEntity, GlobalContentType>();
             CreateModelToEntityMap<GlobalContentType, GlobalContentTypeEntity>();
 
-            CreateEntityToModelMap<UserEntity,User>();
-            CreateModelToEntityMap<User,UserEntity>();
+            CreateEntityToModelMap<UserEntity, User>();
+            CreateModelToEntityMap<User, UserEntity>();
 
-            CreateEntityToModelMap<UserCapacityEntity,UserCapacity>();
-            CreateModelToEntityMap<UserCapacity,UserCapacityEntity>();
+            CreateEntityToModelMap<UserCapacityEntity, UserCapacity>();
+            CreateModelToEntityMap<UserCapacity, UserCapacityEntity>();
 
-            CreateEntityToModelMap<UserHearingRoleEntity,UserHearingRole>();
-            CreateModelToEntityMap<UserHearingRole,UserHearingRoleEntity>();
+            CreateEntityToModelMap<UserHearingRoleEntity, UserHearingRole>();
+            CreateModelToEntityMap<UserHearingRole, UserHearingRoleEntity>();
 
-            CreateEntityToModelMap<HearingRoleEntity,HearingRole>();
-            CreateModelToEntityMap<HearingRole,HearingRoleEntity>();
+            CreateEntityToModelMap<HearingRoleEntity, HearingRole>();
+            CreateModelToEntityMap<HearingRole, HearingRoleEntity>();
 
-            CreateEntityToModelMap<NotificationEntity,Notification>();
-            CreateModelToEntityMap<Notification,NotificationEntity>();
+            CreateEntityToModelMap<NotificationEntity, Notification>();
+            CreateModelToEntityMap<Notification, NotificationEntity>();
 
-            CreateEntityToModelMap<NotificationTypeEntity,NotificationType>();
-            CreateModelToEntityMap<NotificationType,NotificationTypeEntity>();
+            CreateEntityToModelMap<NotificationTypeEntity, NotificationType>();
+            CreateModelToEntityMap<NotificationType, NotificationTypeEntity>();
 
-            CreateEntityToModelMap<NotificationTemplateEntity,NotificationTemplate>();
-            CreateModelToEntityMap<NotificationTemplate,NotificationTemplateEntity>();
+            CreateEntityToModelMap<NotificationTemplateEntity, NotificationTemplate>();
+            CreateModelToEntityMap<NotificationTemplate, NotificationTemplateEntity>();
 
-            CreateEntityToModelMap<NotificationQueueEntity,NotificationQueue>();
-            CreateModelToEntityMap<NotificationQueue,NotificationQueueEntity>();
+            CreateEntityToModelMap<NotificationQueueEntity, NotificationQueue>();
+            CreateModelToEntityMap<NotificationQueue, NotificationQueueEntity>();
 
             CreateEntityToModelMap<JournalizedStatusEntity, JournalizedStatus>();
             CreateModelToEntityMap<JournalizedStatus, JournalizedStatusEntity>();
@@ -143,25 +156,38 @@ namespace BallerupKommune.DAOs.Mappings
 
             CreateEntityToModelMap<CompanyHearingRoleEntity, CompanyHearingRole>();
             CreateModelToEntityMap<CompanyHearingRole, CompanyHearingRoleEntity>();
+
+            CreateEntityToModelMap<InvitationGroupEntity, InvitationGroup>();
+            CreateModelToEntityMap<InvitationGroup, InvitationGroupEntity>();
+
+            CreateEntityToModelMap<InvitationGroupMappingEntity, InvitationGroupMapping>();
+            CreateModelToEntityMap<InvitationGroupMapping, InvitationGroupMappingEntity>();
+
+            CreateEntityToModelMap<InvitationKeyEntity, InvitationKey>();
+            CreateModelToEntityMap<InvitationKey, InvitationKeyEntity>();
+
+            CreateEntityToModelMap<InvitationSourceEntity, InvitationSource>();
+            CreateModelToEntityMap<InvitationSource, InvitationSourceEntity>();
+
+            CreateEntityToModelMap<InvitationSourceMappingEntity, InvitationSourceMapping>();
+            CreateModelToEntityMap<InvitationSourceMapping, InvitationSourceMappingEntity>();
+
+            CreateEntityToModelMap<EventEntity, Event>();
+            CreateModelToEntityMap<Event, EventEntity>();
+            
+            CreateEntityToModelMap<EventMappingEntity, EventMapping>();
+            CreateModelToEntityMap<EventMapping, EventMappingEntity>();
+
+            CreateEntityToModelMap<NotificationContentEntity, NotificationContent>();
+            CreateModelToEntityMap<NotificationContent, NotificationContentEntity>();
+
+            CreateEntityToModelMap<NotificationContentSpecificationEntity, NotificationContentSpecification>();
+            CreateModelToEntityMap<NotificationContentSpecification, NotificationContentSpecificationEntity>();
+
+            CreateEntityToModelMap<NotificationContentTypeEntity, NotificationContentType>();
+            CreateModelToEntityMap<NotificationContentType, NotificationContentTypeEntity>();
         }
-        /*
-        private void ApplyMappingsFromAssembly(Assembly assembly)
-        {
-            var iMapFromTypes = assembly.GetExportedTypes()
-                .Where(t => t.GetInterfaces().Any(i =>
-                    i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEntityMapper<,>)))
-                .ToList();
 
-            foreach (var type in iMapFromTypes)
-            {
-                var instance = Activator.CreateInstance(type);
-
-                var methodInfo = type.GetMethod("Mapping") ?? type.GetInterface("IEntityMapper`2").GetMethod("Mapping");
-
-                methodInfo?.Invoke(instance, new object[] { this });
-            }
-        }
-        */
         private IMappingExpression<TEntity, TModel> CreateEntityToModelMap<TEntity, TModel>() where TEntity : BaseEntity where TModel : BaseModel
         {
             // Entity to model
@@ -170,18 +196,15 @@ namespace BallerupKommune.DAOs.Mappings
             var baseModelReferences = ModelExtension.GetPropertyInfoForBaseModelFields<TModel>();
             foreach (var propertyInfo in baseModelReferences)
             {
-                //var configuration = new MapperConfiguration(cfg => )
                 map.ForMember(propertyInfo.Name, opts => opts.ExplicitExpansion());
-                
             }
-            
+
             return map;
         }
 
         private IMappingExpression<TModel, TEntity> CreateModelToEntityMap<TModel, TEntity>() where TEntity : BaseEntity where TModel : BaseModel
         {
-            return CreateMap<TModel, TEntity>()
-                ;
+            return CreateMap<TModel, TEntity>();
         }
     }
 }

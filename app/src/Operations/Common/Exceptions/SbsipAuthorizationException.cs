@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BallerupKommune.Operations.Common.Exceptions
+namespace Agora.Operations.Common.Exceptions
 {
 	public class SbsipAuthorizationException : Exception
 	{

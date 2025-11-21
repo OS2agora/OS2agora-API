@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BallerupKommune.Models.Models.Esdh
+namespace Agora.Models.Models.Esdh
 {
     public class Case
     {

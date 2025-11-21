@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BallerupKommune.DAOs.Identity
+namespace Agora.DAOs.Identity
 {
     public class RefreshToken
     {

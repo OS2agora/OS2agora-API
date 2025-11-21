@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using BallerupKommune.Entities.Attributes;
-using BallerupKommune.Entities.Common;
+using Agora.Entities.Attributes;
+using Agora.Entities.Common;
 
-namespace BallerupKommune.Entities.Entities
+namespace Agora.Entities.Entities
 {
     public class FieldTypeEntity : AuditableEntity
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BallerupKommune.Operations.Common.Interfaces
+namespace Agora.Operations.Common.Interfaces
 {
     public interface IDateTime
     {

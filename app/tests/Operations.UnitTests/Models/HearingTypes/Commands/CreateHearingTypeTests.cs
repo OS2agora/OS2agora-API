@@ -1,16 +1,16 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Constants;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Models.HearingTypes.Commands.CreateHearingType;
+﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Agora.Models.Models;
+using Agora.Operations.Common.Constants;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Models.HearingTypes.Commands.CreateHearingType;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore.Internal;
 using Moq;
 using NUnit.Framework;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace BallerupKommune.Operations.UnitTests.Models.KleMappings.Commands
+namespace Agora.Operations.UnitTests.Models.HearingTypes.Commands
 {
     public class CreateHearingTypeTests : ModelsTestBase<CreateHearingTypeCommand, HearingType>
     {

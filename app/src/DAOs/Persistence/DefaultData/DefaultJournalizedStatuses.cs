@@ -1,11 +1,11 @@
-﻿using BallerupKommune.Entities.Entities;
-using BallerupKommune.Entities.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using JournalizedStatusEntity = Agora.Entities.Entities.JournalizedStatusEntity;
+using JournalizedStatus = Agora.Entities.Enums.JournalizedStatus;
+using System.Linq;
 
-namespace BallerupKommune.DAOs.Persistence.DefaultData
+namespace Agora.DAOs.Persistence.DefaultData
 {
     public class DefaultJournalizedStatus : DefaultDataSeeder<JournalizedStatusEntity>
     {
@@ -35,20 +35,21 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
         {
         }
 
-        public static async Task SeedData(ApplicationDbContext context)
+        public static async Task SeedData(ApplicationDbContext context, List<JournalizedStatusEntity> municipalitySpecificEntities = null)
         {
             var defaultEntities = GetDefaultEntities();
-            var seeder = new DefaultJournalizedStatus(context, defaultEntities);
+            var seeder = new DefaultJournalizedStatus(context, municipalitySpecificEntities ?? defaultEntities);
             await seeder.SeedEntitiesAsync();
         }
 
-        public override List<JournalizedStatusEntity> FetchEntitiesToUpdate(List<JournalizedStatusEntity> existingEntities, List<JournalizedStatusEntity> defaultEntities)
+        public override List<JournalizedStatusEntity> GetUpdatedEntities(List<JournalizedStatusEntity> existingEntities, List<JournalizedStatusEntity> defaultEntities)
         {
             var updatedEntities = new List<JournalizedStatusEntity>();
 
             foreach (var entity in existingEntities)
             {
                 var defaultEntity = defaultEntities.FirstOrDefault(e => _comparer(e, entity));
+
                 if (defaultEntity == null)
                 {
                     continue;

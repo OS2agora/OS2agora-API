@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Text.Json;
 
-namespace BallerupKommune.DAOs.Persistence.Configurations.Utility
+namespace Agora.DAOs.Persistence.Configurations.Utility
 {
     internal static class ValueConverters
     {

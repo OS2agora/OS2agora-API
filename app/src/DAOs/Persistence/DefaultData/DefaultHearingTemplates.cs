@@ -1,10 +1,10 @@
-﻿using BallerupKommune.Entities.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HearingTemplateEntity = Agora.Entities.Entities.HearingTemplateEntity;
 
-namespace BallerupKommune.DAOs.Persistence.DefaultData
+namespace Agora.DAOs.Persistence.DefaultData
 {
     public class DefaultHearingTemplate : DefaultDataSeeder<HearingTemplateEntity>
     {
@@ -26,20 +26,21 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
         {
         }
 
-        public static async Task SeedData(ApplicationDbContext context)
+        public static async Task SeedData(ApplicationDbContext context, List<HearingTemplateEntity> municipalitySpecificEntities = null)
         {
             var defaultEntities = GetDefaultEntities();
-            var seeder = new DefaultHearingTemplate(context, defaultEntities);
+            var seeder = new DefaultHearingTemplate(context, municipalitySpecificEntities ?? defaultEntities);
             await seeder.SeedEntitiesAsync();
         }
 
-        public override List<HearingTemplateEntity> FetchEntitiesToUpdate(List<HearingTemplateEntity> existingEntities, List<HearingTemplateEntity> defaultEntities)
+        public override List<HearingTemplateEntity> GetUpdatedEntities(List<HearingTemplateEntity> existingEntities, List<HearingTemplateEntity> defaultEntities)
         {
             var updatedEntities = new List<HearingTemplateEntity>();
 
             foreach (var entity in existingEntities)
             {
                 var defaultEntity = defaultEntities.FirstOrDefault(e => _comparer(e, entity));
+
                 if (defaultEntity == null)
                 {
                     continue;

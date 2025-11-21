@@ -1,4 +1,4 @@
-﻿namespace BallerupKommune.Operations.ApplicationOptions
+﻿namespace Agora.Operations.ApplicationOptions
 {
     public class DataScannerOptions
     {
@@ -6,5 +6,6 @@
 
         public string BaseAddress { get; set; }
         public string Token { get; set; }
+        public bool UseSimpleDataScanner { get; set; }
     }
 }

@@ -1,9 +1,9 @@
-﻿using BallerupKommune.DAOs.Persistence.Configurations.Utility;
-using BallerupKommune.Entities.Entities;
+﻿using Agora.DAOs.Persistence.Configurations.Utility;
+using Agora.Entities.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BallerupKommune.DAOs.Persistence.Configurations
+namespace Agora.DAOs.Persistence.Configurations
 {
     public class ContentConfiguration : AuditableEntityTypeConfiguration<ContentEntity>
     {
@@ -18,7 +18,7 @@ namespace BallerupKommune.DAOs.Persistence.Configurations
         {
             base.Configure(builder);
 
-            builder.Property(content => content.FileName).HasMaxLength(300);
+            builder.Property(content => content.FileName).HasMaxLength(600);
 
             builder.Property(content => content.FilePath).HasMaxLength(100);
 

@@ -1,6 +1,6 @@
-﻿using BallerupKommune.Primitives.Constants;
+﻿using Agora.Primitives.Constants;
 
-namespace BallerupKommune.Primitives.Logic
+namespace Agora.Primitives.Logic
 {
     public static class Environment
     {

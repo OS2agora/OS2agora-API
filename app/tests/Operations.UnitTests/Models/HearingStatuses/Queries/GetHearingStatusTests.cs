@@ -2,11 +2,11 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Models.HearingStatuses.Queries.GetHearingStatus;
+using Agora.Models.Models;
+using Agora.Operations.Models.HearingStatuses.Queries.GetHearingStatus;
 using NUnit.Framework;
 
-namespace BallerupKommune.Operations.UnitTests.Models.HearingStatuses.Queries
+namespace Agora.Operations.UnitTests.Models.HearingStatuses.Queries
 {
     public class GetHearingStatusTests : ModelsTestBase<GetHearingStatusesQuery, List<HearingStatus>>
     {
@@ -27,7 +27,7 @@ namespace BallerupKommune.Operations.UnitTests.Models.HearingStatuses.Queries
 
             Assert.IsTrue(result.Count == 2);
             Assert.IsTrue(result.All(x => 
-                x.Status == BallerupKommune.Models.Enums.HearingStatus.ACTIVE 
+                x.Status == Agora.Models.Enums.HearingStatus.ACTIVE 
                 && !string.IsNullOrEmpty(x.Name) 
                 && !string.IsNullOrEmpty(x.CreatedBy)
                 && x.Hearings == null ));
@@ -46,7 +46,7 @@ namespace BallerupKommune.Operations.UnitTests.Models.HearingStatuses.Queries
                     {
                         new Hearing()
                     },
-                    Status = BallerupKommune.Models.Enums.HearingStatus.ACTIVE,
+                    Status = Agora.Models.Enums.HearingStatus.ACTIVE,
                     CreatedBy = "Someone"
                 },
                 new HearingStatus()
@@ -57,7 +57,7 @@ namespace BallerupKommune.Operations.UnitTests.Models.HearingStatuses.Queries
                     {
                         new Hearing()
                     },
-                    Status = BallerupKommune.Models.Enums.HearingStatus.ACTIVE,
+                    Status = Agora.Models.Enums.HearingStatus.ACTIVE,
                     CreatedBy = "Someone else"
                 }
             };

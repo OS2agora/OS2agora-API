@@ -1,11 +1,11 @@
-﻿using BallerupKommune.Models.Enums;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Models.Models.Multiparts;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Common.Interfaces;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
-using BallerupKommune.Operations.Common.Interfaces.Plugins;
-using BallerupKommune.Operations.Common.Interfaces.Security;
+﻿using Agora.Models.Enums;
+using Agora.Models.Models;
+using Agora.Models.Models.Multiparts;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Common.Interfaces;
+using Agora.Operations.Common.Interfaces.DAOs;
+using Agora.Operations.Common.Interfaces.Plugins;
+using Agora.Operations.Common.Interfaces.Security;
 using MediatR;
 using NovaSec.Attributes;
 using System;
@@ -13,16 +13,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using CommentStatus = BallerupKommune.Models.Models.CommentStatus;
-using CommentType = BallerupKommune.Models.Enums.CommentType;
-using ContentType = BallerupKommune.Models.Enums.ContentType;
-using HearingRole = BallerupKommune.Models.Enums.HearingRole;
-using HearingStatus = BallerupKommune.Models.Enums.HearingStatus;
-using InvalidOperationException = BallerupKommune.Operations.Common.Exceptions.InvalidOperationException;
-using UserCapacity = BallerupKommune.Models.Enums.UserCapacity;
+using Agora.Models.Common;
+using Agora.Operations.ApplicationOptions.OperationsOptions;
+using Microsoft.Extensions.Options;
+using CommentStatus = Agora.Models.Models.CommentStatus;
+using CommentType = Agora.Models.Enums.CommentType;
+using ContentType = Agora.Models.Enums.ContentType;
+using HearingRole = Agora.Models.Enums.HearingRole;
+using HearingStatus = Agora.Models.Enums.HearingStatus;
+using InvalidOperationException = Agora.Operations.Common.Exceptions.InvalidOperationException;
+using UserCapacity = Agora.Models.Enums.UserCapacity;
+using Agora.Operations.Common.Interfaces.Files;
 
-namespace BallerupKommune.Operations.Models.Comments.Commands.CreateComment
+namespace Agora.Operations.Models.Comments.Commands.CreateComment
 {
     [PreAuthorize("HasAnyRole(['Citizen','Employee']) || @Security.IsHearingOwnerByHearingId(#request.HearingId) || @Security.IsHearingReviewerByHearingId(#request.HearingId)")]
     public class CreateCommentCommand : IRequest<Comment>
@@ -50,23 +53,27 @@ namespace BallerupKommune.Operations.Models.Comments.Commands.CreateComment
             private readonly IConsentDao _consentDao;
             private readonly IHearingRoleDao _hearingRoleDao;
             private readonly IUserHearingRoleDao _userHearingRoleDao;
-            private readonly ICompanyDao _companyDao;
             private readonly ICompanyHearingRoleDao _companyHearingRoleDao;
             private readonly IPluginService _pluginService;
+            private readonly IOptions<CommentOperationsOptions> _options;
 
             public CreateCommentCommandHandler(
                 ICommentTypeDao commentTypeDao, 
                 ICommentStatusDao commentStatusDao, 
-                IHearingDao hearingDao, ICurrentUserService currentUserService, 
-                IUserDao userDao, ICommentDao commentDao, IContentDao contentDao, 
-                IContentTypeDao contentTypeDao, IFileService fileService, 
-                IGlobalContentDao globalContentDao, IConsentDao consentDao,
+                IHearingDao hearingDao, 
+                ICurrentUserService currentUserService, 
+                IUserDao userDao, ICommentDao commentDao, 
+                IContentDao contentDao, 
+                IContentTypeDao contentTypeDao, 
+                IFileService fileService, 
+                IGlobalContentDao globalContentDao, 
+                IConsentDao consentDao, 
                 IHearingRoleDao hearingRoleDao, 
-                IUserHearingRoleDao userHearingRoleDao, 
+                IUserHearingRoleDao userHearingRoleDao,
+                ICompanyHearingRoleDao companyHearingRoleDao,
                 ISecurityExpressions securityExpressions, 
-                IPluginService pluginService,
-                ICompanyDao companyDao,
-                ICompanyHearingRoleDao companyHearingRoleDao)
+                IPluginService pluginService, 
+                IOptions<CommentOperationsOptions> options)
             {
                 _commentTypeDao = commentTypeDao;
                 _commentStatusDao = commentStatusDao;
@@ -81,11 +88,10 @@ namespace BallerupKommune.Operations.Models.Comments.Commands.CreateComment
                 _consentDao = consentDao;
                 _hearingRoleDao = hearingRoleDao;
                 _userHearingRoleDao = userHearingRoleDao;
+                _companyHearingRoleDao = companyHearingRoleDao;
                 _securityExpressions = securityExpressions;
                 _pluginService = pluginService;
-                _companyDao = companyDao;
-                _companyHearingRoleDao = companyHearingRoleDao;
-
+                _options = options;
             }
 
             public async Task<Comment> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
@@ -101,7 +107,6 @@ namespace BallerupKommune.Operations.Models.Comments.Commands.CreateComment
 
                 var commentStatusIncludes = IncludeProperties.Create<CommentStatus>();
                 var allCommentStatus = await _commentStatusDao.GetAllAsync(commentStatusIncludes);
-                var correctCommentStatus = SelectCorrectCommentStatus(allCommentStatus, correctCommentType);
 
                 var currentHearing = await _hearingDao.GetAsync(request.HearingId, hearingIncludes);
 
@@ -110,10 +115,13 @@ namespace BallerupKommune.Operations.Models.Comments.Commands.CreateComment
                     throw new NotFoundException(nameof(Hearing), request.HearingId);
                 }
 
+                var correctCommentStatus = SelectCorrectCommentStatus(allCommentStatus, correctCommentType, currentHearing.AutoApproveComments);
+
                 var userIncludes = IncludeProperties.Create<User>(null, new List<string>
                 {
                     nameof(User.Company)
                 });
+
                 var loggedInUserId = _currentUserService.UserId;
                 var loggedInUser = await _userDao.FindUserByIdentifier(loggedInUserId, userIncludes);
 
@@ -134,11 +142,20 @@ namespace BallerupKommune.Operations.Models.Comments.Commands.CreateComment
                     throw new InvalidOperationException("Invalid comment type.");
                 }
 
-                var globalContent = await _globalContentDao.GetLatestVersionOfTypeAsync(BallerupKommune.Models.Enums.GlobalContentType.TERMS_AND_CONDITIONS);
+                var isCommentCountValid = ValidateCommentLimits(currentHearing, correctCommentType.Type, loggedInUser.Id);
+
+                if (!isCommentCountValid)
+                {
+                    throw new InvalidOperationException(
+                        $"New comment would exceed comment limitation for user (Id: {loggedInUserId}) on hearing (Id: {currentHearing.Id})");
+                }
+                
+
+                var globalContent = await _globalContentDao.GetLatestVersionOfTypeAsync(Agora.Models.Enums.GlobalContentType.TERMS_AND_CONDITIONS);
 
                 if (globalContent == null)
                 {
-                    throw new NotFoundException($"Latest version of entity: {nameof(GlobalContent)} with type: {BallerupKommune.Models.Enums.GlobalContentType.TERMS_AND_CONDITIONS} was not found");
+                    throw new NotFoundException($"Latest version of entity: {nameof(GlobalContent)} with type: {Agora.Models.Enums.GlobalContentType.TERMS_AND_CONDITIONS} was not found");
                 }
 
                 request.FileOperations = request.FileOperations != null ? await _pluginService.BeforeFileOperation(request.FileOperations) : null;
@@ -246,9 +263,27 @@ namespace BallerupKommune.Operations.Models.Comments.Commands.CreateComment
                     await _pluginService.NotifyAfterHearingReview(currentHearing.Id);
                 }
 
+                var result = await EvaluateStatusAfterScan(createdComment.Id, allCommentStatus, isHearingResponse);
+
+                return result;
+            }
+
+            private async Task<Comment> EvaluateStatusAfterScan(int commentId,
+                List<CommentStatus> allCommentStatus, bool isHearingResponse)
+            {
                 // Round-trip to database to get the relationships
                 var defaultIncludes = IncludeProperties.Create<Comment>();
-                var result = await _commentDao.GetAsync(createdComment.Id, defaultIncludes);
+                var result = await _commentDao.GetAsync(commentId, defaultIncludes);
+
+                if (isHearingResponse && result.ContainsSensitiveInformation)
+                {
+                    var awaitingApprovalStatus = allCommentStatus.Single(status =>
+                        status.Status == Agora.Models.Enums.CommentStatus.AWAITING_APPROVAL);
+                    result.CommentStatusId = awaitingApprovalStatus.Id;
+                    result.CommentStatus = awaitingApprovalStatus;
+                    result.PropertiesUpdated = new List<string> { nameof(Comment.CommentStatusId), nameof(Comment.CommentStatus) };
+                    result = await _commentDao.UpdateAsync(result);
+                }
 
                 return result;
             }
@@ -264,7 +299,6 @@ namespace BallerupKommune.Operations.Models.Comments.Commands.CreateComment
                     UserId = user.Id
                 };
                 await _userHearingRoleDao.CreateAsync(newUserHearingRole);
-
                 if (user.UserCapacity.Capacity == UserCapacity.COMPANY)
                 {
                     if (user.Company == null)
@@ -272,33 +306,35 @@ namespace BallerupKommune.Operations.Models.Comments.Commands.CreateComment
                         throw new InvalidOperationException(
                             $"Cannot create Responder CompanyHearingRole on hearing with Id {hearing.Id}. User with Id {user.Id} has UserCapacity COMPANY, but is not connected to a Company");
                     }
-
                     var newCompanyHearingRole = new CompanyHearingRole
                     {
                         HearingRoleId = hearingResponderHearingRole.Id,
                         HearingId = hearing.Id,
                         CompanyId = user.Company.Id
                     };
-
                     await _companyHearingRoleDao.CreateAsync(newCompanyHearingRole);
                 }
             }
 
-            private CommentStatus SelectCorrectCommentStatus(List<CommentStatus> commentStatuses, BallerupKommune.Models.Models.CommentType commentType)
+            private CommentStatus SelectCorrectCommentStatus(List<CommentStatus> commentStatuses, Agora.Models.Models.CommentType commentType, bool autoAcceptResponse)
             {
                 IEnumerable<CommentStatus> candidates;
                 switch (commentType.Type)
                 {
                     case CommentType.HEARING_RESPONSE:
                         candidates = commentStatuses.Where(x => x.CommentType.Type == CommentType.HEARING_RESPONSE);
-                        return candidates.Single(x => x.Status == BallerupKommune.Models.Enums.CommentStatus.AWAITING_APPROVAL);
+                        if (autoAcceptResponse)
+                        {
+                            return candidates.Single(x => x.Status == Agora.Models.Enums.CommentStatus.APPROVED);
+                        }
+                        return candidates.Single(x => x.Status == Agora.Models.Enums.CommentStatus.AWAITING_APPROVAL);
                     case CommentType.HEARING_REVIEW:
                         candidates = commentStatuses.Where(x => x.CommentType.Type == CommentType.HEARING_REVIEW);
-                        return candidates.Single(x => x.Status == BallerupKommune.Models.Enums.CommentStatus.NONE);
+                        return candidates.Single(x => x.Status == Agora.Models.Enums.CommentStatus.NONE);
                     case CommentType.HEARING_RESPONSE_REPLY:
                         candidates =
                             commentStatuses.Where(x => x.CommentType.Type == CommentType.HEARING_RESPONSE_REPLY);
-                        return candidates.Single(x => x.Status == BallerupKommune.Models.Enums.CommentStatus.NONE);
+                        return candidates.Single(x => x.Status == Agora.Models.Enums.CommentStatus.NONE);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -336,6 +372,40 @@ namespace BallerupKommune.Operations.Models.Comments.Commands.CreateComment
                 }
                 
                 return false;
+            }
+
+            private bool ValidateCommentLimits(Hearing hearing, CommentType commentType, int currentUserId)
+            {
+                if (commentType != CommentType.HEARING_RESPONSE)
+                {
+                    return true;
+                }
+
+                var currentUserCommentCount = hearing.Comments
+                    .Where(comment => comment.CommentType.Type == CommentType.HEARING_RESPONSE && !comment.IsDeleted)
+                    .Count(comment => comment.UserId == currentUserId);
+
+                var isHearingOwner = _securityExpressions.IsHearingOwnerByHearingId(hearing.Id);
+
+                if (isHearingOwner)
+                {
+                    var hearingOwnerResponseLimit = _options.Value.CreateComment.HearingOwnerResponseLimit;
+                    if (hearingOwnerResponseLimit <= 0)
+                    {
+                        return true;
+                    }
+                    var newCommentExceedsLimits = currentUserCommentCount + 1 > hearingOwnerResponseLimit;
+                    return !newCommentExceedsLimits;
+                }
+
+                var responseLimit = _options.Value.CreateComment.ResponseLimit;
+                if (responseLimit > 0)
+                {
+                    var newCommentExceedsLimits = currentUserCommentCount + 1 > responseLimit;
+                    return !newCommentExceedsLimits;
+                }
+                
+                return true;
             }
         }
     }

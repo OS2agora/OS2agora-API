@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using BallerupKommune.Models.Common;
+using Agora.Models.Common;
 using NovaSec;
 using NovaSec.Attributes;
 
-namespace BallerupKommune.Operations.Common.Utility
+namespace Agora.Operations.Common.Utility
 {
     public static class  SecurityContextExtensions
     {

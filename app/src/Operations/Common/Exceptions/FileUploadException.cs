@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BallerupKommune.Operations.Common.Exceptions
+namespace Agora.Operations.Common.Exceptions
 {
     public class FileUploadException : Exception
     {

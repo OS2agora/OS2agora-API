@@ -1,23 +1,24 @@
-﻿using BallerupKommune.Api.Mappings;
-using BallerupKommune.Api.Models.DTOs;
-using BallerupKommune.Api.Models.JsonApi;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Models.FieldTemplates.Commands.CreateFieldTemplate;
-using BallerupKommune.Operations.Models.FieldTemplates.Commands.DeleteFieldTemplate;
-using BallerupKommune.Operations.Models.FieldTemplates.Commands.UpdateFieldTemplate;
-using BallerupKommune.Operations.Models.FieldTemplates.Queries.GetFieldTemplates;
-using BallerupKommune.Operations.Models.HearingTypes.Commands.CreateHearingType;
-using BallerupKommune.Operations.Models.HearingTypes.Commands.DeleteHearingType;
-using BallerupKommune.Operations.Models.HearingTypes.Commands.UpdateHearingType;
-using BallerupKommune.Operations.Models.HearingTypes.Queries.GetHearingTypes;
+﻿using Agora.Api.Mappings;
+using Agora.Api.Models.DTOs;
+using Agora.Api.Models.JsonApi;
+using Agora.Models.Models;
+using Agora.Operations.Models.FieldTemplates.Commands.CreateFieldTemplate;
+using Agora.Operations.Models.FieldTemplates.Commands.DeleteFieldTemplate;
+using Agora.Operations.Models.FieldTemplates.Commands.UpdateFieldTemplate;
+using Agora.Operations.Models.FieldTemplates.Queries.GetFieldTemplates;
+using Agora.Operations.Models.HearingTypes.Commands.CreateHearingType;
+using Agora.Operations.Models.HearingTypes.Commands.DeleteHearingType;
+using Agora.Operations.Models.HearingTypes.Commands.UpdateHearingType;
+using Agora.Operations.Models.HearingTypes.Queries.GetHearingTypes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BallerupKommune.Operations.Models.KleMappings.Commands.UpdateKleMappings;
+using Agora.Operations.Models.InvitationGroupMappings.Commands.UpdateInvitationGroupMappings;
+using Agora.Operations.Models.KleMappings.Commands.UpdateKleMappings;
 
-namespace BallerupKommune.Api.Controllers
+namespace Agora.Api.Controllers
 {
     [Authorize]
     public class HearingTypeController : ApiController
@@ -182,6 +183,28 @@ namespace BallerupKommune.Api.Controllers
 
             var kleMappingDtoList = operationResponse.Select(kleMapping => Mapper.Map<KleMapping, DTOs.Models.KleMappingDto>(kleMapping)).ToList();
             return Ok(kleMappingDtoList);
+        }
+
+        [HttpPatch("{hearingTypeId}/InvitationGroupMappings")]
+        public async Task<ActionResult<JsonApiTopLevelDto<List<InvitationGroupMappingDto>>>> UpdateInvitationGroupMappings(int hearingTypeId, List<JsonApiTopLevelDto<InvitationGroupMappingDto>> dtos)
+        {
+            var resourceDtos = dtos.Select(dto => dto.MapFromJsonApiDtoToDto<DTOs.Models.InvitationGroupMappingDto, JsonApiTopLevelDto<InvitationGroupMappingDto>, InvitationGroupMappingDto, InvitationGroupMappingDto.InvitationGroupMappingAttributeDto>());
+
+            var resources = resourceDtos.Select(resourceDto => Mapper.Map<DTOs.Models.InvitationGroupMappingDto, InvitationGroupMapping>(resourceDto)).ToList();
+
+            if (resources.Any(resource => resource?.HearingTypeId != hearingTypeId))
+            {
+                return BadRequest("HearingType Id from DTO does not match URL parameter");
+            }
+
+            var operationResponse = await Mediator.Send(new UpdateInvitationGroupMappingsCommand
+            {
+                HearingTypeId = hearingTypeId,
+                InvitationGroupMappings = resources
+            });
+
+            var invitationGroupMappingDtoList = operationResponse.Select(invitationGroupMapping => Mapper.Map<InvitationGroupMapping, DTOs.Models.InvitationGroupMappingDto>(invitationGroupMapping)).ToList();
+            return Ok(invitationGroupMappingDtoList);
         }
     }
 }

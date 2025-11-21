@@ -3,18 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Constants;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Common.Interfaces;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
-using BallerupKommune.Operations.Common.Interfaces.Plugins;
+using Agora.Models.Common;
+using Agora.Models.Models;
+using Agora.Operations.ApplicationOptions.OperationsOptions;
+using Agora.Operations.Common.Constants;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Common.Interfaces;
+using Agora.Operations.Common.Interfaces.DAOs;
+using Agora.Operations.Common.Interfaces.Plugins;
 using MediatR;
+using Microsoft.Extensions.Options;
 using NovaSec.Attributes;
-using HearingStatus = BallerupKommune.Models.Enums.HearingStatus;
+using HearingStatus = Agora.Models.Enums.HearingStatus;
 
-namespace BallerupKommune.Operations.Models.Hearings.Command.CreateHearing
+namespace Agora.Operations.Models.Hearings.Command.CreateHearing
 {
     [PreAuthorize("HasRole('HearingCreator')")]
     public class CreateHearingCommand : IRequest<Hearing>
@@ -32,12 +34,13 @@ namespace BallerupKommune.Operations.Models.Hearings.Command.CreateHearing
             private readonly IIdentityService _identityService;
             private readonly IUserHearingRoleDao _userHearingRoleDao;
             private readonly IPluginService _pluginService;
+            private readonly IOptions<HearingOperationsOptions> _options;
 
             public CreateHearingCommandHandler(IHearingDao hearingDao, IHearingStatusDao hearingStatusDao,
                 IJournalizeStatusDao journalizedStatusDao, IUserDao userDao,
                 ICurrentUserService currentUserService, IHearingRoleDao hearingRoleDao,
                 IIdentityService identityService, IUserHearingRoleDao userHearingRoleDao,
-                IPluginService pluginService)
+                IPluginService pluginService, IOptions<HearingOperationsOptions> options)
             {
                 _hearingDao = hearingDao;
                 _hearingStatusDao = hearingStatusDao;
@@ -48,6 +51,7 @@ namespace BallerupKommune.Operations.Models.Hearings.Command.CreateHearing
                 _identityService = identityService;
                 _userHearingRoleDao = userHearingRoleDao;
                 _pluginService = pluginService;
+                _options = options;
             }
 
             public async Task<Hearing> Handle(CreateHearingCommand request, CancellationToken cancellationToken)
@@ -83,17 +87,19 @@ namespace BallerupKommune.Operations.Models.Hearings.Command.CreateHearing
 
                 var journalizedStatuses = await _journalizedStatusDao.GetAllAsync();
                 var notJournalizedStatus = journalizedStatuses.Single(status =>
-                    status.Status == BallerupKommune.Models.Enums.JournalizedStatus.NOT_JOURNALIZED);
+                    status.Status == Agora.Models.Enums.JournalizedStatus.NOT_JOURNALIZED);
 
                 var hearingRoles = await _hearingRoleDao.GetAllAsync();
                 var hearingOwnerRole = hearingRoles.Single(hearingRole =>
-                    hearingRole.Role == BallerupKommune.Models.Enums.HearingRole.HEARING_OWNER);
+                    hearingRole.Role == Agora.Models.Enums.HearingRole.HEARING_OWNER);
 
 
                 var newHearing = new Hearing
                 {
                     HearingStatusId = createdHearingStatus.Id,
-                    JournalizedStatusId = notJournalizedStatus.Id
+                    JournalizedStatusId = notJournalizedStatus.Id,
+                    ShowComments = true,
+                    AutoApproveComments = !_options.Value.CreateHearing.DisableAutoApproveComments
                 };
 
                 newHearing = await _pluginService.BeforeHearingCreate(newHearing);

@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
-using BallerupKommune.Operations.Common.Enums;
-using BallerupKommune.Operations.Models.Comments.Queries.GetComments;
+using Agora.Operations.Common.Enums;
+using Agora.Operations.Models.Comments.Queries.GetComments;
 using MediatR;
 using NUnit.Framework;
 using System.Linq;
 using System.Threading.Tasks;
-using CommentType = BallerupKommune.Models.Enums.CommentType;
+using CommentType = Agora.Models.Enums.CommentType;
 
-namespace BallerupKommune.Operations.IntegrationTests.RelationshipTests
+namespace Agora.Operations.IntegrationTests.RelationshipTests
 {
     using static TestSetup;
     public class GetCommentsRelationTest : TestBase
@@ -36,10 +36,6 @@ namespace BallerupKommune.Operations.IntegrationTests.RelationshipTests
 
                 c.Hearing != null &&
                 !c.Hearing.Comments.Any() &&
-
-                c.CommentDeclineInfo != null &&
-                !c.CommentDeclineInfo.DeclinerInitials.Any() &&
-                !c.CommentDeclineInfo.DeclineReason.Any() &&
 
                 c.Contents != null &&
                 c.Contents.All(co =>

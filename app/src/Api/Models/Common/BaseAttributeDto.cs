@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BallerupKommune.Api.Models.JsonApi.Interfaces;
+using Agora.Api.Models.JsonApi.Interfaces;
 using Newtonsoft.Json;
 
-namespace BallerupKommune.Api.Models.Common
+namespace Agora.Api.Models.Common
 {
     public class BaseAttributeDto : IJsonApiAttributes
     {

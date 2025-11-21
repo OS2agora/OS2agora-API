@@ -1,6 +1,6 @@
-﻿using BallerupKommune.DTOs.Common;
+﻿using Agora.DTOs.Common;
 
-namespace BallerupKommune.DTOs.Models
+namespace Agora.DTOs.Models
 {
     public class ConsentDto : AuditableDto<ConsentDto>
     {

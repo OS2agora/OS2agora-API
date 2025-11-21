@@ -1,8 +1,8 @@
-﻿using BallerupKommune.DAOs.Persistence.Configurations.Utility;
-using BallerupKommune.Entities.Entities;
+﻿using Agora.DAOs.Persistence.Configurations.Utility;
+using Agora.Entities.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BallerupKommune.DAOs.Persistence.Configurations
+namespace Agora.DAOs.Persistence.Configurations
 {
     public class UserConfiguration : AuditableEntityTypeConfiguration<UserEntity>
     {
@@ -16,7 +16,7 @@ namespace BallerupKommune.DAOs.Persistence.Configurations
         public override void Configure(EntityTypeBuilder<UserEntity> builder)
         {
             base.Configure(builder);
-            
+
             builder.Property(user => user.PersonalIdentifier)
                 .HasMaxLength(500)
                 .HasConversion(_encryptionValueConverterFactory.GetLowerCaseStringEncryptionConverter());
@@ -40,6 +40,30 @@ namespace BallerupKommune.DAOs.Persistence.Configurations
             builder.Property(user => user.Cvr)
                 .HasMaxLength(500)
                 .HasConversion(_encryptionValueConverterFactory.GetStringEncryptionStrippingConverter());
+
+            builder.Property(user => user.Address)
+                .HasMaxLength(500)
+                .HasConversion(_encryptionValueConverterFactory.GetStringEncryptionConverter());
+
+            builder.Property(user => user.City)
+                .HasMaxLength(500)
+                .HasConversion(_encryptionValueConverterFactory.GetStringEncryptionConverter());
+
+            builder.Property(user => user.Municipality)
+                .HasMaxLength(500)
+                .HasConversion(_encryptionValueConverterFactory.GetStringEncryptionConverter());
+
+            builder.Property(user => user.PostalCode)
+                .HasMaxLength(500)
+                .HasConversion(_encryptionValueConverterFactory.GetStringEncryptionConverter());
+
+            builder.Property(user => user.Country)
+                .HasMaxLength(500)
+                .HasConversion(_encryptionValueConverterFactory.GetStringEncryptionConverter());
+
+            builder.Property(user => user.StreetName)
+                .HasMaxLength(500)
+                .HasConversion(_encryptionValueConverterFactory.GetStringEncryptionConverter());
 
             builder.Property(content => content.Identifier).HasMaxLength(100);
         }

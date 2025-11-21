@@ -1,11 +1,11 @@
-﻿using BallerupKommune.Operations.Common.Interfaces;
+﻿using Agora.Operations.Common.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.Operations.Common.Behaviours
+namespace Agora.Operations.Common.Behaviours
 {
     public class PerformanceBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     {

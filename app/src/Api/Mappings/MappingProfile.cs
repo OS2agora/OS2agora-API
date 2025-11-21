@@ -2,13 +2,13 @@
 using Microsoft.AspNetCore.Http;
 using System.IO;
 
-namespace BallerupKommune.Api.Mappings
+namespace Agora.Api.Mappings
 {
     public class MappingProfile : Profile
     {
         public MappingProfile()
         {
-            CreateMap<IFormFile, BallerupKommune.Models.Models.Files.File>(MemberList.Destination)
+            CreateMap<IFormFile, Agora.Models.Models.Files.File>(MemberList.Destination)
                 .ForMember(x => x.Extension, options => options.MapFrom(x => Path.GetExtension(x.FileName)))
                 .ForMember(x => x.Name, options => options.MapFrom(x => x.FileName))
                 .ForMember(x => x.Content, options => options.MapFrom(x => MapIFormFileToByteArray(x)))

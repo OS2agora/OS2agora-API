@@ -1,14 +1,14 @@
-﻿using BallerupKommune.Entities.Entities;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
-using BallerupKommune.DAOs.Persistence;
-using BallerupKommune.DAOs.Statistics;
+﻿using Agora.DAOs.Persistence;
+using Agora.DAOs.Statistics;
+using Agora.Entities.Entities;
+using Agora.Models.Common;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using AutoMapper;
-using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
-namespace BallerupKommune.DAOs.Models
+namespace Agora.DAOs.Models
 {
     public class CommentDeclineInfoDao : BaseDao<CommentDeclineInfoEntity, CommentDeclineInfo>, ICommentDeclineInfoDao
     {
@@ -18,11 +18,11 @@ namespace BallerupKommune.DAOs.Models
 
         public new async Task<CommentDeclineInfo> GetAsync(int id, IncludeProperties includes = null)
         {
-            var commentDeclineInfoEntity =  await base.GetAsync(id, includes);
+            var commentDeclineInfoEntity = await base.GetAsync(id, includes);
             return MapAndPrune(commentDeclineInfoEntity, includes);
         }
 
-        public async Task<CommentDeclineInfo> CreateAsync(CommentDeclineInfo model, IncludeProperties includes = null)
+        public new async Task<CommentDeclineInfo> CreateAsync(CommentDeclineInfo model, IncludeProperties includes = null)
         {
             var commentDeclineInfoEntity = await base.CreateAsync(model, includes);
             return MapAndPrune(commentDeclineInfoEntity, includes);

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using BallerupKommune.Entities.Common;
-using BallerupKommune.Models.Common;
+using Agora.Entities.Common;
+using Agora.Models.Common;
 
-namespace BallerupKommune.DAOs.Mappings
+namespace Agora.DAOs.Mappings
 {
     public static class ExpressionMapper
     {
@@ -48,11 +48,14 @@ namespace BallerupKommune.DAOs.Mappings
                 case ExpressionType.AndAlso:
                 case ExpressionType.OrElse:
                 case ExpressionType.Equal:
+                case ExpressionType.NotEqual:
                 case ExpressionType.GreaterThan:
                 case ExpressionType.GreaterThanOrEqual:
                 case ExpressionType.LessThan:
                 case ExpressionType.LessThanOrEqual:
                     return MapBinaryExpressionNode((BinaryExpression)expressionNode, substitutes);
+                case ExpressionType.Call:
+                    return MapMethodCallExpressionNode((MethodCallExpression)expressionNode, substitutes);
                 default:
                     throw new NotSupportedException(
                         $"Mapping of '{expressionNode.NodeType}' expression node type is not supported.");
@@ -92,6 +95,18 @@ namespace BallerupKommune.DAOs.Mappings
                 MapExpressionNode(binaryExpressionNode.Left, substitutes),
                 MapExpressionNode(binaryExpressionNode.Right, substitutes), binaryExpressionNode.IsLiftedToNull,
                 binaryExpressionNode.Method);
+        }
+
+        private static Expression MapMethodCallExpressionNode(MethodCallExpression methodCallExpressionNode,
+            IDictionary<Expression, Expression> substitutes)
+        {
+            Expression newObject = MapExpressionNode(methodCallExpressionNode.Object, substitutes);
+
+            var newArguments = methodCallExpressionNode.Arguments
+                .Select(arg => MapExpressionNode(arg, substitutes))
+                .ToArray();
+
+            return Expression.Call(newObject, methodCallExpressionNode.Method, newArguments);
         }
     }
 }

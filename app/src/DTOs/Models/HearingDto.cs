@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using BallerupKommune.DTOs.Common;
+using Agora.DTOs.Common;
 
-namespace BallerupKommune.DTOs.Models
+namespace Agora.DTOs.Models
 {
     public class HearingDto : AuditableDto<HearingDto>
     {
         public bool ClosedHearing { get; set; }
         public bool ShowComments { get; set; }
-
+        public bool AutoApproveComments { get; set; }
         public string ContactPersonDepartmentName { get; set; }
         public string ContactPersonEmail { get; set; }
         public string ContactPersonName { get; set; }
@@ -28,6 +28,8 @@ namespace BallerupKommune.DTOs.Models
         public BaseDto<HearingTypeDto> HearingType { get; set; }
 
         public BaseDto<SubjectAreaDto> SubjectArea { get; set; }
+
+        public BaseDto<CityAreaDto> CityArea { get; set; }
 
         public BaseDto<KleHierarchyDto> KleHierarchy { get; set; }
 

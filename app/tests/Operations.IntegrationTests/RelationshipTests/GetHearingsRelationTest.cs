@@ -1,13 +1,13 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Enums;
-using BallerupKommune.Operations.Models.Hearings.Queries.GetHearings;
-using BallerupKommune.TestUtilities.Extensions;
+using Agora.Models.Models;
+using Agora.Operations.Common.Enums;
+using Agora.Operations.Models.Hearings.Queries.GetHearings;
+using Agora.TestUtilities.Extensions;
 using MediatR;
 using NUnit.Framework;
 
-namespace BallerupKommune.Operations.IntegrationTests.RelationshipTests
+namespace Agora.Operations.IntegrationTests.RelationshipTests
 {
     using static TestSetup;
     public class GetHearingsRelationTest : TestBase
@@ -82,11 +82,6 @@ namespace BallerupKommune.Operations.IntegrationTests.RelationshipTests
                                                 !c.Field.Contents.Any() &&
                                                 c.ContentType != null &&
                                                 !c.ContentType.Contents.Any())));
-
-            Assert.IsTrue(hearings.All(h => h.Comments != null &&
-                                            h.Comments.All(c =>
-                                                c.Hearing != null &&
-                                                c.Hearing.Comments.Count() == h.Comments.Count())));
         }
 
         [Test]

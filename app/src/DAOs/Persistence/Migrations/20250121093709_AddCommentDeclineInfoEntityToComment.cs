@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace BallerupKommune.DAOs.Persistence.Migrations
+namespace Agora.DAOs.Persistence.Migrations
 {
     public partial class AddCommentDeclineInfoEntityToComment : Migration
     {
@@ -61,6 +61,16 @@ namespace BallerupKommune.DAOs.Persistence.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<string>(
+                    name: "CommentDeclineReason",
+                    table: "Comments",
+                    type: "varchar(500)",
+                    maxLength: 500,
+                    nullable: true)
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            reverseCommentDeclineInfo(migrationBuilder);
+
             migrationBuilder.DropForeignKey(
                 name: "FK_Comments_CommentDeclineInfos_CommentDeclineInfoId",
                 table: "Comments");
@@ -75,14 +85,6 @@ namespace BallerupKommune.DAOs.Persistence.Migrations
             migrationBuilder.DropColumn(
                 name: "CommentDeclineInfoId",
                 table: "Comments");
-
-            migrationBuilder.AddColumn<string>(
-                name: "CommentDeclineReason",
-                table: "Comments",
-                type: "varchar(500)",
-                maxLength: 500,
-                nullable: true)
-                .Annotation("MySql:CharSet", "utf8mb4");
         }
 
         private void createCommentDeclineInfo(MigrationBuilder migrationBuilder)
@@ -108,6 +110,17 @@ namespace BallerupKommune.DAOs.Persistence.Migrations
 
                 ALTER TABLE CommentDeclineInfos DROP COLUMN TempCommentId;
                 ");
+        }
+
+        private void reverseCommentDeclineInfo(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.Sql(@"
+                UPDATE Comments c
+                LEFT JOIN CommentDeclineInfos cdi ON c.CommentDeclineInfoId = cdi.Id
+                SET c.CommentDeclineReason = CASE 
+                    WHEN c.CommentDeclineInfoId IS NULL THEN NULL
+                    ELSE cdi.DeclineReason
+                END;");
         }
     }
 }

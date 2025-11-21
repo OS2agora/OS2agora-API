@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using BallerupKommune.Api.Models.JsonApi;
-using BallerupKommune.Api.Models.JsonApi.Interfaces;
+using Agora.Api.Models.JsonApi;
+using Agora.Api.Models.JsonApi.Interfaces;
 
-namespace BallerupKommune.Api.Models.Common
+namespace Agora.Api.Models.Common
 {
     public abstract class BaseDto<T> : BaseModifyControlDto<T>, IJsonApiResource, IValidatableObject
         where T : BaseAttributeDto, IJsonApiAttributes

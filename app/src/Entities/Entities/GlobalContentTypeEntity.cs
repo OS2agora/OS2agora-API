@@ -1,7 +1,7 @@
-﻿using BallerupKommune.Entities.Common;
+﻿using Agora.Entities.Common;
 using System.Collections.Generic;
 
-namespace BallerupKommune.Entities.Entities
+namespace Agora.Entities.Entities
 {
     public class GlobalContentTypeEntity : AuditableEntity
     {

@@ -1,16 +1,16 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Models.HearingRoles.Queries.GetHearingRoles;
+﻿using Agora.Models.Models;
+using Agora.Operations.Models.HearingRoles.Queries.GetHearingRoles;
 using Moq;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Operations.Common.Constants;
+using Agora.Operations.Common.Constants;
 using NUnit.Framework.Constraints;
-using HearingRoleEnum = BallerupKommune.Models.Enums.HearingRole;
+using HearingRoleEnum = Agora.Models.Enums.HearingRole;
 
-namespace BallerupKommune.Operations.UnitTests.Models.HearingRoles.Queries
+namespace Agora.Operations.UnitTests.Models.HearingRoles.Queries
 {
     public class GetHearingRoleTests : ModelsTestBase<GetHearingRolesQuery, List<HearingRole>>
     {

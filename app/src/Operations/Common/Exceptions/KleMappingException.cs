@@ -1,8 +1,8 @@
-﻿using BallerupKommune.Models.Models;
+﻿using Agora.Models.Models;
 using System;
 using System.Collections.Generic;
 
-namespace BallerupKommune.Operations.Common.Exceptions
+namespace Agora.Operations.Common.Exceptions
 {
     public class KleMappingException : Exception
     {

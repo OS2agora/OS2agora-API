@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Operations.Common.Exceptions;
+using Agora.Models.Common;
+using Agora.Operations.Common.Exceptions;
 
-namespace BallerupKommune.Operations.Models.Hearings.Queries.GetHearing
+namespace Agora.Operations.Models.Hearings.Queries.GetHearing
 {
     public class GetHearingQuery : IRequest<Hearing>
     {

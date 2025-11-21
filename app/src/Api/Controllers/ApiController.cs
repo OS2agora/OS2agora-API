@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BallerupKommune.Api.Controllers
+namespace Agora.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace BallerupKommune.Operations.Models.Comments.Commands.SoftDeleteComment
+namespace Agora.Operations.Models.Comments.Commands.SoftDeleteComment
 {
     public class SoftDeleteCommentCommandValidator : AbstractValidator<SoftDeleteCommentCommand>
     {

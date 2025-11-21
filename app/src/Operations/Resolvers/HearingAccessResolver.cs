@@ -1,20 +1,20 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
-using BallerupKommune.Models.Common;
+using Agora.Models.Common;
 using NovaSec.Attributes;
-using BallerupKommune.Operations.Common.Behaviours;
+using Agora.Operations.Common.Behaviours;
 using MediatR;
-using BallerupKommune.Operations.Models.Hearings.Queries.GetHearingsAfterSecurity;
+using Agora.Operations.Models.Hearings.Queries.GetHearingsAfterSecurity;
 using System.Net.Http;
-using BallerupKommune.Operations.Common.Interfaces;
-using HearingRole = BallerupKommune.Models.Enums.HearingRole;
+using Agora.Operations.Common.Interfaces;
+using HearingRole = Agora.Models.Enums.HearingRole;
 
-namespace BallerupKommune.Operations.Resolvers
+namespace Agora.Operations.Resolvers
 {
     /// <summary>
     /// This resolver interface is in charge of finding all the hearing id's your allowed to see
@@ -25,6 +25,8 @@ namespace BallerupKommune.Operations.Resolvers
         public Task<bool> CanSeeHearingById(int? hearingId = null);
 
         public Task<bool> CanSeeHearingBySubjectAreaId(int? SubjectAreaId);
+
+        public Task<bool> CanSeeHearingByCityAreaId(int? cityAreaId);
 
         public Task<bool> CanHearingShowComments(int hearingId);
 
@@ -83,6 +85,18 @@ namespace BallerupKommune.Operations.Resolvers
         {
             await EnsureLoaded();
             bool hearingAccessId = _cachedHearings.Any(hearing => hearing.SubjectAreaId == subjectAreaId);
+            return hearingAccessId;
+        }
+
+        /// <summary>
+        /// Finds out if cityarea can be seen through hearings
+        /// </summary>
+        /// <param name="cityAreaId"> the CityAreaId that needs to be checked  user</param>
+        /// <returns></returns>
+        public async Task<bool> CanSeeHearingByCityAreaId(int? cityAreaId)
+        {
+            await EnsureLoaded();
+            bool hearingAccessId = _cachedHearings.Any(hearing => hearing.CityAreaId == cityAreaId);
             return hearingAccessId;
         }
 

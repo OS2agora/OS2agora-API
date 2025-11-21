@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
-using BallerupKommune.Operations.Resolvers;
+using Agora.Models.Common;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
+using Agora.Operations.Resolvers;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
-using HearingRoleEnum = BallerupKommune.Models.Enums.HearingRole;
+using HearingRoleEnum = Agora.Models.Enums.HearingRole;
 
-namespace BallerupKommune.Operations.UnitTests.Resolvers
+namespace Agora.Operations.UnitTests.Resolvers
 {
     public class HearingRoleResolverTests
     {

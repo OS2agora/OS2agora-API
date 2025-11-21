@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using NUnit.Framework;
 
-namespace BallerupKommune.Operations.IntegrationTests
+namespace Agora.Operations.IntegrationTests
 {
     using static TestSetup;
 

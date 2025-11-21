@@ -1,13 +1,13 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Models.UserHearingRoles.Commands.CreateUserHearingRole;
+﻿using Agora.Models.Models;
+using Agora.Operations.Models.UserHearingRoles.Commands.CreateUserHearingRole;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Operations.Common.Exceptions;
+using Agora.Operations.Common.Exceptions;
 
-namespace BallerupKommune.Operations.UnitTests.Models.UserHearingRoles.Commands
+namespace Agora.Operations.UnitTests.Models.UserHearingRoles.Commands
 {
     public class CreateUserHearingRoleTests : ModelsTestBase<CreateUserHearingRoleCommand, UserHearingRole>
     {

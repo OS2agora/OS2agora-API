@@ -1,23 +1,22 @@
 ﻿using System.Collections.Generic;
-using BallerupKommune.DTOs.Common;
+using Agora.DTOs.Common;
 
-namespace BallerupKommune.DTOs.Models
+namespace Agora.DTOs.Models
 {
     public class UserDto : AuditableDto<UserDto>
     {
-        public string PersonalIdentifier { get; set; }
         public string Name { get; set; }
         public string EmployeeDisplayName { get; set; }
         public string Email { get; set; }
         public string Cpr { get; set; }
-        public string Cvr { get; set; }
+        public string PostalCode { get; set; }
+        public string City { get; set; }
+        public string StreetName { get; set; }
 
         public bool IsAdministrator { get; set; }
         public bool IsHearingCreator { get; set; }
 
-        // TODO: Should this be here?
         public string Identifier { get; set; }
-
         public BaseDto<CompanyDto> Company { get; set; }
 
         public BaseDto<UserCapacityDto> UserCapacity { get; set; }

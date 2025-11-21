@@ -1,17 +1,17 @@
-﻿using BallerupKommune.Models.Enums;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Models.Models.Multiparts;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Enums;
+using Agora.Models.Models;
+using Agora.Models.Models.Multiparts;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Common.Interfaces.DAOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Operations.Common.Interfaces;
-using ContentType = BallerupKommune.Models.Enums.ContentType;
+using Agora.Models.Common;
+using Agora.Operations.Common.Interfaces;
+using ContentType = Agora.Models.Enums.ContentType;
 
-namespace BallerupKommune.Operations.Models.Fields.Commands.UpdateFields
+namespace Agora.Operations.Models.Fields.Commands.UpdateFields
 {
     public class FieldsValidator : IFieldsValidator
     {
@@ -56,36 +56,36 @@ namespace BallerupKommune.Operations.Models.Fields.Commands.UpdateFields
                 {
                     if (!rules.CanBeEmpty.Value && string.IsNullOrEmpty(multiPartField.Content))
                     {
-                        errorsForField.Add($"Validation error - content cannot be empty");
+                        errorsForField.Add($"Validation error on field {multiPartField.FieldType} - content cannot be empty");
                     }
                 }
 
-                if (rules.MaxLength.HasValue)
+                if (rules.MaxLength.HasValue && !string.IsNullOrEmpty(multiPartField.Content))
                 {
-                    if (multiPartField.Content.Length > rules.MaxLength)
+                    if (multiPartField.Content?.Length > rules.MaxLength)
                     {
-                        errorsForField.Add($"Validation error - content length exceeds the limit");
+                        errorsForField.Add($"Validation error on field {multiPartField.FieldType} - content length exceeds the limit");
                     }
                 }
 
-                if (rules.MinLength.HasValue)
+                if (rules.MinLength.HasValue && !string.IsNullOrEmpty(multiPartField.Content))
                 {
-                    if (multiPartField.Content.Length < rules.MinLength)
+                    if (multiPartField.Content?.Length < rules.MinLength)
                     {
-                        errorsForField.Add($"Validation error - content length is smaller than minimum");
+                        errorsForField.Add($"Validation error on field {multiPartField.FieldType} - content length is smaller than minimum");
                     }
                 }
 
                 if (rules.MaxFileSize.HasValue)
                 {
-                    var maxByteArrayLength = rules.MaxFileSize.Value * Math.Pow(1024, 2);
+                    var maxByteArrayLength = rules.MaxFileSize.Value;
                     foreach (var fileOperation in multiPartField.FileOperations)
                     {
                         if (fileOperation.Operation == FileOperationEnum.ADD)
                         {
                             if (fileOperation.File.Content.Length > maxByteArrayLength)
                             {
-                                errorsForField.Add($"Validation error - file size exceeds limit");
+                                errorsForField.Add($"Validation error on field {multiPartField.FieldType} - file size exceeds limit");
                             }
                         }    
                     }
@@ -108,7 +108,7 @@ namespace BallerupKommune.Operations.Models.Fields.Commands.UpdateFields
                     // Check against MaxFileCount
                     if (fileCount > rules.MaxFileCount.Value)
                     {
-                        errorsForField.Add($"Validation error - file count exceeded limit");
+                        errorsForField.Add($"Validation error on field {multiPartField.FieldType} - file count exceeded limit");
                     }
                 }
 
@@ -121,7 +121,7 @@ namespace BallerupKommune.Operations.Models.Fields.Commands.UpdateFields
                     {
                         if (rules.AllowedFileTypes.All(fileType => fileType != file.ContentType))
                         {
-                            errorsForField.Add("Validation error - file type was not found in list of valid file types for this field");
+                            errorsForField.Add("Validation error on field {multiPartField.FieldType} - file type was not found in list of valid file types for this field");
                         }
                     }
                 }

@@ -1,10 +1,18 @@
-using BallerupKommune.Api.Filters;
-using BallerupKommune.Api.Services;
-using BallerupKommune.DAOs;
-using BallerupKommune.DAOs.Persistence;
-using BallerupKommune.DTOs;
-using BallerupKommune.Operations;
-using BallerupKommune.Operations.Common.Interfaces;
+using Agora.Api.Configuration;
+using Agora.Api.Filters;
+using Agora.Api.Models.Elmah;
+using Agora.Api.Services;
+using Agora.Api.Services.AuthenticationHandlers;
+using Agora.Api.Services.ClaimsServices;
+using Agora.Api.Services.Interfaces;
+using Agora.DAOs;
+using Agora.DAOs.Persistence;
+using Agora.DTOs;
+using Agora.Operations;
+using Agora.Operations.ApplicationOptions;
+using Agora.Operations.Common.Constants;
+using Agora.Operations.Common.Interfaces;
+using ElmahCore.Mvc;
 using FluentValidation.AspNetCore;
 using Jobs;
 using Microsoft.AspNetCore.Builder;
@@ -16,19 +24,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using NSwag;
 using NSwag.Generation.Processors.Security;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Serilog;
 using System.Linq;
 using System.Reflection;
-using BallerupKommune.Api.Configuration;
-using BallerupKommune.Api.Models.Elmah;
-using BallerupKommune.Operations.ApplicationOptions;
-using BallerupKommune.Operations.Common.Constants;
-using ElmahCore.Mvc;
-using OpenTelemetry.Exporter;
+using Agora.Api.Middleware;
+using OpenTelemetry.Metrics;
 
-namespace BallerupKommune.Api
+namespace Agora.Api
 {
     public class Startup
     {
@@ -56,15 +61,45 @@ namespace BallerupKommune.Api
             
             services.AddApiDependencies();
 
+            services.AddNemLogin3SamlConfiguration(Configuration);
+
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
             services.AddSingleton<ICookieService, CookieService>();
             services.AddSingleton<IAuthenticationClientService, AuthenticationClientService>();
+
+            services.AddTransient<IClaimsService<CodeFlowAuthenticationHandler>, CodeFlowClaimsService>();
+            services.AddTransient<IAuthenticationHandler, CodeFlowAuthenticationHandler>();
+
+            if (Configuration.GetValue<bool>("Saml2:Enable"))
+            {
+                services.AddTransient<IClaimsService<NemLoginAuthenticationHandler>, NemLoginClaimsService>();
+                services.AddTransient<IAuthenticationHandler, NemLoginAuthenticationHandler>();
+            }
+            if (Configuration.GetValue<bool>("EntraId:Enable"))
+            {
+                services.AddTransient<IClaimsService<EntraIdAuthenticationHandler>, EntraIdClaimsService>();
+                services.AddTransient<IAuthenticationHandler, EntraIdAuthenticationHandler>();
+            }
+            services.AddTransient<IAuthenticationHandlerFactory, AuthenticationHandlerFactory>();
 
             // Allow use of HttpContext
             services.AddHttpContextAccessor();
 
             // Allow use of HttpContext.Session
-            services.AddDistributedMemoryCache();
+            if (Configuration.GetValue<bool>("Session:UseRedis"))
+            {
+                // A distributed session cache used for multi-server scenarios 
+                services.AddStackExchangeRedisCache(config =>
+                {
+                    config.Configuration = Configuration.GetConnectionString("RedisConnection");
+                    config.InstanceName = "Session_";
+                });
+            }
+            else
+            {
+                // An in-memory cache that is not distributed. Used for single-server scenarios
+                services.AddDistributedMemoryCache();
+            }
             services.AddSession();
 
             services.AddHealthChecks().AddDbContextCheck<ApplicationDbContext>();
@@ -106,7 +141,7 @@ namespace BallerupKommune.Api
             
             string openTelemetryServiceName = Assembly.GetExecutingAssembly().GetName().Name!;
             var jaegerOptions = Configuration.GetSection(JaegerOptions.Jaeger).Get<JaegerOptions>();
-            
+
             services.AddOpenTelemetry().WithTracing(
                 builder => builder
                     .AddSource(Telemetry.ActivitySourceName)
@@ -127,6 +162,24 @@ namespace BallerupKommune.Api
                         options.Protocol = OtlpExportProtocol.HttpProtobuf;
                     })
             );
+
+            if (jaegerOptions.EnableRuntimeMetrics)
+            {
+                services.AddOpenTelemetry().WithMetrics(
+                    builder => builder
+                        .ConfigureResource(resource =>
+                        {
+                            resource.AddService(serviceName: openTelemetryServiceName);
+                        })
+                        .AddRuntimeInstrumentation()
+                        .AddOtlpExporter(options =>
+                        {
+                            options.Endpoint = jaegerOptions.Endpoint;
+                            options.Protocol = OtlpExportProtocol.HttpProtobuf;
+                        })
+                        .AddConsoleExporter()
+                );
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -159,7 +212,7 @@ namespace BallerupKommune.Api
 
             // Open for CORS when developing locally
             app.UseCors(builder => builder
-                .WithOrigins("http://localhost:4000", "http://localhost:3000")
+                .WithOrigins("http://localhost:3000", "http://localhost:4000", "http://localhost:4001")
                 // Allow '*' methods (PUT, POST, GET, etc)
                 .AllowAnyMethod()
                 // Allow all headers to be send with the request
@@ -169,6 +222,9 @@ namespace BallerupKommune.Api
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            // custom logging middlewares must be after authentication
+            app.UseMiddleware<UserDataLoggingMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {

@@ -1,4 +1,4 @@
-﻿namespace BallerupKommune.DAOs.ContentScanners.DataScanner.DTOs
+﻿namespace Agora.DAOs.ContentScanners.DataScanner.DTOs
 {
     public class RuleDto
     {

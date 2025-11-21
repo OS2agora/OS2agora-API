@@ -1,4 +1,4 @@
-﻿using BallerupKommune.Operations.ApplicationOptions;
+﻿using Agora.Operations.ApplicationOptions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -9,7 +9,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.DAOs.Esdh.Sbsip
+namespace Agora.DAOs.Esdh.Sbsip
 {
     public class TokenService
     {
@@ -41,12 +41,12 @@ namespace BallerupKommune.DAOs.Esdh.Sbsip
             }
             catch (HttpRequestException exception)
             {
-                _logger.LogError($"SBSIP (Token Service): HttpRequestException caught with exception: {exception}");
+                _logger.LogError(exception, $"SBSIP (Token Service): HttpRequestException caught with message: {exception.Message}");
                 throw new Exception(exception.Message);
             }
             catch (AggregateException exception)
             {
-                _logger.LogError($"SBSIP (Token Service): HttpRequestException caught with exception: {exception}");
+                _logger.LogError(exception, $"SBSIP (Token Service): HttpRequestException caught with exception: {exception.Message}");
                 throw new Exception(exception.Message);
             }
 

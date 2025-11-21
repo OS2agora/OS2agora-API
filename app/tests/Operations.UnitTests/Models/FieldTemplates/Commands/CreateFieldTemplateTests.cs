@@ -1,14 +1,14 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Constants;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Models.FieldTemplates.Commands.CreateFieldTemplate;
+using Agora.Models.Models;
+using Agora.Operations.Common.Constants;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Models.FieldTemplates.Commands.CreateFieldTemplate;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 
-namespace BallerupKommune.Operations.UnitTests.Models.FieldTemplates.Commands
+namespace Agora.Operations.UnitTests.Models.FieldTemplates.Commands
 {
     public class CreateFieldTemplateTests : ModelsTestBase<CreateFieldTemplateCommand, FieldTemplate>
     {

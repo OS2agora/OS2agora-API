@@ -1,8 +1,8 @@
-﻿using BallerupKommune.Models.Models.Esdh;
+﻿using Agora.Models.Models.Esdh;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Models;
+using Agora.Models.Models;
 
-namespace BallerupKommune.Operations.Common.Interfaces
+namespace Agora.Operations.Common.Interfaces
 {
     public interface IEsdhService
     {

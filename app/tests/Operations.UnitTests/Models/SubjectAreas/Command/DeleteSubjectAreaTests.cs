@@ -1,17 +1,17 @@
-﻿using BallerupKommune.Operations.Common.Constants;
-using BallerupKommune.Operations.Models.SubjectAreas.Command.DeleteSubjectArea;
+﻿using Agora.Operations.Common.Constants;
+using Agora.Operations.Models.SubjectAreas.Command.DeleteSubjectArea;
 using FluentAssertions;
 using MediatR;
 using Moq;
 using NUnit.Framework;
 using System.Threading;
-using BallerupKommune.Operations.Common.Exceptions;
+using Agora.Operations.Common.Exceptions;
 
-namespace BallerupKommune.Operations.UnitTests.Models.SubjectAreas.Command
+namespace Agora.Operations.UnitTests.Models.SubjectAreas.Command
 {
-    public class DeleteSubjectAreaTests : ModelsTestBase<DeleteSubjectAreaCommand, Unit>
+    public class DeleteCityAreaTests : ModelsTestBase<DeleteSubjectAreaCommand, Unit>
     {
-        public DeleteSubjectAreaTests()
+        public DeleteCityAreaTests()
         {
             RequestHandlerDelegateMock
                 .Setup(x => x())

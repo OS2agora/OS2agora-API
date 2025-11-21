@@ -1,18 +1,20 @@
-﻿using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
-using BallerupKommune.Operations.Common.Interfaces.Security;
-using BallerupKommune.Operations.Resolvers;
+﻿using Agora.Models.Common;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces;
+using Agora.Operations.Common.Interfaces.DAOs;
+using Agora.Operations.Common.Interfaces.Security;
+using Agora.Operations.Resolvers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CommentStatus = BallerupKommune.Models.Enums.CommentStatus;
-using CommentType = BallerupKommune.Models.Enums.CommentType;
-using HearingRole = BallerupKommune.Models.Enums.HearingRole;
-using HearingStatus = BallerupKommune.Models.Enums.HearingStatus;
+using Agora.Operations.ApplicationOptions;
+using Microsoft.Extensions.Options;
+using CommentStatus = Agora.Models.Enums.CommentStatus;
+using CommentType = Agora.Models.Enums.CommentType;
+using HearingRole = Agora.Models.Enums.HearingRole;
+using HearingStatus = Agora.Models.Enums.HearingStatus;
 
-namespace BallerupKommune.DAOs.Security
+namespace Agora.DAOs.Security
 {
     public class SecurityExpressions : ISecurityExpressions
     {
@@ -24,10 +26,11 @@ namespace BallerupKommune.DAOs.Security
         private readonly IHearingAccessResolver _hearingAccessResolver;
         private readonly IUserHearingRoleResolver _userHearingRoleResolver;
         private readonly ICompanyHearingRoleResolver _companyHearingRoleResolver;
+        private readonly IOptions<SecurityOptions> _securityOptions;
 
         public SecurityExpressions(ICurrentUserService currentUserService, IUserDao userDao, IHearingDao hearingDao,
             IHearingRoleDao hearingRoleDao, ICommentDao commentDao, IHearingAccessResolver hearingAccessResolver, 
-            IUserHearingRoleResolver userHearingRoleResolver, ICompanyHearingRoleResolver companyHearingRoleResolver)
+            IUserHearingRoleResolver userHearingRoleResolver, ICompanyHearingRoleResolver companyHearingRoleResolver, IOptions<SecurityOptions> securityOptions)
         {
             _currentUserService = currentUserService;
             _userDao = userDao;
@@ -37,6 +40,7 @@ namespace BallerupKommune.DAOs.Security
             _hearingAccessResolver = hearingAccessResolver;
             _userHearingRoleResolver = userHearingRoleResolver;
             _companyHearingRoleResolver = companyHearingRoleResolver;
+            _securityOptions = securityOptions;
         }
 
         public bool IsCurrentUser(int id)
@@ -107,13 +111,9 @@ namespace BallerupKommune.DAOs.Security
         public bool IsCommentFromMyCompany(Comment comment)
         {
             if (comment == null) return false;
-
             var currentUserId = _currentUserService.DatabaseUserId;
-
             if (currentUserId == null) return false;
-
             var companyId = _currentUserService.CompanyId;
-
             if (companyId == null) return false;
 
             if (comment.User == null)
@@ -121,7 +121,6 @@ namespace BallerupKommune.DAOs.Security
                 var includes = IncludeProperties.Create<Comment>(null, new List<string> { nameof(Comment.User) });
                 comment = _commentDao.GetAsync(comment.Id, includes).GetAwaiter().GetResult();
             }
-
             return comment.User.CompanyId == companyId;
         }
 
@@ -149,6 +148,23 @@ namespace BallerupKommune.DAOs.Security
             return comment.CommentType.Type == CommentType.HEARING_REVIEW ||
                    comment.CommentType.Type == CommentType.HEARING_RESPONSE_REPLY ||
                    comment.CommentStatus?.Status == CommentStatus.APPROVED;
+        }
+
+        public bool IsCommentReview(Comment comment)
+        {
+            // ensure that comment has required includes
+            if (comment.CommentType == null)
+            {
+                var missingIncludes = new List<string>
+                {
+                    comment.CommentType == null ? nameof(comment.CommentType) : null,
+                };
+
+                throw new ArgumentException(
+                    $"Comment is missing required include(s): {string.Join(", ", missingIncludes.Where(x => x != null))}");
+            }
+
+            return comment.CommentType.Type == CommentType.HEARING_REVIEW;
         }
 
         public bool IsCommentResponseReply(Comment comment)
@@ -192,6 +208,14 @@ namespace BallerupKommune.DAOs.Security
                     $"Hearing is missing required include: {nameof(hearing.HearingStatus)}");
             }
 
+            if (!_securityOptions.Value.IncludeAwaitingStartdate)
+            {
+                return hearing != null &&
+                       hearing.HearingStatus.Status != HearingStatus.CREATED &&
+                       hearing.HearingStatus.Status != HearingStatus.DRAFT &&
+                       hearing.HearingStatus.Status != HearingStatus.AWAITING_STARTDATE;
+            }
+
             return hearing != null && 
                    hearing.HearingStatus.Status != HearingStatus.CREATED &&
                    hearing.HearingStatus.Status != HearingStatus.DRAFT;
@@ -209,10 +233,16 @@ namespace BallerupKommune.DAOs.Security
             return hearing?.HearingType?.IsInternalHearing ?? true;
         }
 
-        public bool CanSeeSubjectArea(SubjectArea subjectAre)
+        public bool CanSeeSubjectArea(SubjectArea subjectArea)
         {
-            bool canSeeSubjectArea = _hearingAccessResolver.CanSeeHearingBySubjectAreaId(subjectAre.Id).GetAwaiter().GetResult();
+            bool canSeeSubjectArea = _hearingAccessResolver.CanSeeHearingBySubjectAreaId(subjectArea.Id).GetAwaiter().GetResult();
             return canSeeSubjectArea;
+        }
+
+        public bool CanSeeCityArea(CityArea cityArea)
+        {
+            bool canSeeCityArea = _hearingAccessResolver.CanSeeHearingByCityAreaId(cityArea.Id).GetAwaiter().GetResult();
+            return canSeeCityArea;
         }
     }
 }

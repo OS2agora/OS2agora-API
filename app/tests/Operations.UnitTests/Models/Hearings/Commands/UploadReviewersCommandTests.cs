@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Models.Hearings.Command.UploadReviewers;
+using Agora.Models.Models;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Models.Hearings.Command.UploadReviewers;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 
-namespace BallerupKommune.Operations.UnitTests.Models.Hearings.Commands
+namespace Agora.Operations.UnitTests.Models.Hearings.Commands
 {
     public class UploadReviewersCommandTests : ModelsTestBase<UploadReviewersCommand, List<UserHearingRole>>
     {

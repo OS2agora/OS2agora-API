@@ -1,10 +1,10 @@
-﻿using BallerupKommune.Api.Models.Common;
-using BallerupKommune.Api.Models.JsonApi;
+﻿using Agora.Api.Models.Common;
+using Agora.Api.Models.JsonApi;
 using JsonApiSerializer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace BallerupKommune.Api.Mappings
+namespace Agora.Api.Mappings
 {
     public static class DtoMapper
     {

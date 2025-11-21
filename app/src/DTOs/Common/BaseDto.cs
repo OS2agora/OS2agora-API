@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using BallerupKommune.Models.Extensions;
+using Agora.Models.Extensions;
 using Newtonsoft.Json;
 
-namespace BallerupKommune.DTOs.Common
+namespace Agora.DTOs.Common
 {
     public class BaseDto<T>
     {

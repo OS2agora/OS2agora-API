@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Models.Comments.Commands.CreateComment;
+using Agora.Models.Models;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Models.Comments.Commands.CreateComment;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 
-namespace BallerupKommune.Operations.UnitTests.Models.Comments.Commands
+namespace Agora.Operations.UnitTests.Models.Comments.Commands
 {
     public class CreateCommentCommandTests : ModelsTestBase<CreateCommentCommand, Comment>
     {

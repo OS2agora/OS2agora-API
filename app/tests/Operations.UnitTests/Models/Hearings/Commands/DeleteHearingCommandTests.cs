@@ -1,12 +1,12 @@
 ﻿using System.Threading;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Models.Hearings.Command.DeleteHearing;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Models.Hearings.Command.DeleteHearing;
 using FluentAssertions;
 using MediatR;
 using Moq;
 using NUnit.Framework;
 
-namespace BallerupKommune.Operations.UnitTests.Models.Hearings.Commands
+namespace Agora.Operations.UnitTests.Models.Hearings.Commands
 {
     public class DeleteHearingTests : ModelsTestBase<DeleteHearingCommand, Unit>
     {

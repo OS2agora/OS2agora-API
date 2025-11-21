@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace BallerupKommune.Operations.Models.GlobalContents.Commands
+namespace Agora.Operations.Models.GlobalContents.Commands
 {
     public class CreateGlobalContentCommandValidator : AbstractValidator<CreateGlobalContentCommand>
     {

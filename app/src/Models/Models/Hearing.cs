@@ -1,24 +1,24 @@
-﻿using BallerupKommune.Models.Common;
-using NovaSec.Attributes;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Agora.Models.Common;
+using NovaSec.Attributes;
 
-namespace BallerupKommune.Models.Models
+namespace Agora.Models.Models
 {
     [PostFilter("HasRole('Administrator')")]
     [PostFilter("@Security.IsHearingOwner(resultObject.Id)")]
     [PostFilter("@Security.IsHearingReviewer(resultObject.Id)")]
     [PostFilter("@Security.IsHearingInvitee(resultObject) && @Security.IsHearingPublished(resultObject)",
-        "UserHearingRoles, HearingType.FieldTemplates, HearingType.HearingTemplate.Fields.FieldTemplates")]
-    [PostFilter("HasRole('Employee') && @Security.IsHearingPublished(resultObject) && !resultObject.ClosedHearing && @Security.IsInternalHearing(resultObject)",
-        "UserHearingRoles, HearingType.FieldTemplates, HearingType.HearingTemplate.Fields.FieldTemplates")]
+        "UserHearingRoles, CompanyHearingRoles, HearingType.FieldTemplates, HearingType.HearingTemplate.Fields.FieldTemplates")]
+    [PostFilter("HasRole('Employee') && @Security.IsHearingPublished(resultObject) && !resultObject.ClosedHearing",
+        "UserHearingRoles, CompanyHearingRoles, HearingType.FieldTemplates, HearingType.HearingTemplate.Fields.FieldTemplates")]
     [PostFilter("HasAnyRole(['Anonymous', 'Citizen']) && @Security.IsHearingPublished(resultObject) && !resultObject.ClosedHearing && !@Security.IsInternalHearing(resultObject)",
-        "UserHearingRoles, HearingType.FieldTemplates, HearingType.HearingTemplate.Fields.FieldTemplates")]
+        "UserHearingRoles, CompanyHearingRoles, HearingType.FieldTemplates, HearingType.HearingTemplate.Fields.FieldTemplates")]
     public class Hearing : AuditableModel
     {
         public bool ClosedHearing { get; set; }
         public bool ShowComments { get; set; }
-
+        public bool AutoApproveComments { get; set; }
         public string ContactPersonDepartmentName { get; set; }
         public string ContactPersonEmail { get; set; }
         public string ContactPersonName { get; set; }
@@ -29,6 +29,7 @@ namespace BallerupKommune.Models.Models
 
         public DateTime? Deadline { get; set; }
         public DateTime? StartDate { get; set; }
+        public DateTime? ConcludedDate { get; set; }
 
         public int? HearingStatusId { get; set; }
         public int? CommentAmount { get; set; }
@@ -42,6 +43,9 @@ namespace BallerupKommune.Models.Models
 
         public int? SubjectAreaId { get; set; }
         public SubjectArea SubjectArea { get; set; }
+
+        public int? CityAreaId { get; set; }
+        public CityArea CityArea { get; set; }
         
 
         public int? KleHierarchyId { get; set; }
@@ -61,14 +65,20 @@ namespace BallerupKommune.Models.Models
 
         public ICollection<Content> Contents { get; set; } = new List<Content>();
 
+        public ICollection<Event> Events { get; set; } = new List<Event>();
+        
+        public ICollection<NotificationContentSpecification> NotificationContentSpecifications { get; set; } = new List<NotificationContentSpecification>();
+
         public static List<string> DefaultIncludes => new List<string>
         {
             "HearingStatus",
             "HearingType",
             "UserHearingRoles",
+            "UserHearingRoles.HearingRole",
             "UserHearingRoles.User",
+            "UserHearingRoles.User.UserCapacity",
             "CompanyHearingRoles",
-            "CompanyHearingRoles.Company"
+            "CompanyHearingRoles.Company",
         };
     }
 }

@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace BallerupKommune.Operations.Models.KleMappings.Commands.UpdateKleMappings
+namespace Agora.Operations.Models.KleMappings.Commands.UpdateKleMappings
 {
     public class UpdateKleMappingsCommandValidator : AbstractValidator<UpdateKleMappingsCommand>
     {
@@ -14,6 +14,5 @@ namespace BallerupKommune.Operations.Models.KleMappings.Commands.UpdateKleMappin
                     kleMapping.RuleFor(x => x.HearingTypeId).NotEmpty();
                 });
         }
-        
     }
 }

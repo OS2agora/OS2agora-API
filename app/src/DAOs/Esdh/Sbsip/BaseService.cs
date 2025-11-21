@@ -1,4 +1,4 @@
-﻿using BallerupKommune.Operations.ApplicationOptions;
+﻿using Agora.Operations.ApplicationOptions;
 using Microsoft.Extensions.Options;
 using System;
 using System.Net.Http;
@@ -6,9 +6,9 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using System.Net;
-using BallerupKommune.Operations.Common.Exceptions;
+using Agora.Operations.Common.Exceptions;
 
-namespace BallerupKommune.DAOs.Esdh.Sbsip
+namespace Agora.DAOs.Esdh.Sbsip
 {
     public class BaseService
     {

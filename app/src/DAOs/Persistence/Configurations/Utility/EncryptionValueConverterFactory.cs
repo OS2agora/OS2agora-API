@@ -1,8 +1,8 @@
-using BallerupKommune.Models.Extensions;
+using Agora.Models.Extensions;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace BallerupKommune.DAOs.Persistence.Configurations.Utility
+namespace Agora.DAOs.Persistence.Configurations.Utility
 {
     /// <inheritdoc />
     public class EncryptionValueConverterFactory : IEncryptionValueConverterFactory

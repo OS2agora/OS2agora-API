@@ -8,10 +8,10 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Common.Telemetry;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Common.Telemetry;
 
-namespace BallerupKommune.Operations.Common.Behaviours
+namespace Agora.Operations.Common.Behaviours
 {
     public class SecurityBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse>
     {

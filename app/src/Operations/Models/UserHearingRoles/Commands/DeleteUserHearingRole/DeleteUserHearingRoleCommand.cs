@@ -1,17 +1,17 @@
-﻿using BallerupKommune.Models.Extensions;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Extensions;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Operations.Common.Exceptions;
+using Agora.Models.Common;
+using Agora.Operations.Common.Exceptions;
 using NovaSec.Attributes;
-using HearingRole = BallerupKommune.Models.Enums.HearingRole;
+using HearingRole = Agora.Models.Enums.HearingRole;
 
-namespace BallerupKommune.Operations.Models.UserHearingRoles.Commands.DeleteUserHearingRole
+namespace Agora.Operations.Models.UserHearingRoles.Commands.DeleteUserHearingRole
 {
     [PreAuthorize("@Security.IsHearingOwnerByHearingId(#request.HearingId)")]
     public class DeleteUserHearingRoleCommand : IRequest

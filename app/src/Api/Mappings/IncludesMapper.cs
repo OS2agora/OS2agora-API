@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BallerupKommune.Api.Mappings
+namespace Agora.Api.Mappings
 {
     public static class IncludesMapper
     {

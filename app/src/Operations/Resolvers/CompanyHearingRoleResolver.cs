@@ -1,12 +1,12 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces;
+using Agora.Operations.Common.Interfaces.DAOs;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using HearingRoleEnum = BallerupKommune.Models.Enums.HearingRole;
+using HearingRoleEnum = Agora.Models.Enums.HearingRole;
 
-namespace BallerupKommune.Operations.Resolvers
+namespace Agora.Operations.Resolvers
 {
     public interface ICompanyHearingRoleResolver
     {
@@ -72,7 +72,7 @@ namespace BallerupKommune.Operations.Resolvers
             }
 
             return _cachedCompanyHearingsRoles[companyId.Value].Any(
-                chr => chr.HearingId == hearingId 
+                chr => chr.HearingId == hearingId
                        && chr.HearingRoleId == hearingRole.Id);
 
         }

@@ -1,46 +1,55 @@
-﻿using System;
+﻿using Agora.DAOs.Mappings;
+using Agora.DAOs.Persistence;
+using Agora.DAOs.Statistics;
+using Agora.Entities.Entities;
+using Agora.Models.Common;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
 using AutoMapper;
-using BallerupKommune.DAOs.Persistence;
-using BallerupKommune.DAOs.Statistics;
-using BallerupKommune.Entities.Entities;
-using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using BallerupKommune.DAOs.Mappings;
 
-namespace BallerupKommune.DAOs.Models
+namespace Agora.DAOs.Models
 {
     public class NotificationQueueDao : BaseDao<NotificationQueueEntity, NotificationQueue>, INotificationQueueDao
     {
-        public NotificationQueueDao(IApplicationDbContext db,
-            ILogger<BaseDao<NotificationQueueEntity, NotificationQueue>> logger, IMapper mapper, ICommandCountStatistics commandCountStatistics) : 
+        public NotificationQueueDao(IApplicationDbContext db, ILogger<BaseDao<NotificationQueueEntity, NotificationQueue>> logger, IMapper mapper, ICommandCountStatistics commandCountStatistics) :
             base(db, logger, mapper, commandCountStatistics)
         {
         }
 
-        public async Task<List<NotificationQueue>> GetAllAsync(IncludeProperties includes = null,
-            Expression<Func<NotificationQueue, bool>> filter = null)
+        public new async Task<NotificationQueue> GetAsync(int id, IncludeProperties includes = null)
         {
-            List<NotificationQueue> notificationQueueEntities = await base.GetAllAsync(includes,
-                filter?.MapToEntityExpression<NotificationQueue, NotificationQueueEntity>());
-            return notificationQueueEntities.Select(notificationQueueEntity => MapAndPrune(notificationQueueEntity, includes)).ToList();
+            var entity = await base.GetAsync(id, includes);
+            return MapAndPrune(entity, includes);
+        }
+
+        public async Task<List<NotificationQueue>> GetAllAsync(IncludeProperties includes = null, Expression<Func<NotificationQueue, bool>> filter = null, int? limit = null, bool asNoTracking = false)
+        {
+            var entities = await base.GetAllAsync(includes, filter?.MapToEntityExpression<NotificationQueue, NotificationQueueEntity>(), limit, asNoTracking: asNoTracking);
+            return entities.Select(entity => MapAndPrune(entity, includes)).ToList();
         }
 
         public new async Task<NotificationQueue> CreateAsync(NotificationQueue model, IncludeProperties includes = null)
         {
-            var notificationQueueEntity = await base.CreateAsync(model, includes);
-            return MapAndPrune(notificationQueueEntity, includes);
+            var entity = await base.CreateAsync(model, includes);
+            return MapAndPrune(entity, includes);
+        }
+
+        public new async Task<List<NotificationQueue>> CreateRangeAsync(List<NotificationQueue> models, IncludeProperties includes = null)
+        {
+            var entities = await base.CreateRangeAsync(models, includes);
+            return entities.Select(entity => MapAndPrune(entity, includes)).ToList();
         }
 
         public async Task<NotificationQueue> UpdateAsync(NotificationQueue model, IncludeProperties includes = null)
         {
-            var notificationQueueEntity = await UpdateAsync(model, model.PropertiesUpdated, includes);
-            return MapAndPrune(notificationQueueEntity, includes);
+            var entity = await base.UpdateAsync(model, model.PropertiesUpdated, includes);
+            return MapAndPrune(entity, includes);
         }
 
         public new async Task DeleteAsync(int id)

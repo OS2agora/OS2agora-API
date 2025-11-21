@@ -1,7 +1,7 @@
-﻿using BallerupKommune.Models.Common;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
-using BallerupKommune.Operations.Resolvers;
+﻿using Agora.Models.Common;
+using Agora.Models.Models;
+using Agora.Operations.Common.Interfaces.DAOs;
+using Agora.Operations.Resolvers;
 using Moq;
 using NUnit.Framework;
 using System;
@@ -9,9 +9,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EnumFieldType = BallerupKommune.Models.Enums.FieldType;
+using EnumFieldType = Agora.Models.Enums.FieldType;
 
-namespace BallerupKommune.Operations.UnitTests.Resolvers
+namespace Agora.Operations.UnitTests.Resolvers
 {
     public class FieldSystemResolverTest
     {
@@ -42,7 +42,7 @@ namespace BallerupKommune.Operations.UnitTests.Resolvers
                             FieldType = new FieldType
                             {
                                 Id = 5,
-                                Type = BallerupKommune.Models.Enums.FieldType.ESDH_TITLE,
+                                Type = Agora.Models.Enums.FieldType.ESDH_TITLE,
                             }
                         },
                         new Field {
@@ -51,7 +51,7 @@ namespace BallerupKommune.Operations.UnitTests.Resolvers
                             FieldType = new FieldType
                             {
                                 Id = 6,
-                                Type = BallerupKommune.Models.Enums.FieldType.TITLE,
+                                Type = Agora.Models.Enums.FieldType.TITLE,
                             }
                         },
                         new Field {
@@ -60,7 +60,7 @@ namespace BallerupKommune.Operations.UnitTests.Resolvers
                             FieldType = new FieldType
                             {
                                 Id = 3,
-                                Type = BallerupKommune.Models.Enums.FieldType.SUMMARY,
+                                Type = Agora.Models.Enums.FieldType.SUMMARY,
                             }
                         },
                         new Field {
@@ -69,7 +69,7 @@ namespace BallerupKommune.Operations.UnitTests.Resolvers
                             FieldType = new FieldType
                             {
                                 Id = 2,
-                                Type = BallerupKommune.Models.Enums.FieldType.BODYINFORMATION,
+                                Type = Agora.Models.Enums.FieldType.BODYINFORMATION,
                             }
                         },
                         new Field {
@@ -78,7 +78,7 @@ namespace BallerupKommune.Operations.UnitTests.Resolvers
                             FieldType = new FieldType
                             {
                                 Id = 1,
-                                Type = BallerupKommune.Models.Enums.FieldType.CONCLUSION,
+                                Type = Agora.Models.Enums.FieldType.CONCLUSION,
                             }
                         },
                         new Field {
@@ -87,7 +87,7 @@ namespace BallerupKommune.Operations.UnitTests.Resolvers
                             FieldType = new FieldType
                             {
                                 Id = 4,
-                                Type = BallerupKommune.Models.Enums.FieldType.IMAGE,
+                                Type = Agora.Models.Enums.FieldType.IMAGE,
                             }
                         }
                     }

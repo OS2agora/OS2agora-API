@@ -1,11 +1,11 @@
-﻿using BallerupKommune.Entities.Entities;
-using BallerupKommune.Entities.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using CommentTypeEntity = Agora.Entities.Entities.CommentTypeEntity;
+using CommentType = Agora.Entities.Enums.CommentType;
+using System.Linq;
 
-namespace BallerupKommune.DAOs.Persistence.DefaultData
+namespace Agora.DAOs.Persistence.DefaultData
 {
     public class DefaultCommentType : DefaultDataSeeder<CommentTypeEntity>
     {
@@ -35,20 +35,21 @@ namespace BallerupKommune.DAOs.Persistence.DefaultData
         {
         }
 
-        public static async Task SeedData(ApplicationDbContext context)
+        public static async Task SeedData(ApplicationDbContext context, List<CommentTypeEntity> municipalitySpecificEntities = null)
         {
             var defaultEntities = GetDefaultEntities();
-            var seeder = new DefaultCommentType(context, defaultEntities);
+            var seeder = new DefaultCommentType(context, municipalitySpecificEntities ?? defaultEntities);
             await seeder.SeedEntitiesAsync();
         }
 
-        public override List<CommentTypeEntity> FetchEntitiesToUpdate(List<CommentTypeEntity> existingEntities, List<CommentTypeEntity> defaultEntities)
+        public override List<CommentTypeEntity> GetUpdatedEntities(List<CommentTypeEntity> existingEntities, List<CommentTypeEntity> defaultEntities)
         {
             var updatedEntities = new List<CommentTypeEntity>();
 
             foreach (var entity in existingEntities)
             {
                 var defaultEntity = defaultEntities.FirstOrDefault(e => _comparer(e, entity));
+
                 if (defaultEntity == null)
                 {
                     continue;

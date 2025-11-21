@@ -1,4 +1,4 @@
-﻿namespace BallerupKommune.Operations.Common.Constants
+﻿namespace Agora.Operations.Common.Constants
 {
     public static class JWT
     {
@@ -16,6 +16,7 @@
             public const string AuthenticationMethod = "authenticationMethod";
             public const string CompanyId = "companyId";
             public const string RefreshToken = "refreshToken";
+            public const string MainSessionExpiration = "mainSessionExpiration";
         }
 
         public static class Cookie

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BallerupKommune.Primitives.Exceptions
+namespace Agora.Primitives.Exceptions
 {
     public class BaseException : Exception
     {

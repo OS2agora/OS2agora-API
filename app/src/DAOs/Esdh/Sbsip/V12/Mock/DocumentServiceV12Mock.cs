@@ -1,9 +1,9 @@
-﻿using BallerupKommune.DAOs.Esdh.Sbsip.DTOs;
-using BallerupKommune.DAOs.Esdh.Sbsip.V12.Interface;
+﻿using Agora.DAOs.Esdh.Sbsip.DTOs;
+using Agora.DAOs.Esdh.Sbsip.V12.Interface;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BallerupKommune.DAOs.Esdh.Sbsip.V12.Mock
+namespace Agora.DAOs.Esdh.Sbsip.V12.Mock
 {
     public class DocumentServiceV12Mock : IDocumentServiceV12
     {

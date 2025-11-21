@@ -1,23 +1,22 @@
-﻿using BallerupKommune.Operations.ApplicationOptions;
-using BallerupKommune.Operations.Common.Interfaces;
+﻿using Agora.Models.Enums;
+using Agora.Operations.ApplicationOptions;
+using Agora.Operations.Common.Enums;
+using Agora.Operations.Common.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using System;
-using System.Text.RegularExpressions;
-using OAuth2Client = BallerupKommune.Operations.ApplicationOptions.OAuth2Client;
-using BallerupKommune.Operations.Common.Enums;
 
-namespace BallerupKommune.Api.Services
+namespace Agora.Api.Services
 {
     public class AuthenticationClientService : IAuthenticationClientService
     {
-        private readonly IOptions<OAuth2Options> _oauth2Options;
+        private readonly IOptions<AuthenticationOptions> _authOptions;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AuthenticationClientService(IOptions<OAuth2Options> oauth2Options,
+        public AuthenticationClientService(IOptions<AuthenticationOptions> authOptions,
             IHttpContextAccessor httpContextAccessor)
         {
-            _oauth2Options = oauth2Options;
+            _authOptions = authOptions;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -28,67 +27,112 @@ namespace BallerupKommune.Api.Services
 
         public bool IsApiKeyTrusted(string apiKey)
         {
-            var trustedApiKey = _oauth2Options.Value.InternalApiKey == apiKey ||
-                                _oauth2Options.Value.PublicApiKey == apiKey;
+            var trustedApiKey = _authOptions.Value.InternalApiKey == apiKey ||
+                                _authOptions.Value.PublicApiKey == apiKey;
 
             return trustedApiKey;
+        }
+
+        public bool IsLoginAsAllowed(UserCapacity userCapacity, ClientTypes client)
+        {
+            switch (client)
+            {
+                case ClientTypes.Internal:
+                    return _authOptions.Value.InternalAuthentication.Contains(userCapacity);
+                case ClientTypes.Public:
+                    return _authOptions.Value.PublicAuthentication.Contains(userCapacity);
+                default:
+                    return false;
+            }
         }
 
         public string GetApiKeyFromOptions(ClientTypes client)
         {
             switch (client) { 
                 case ClientTypes.Public:
-                    return _oauth2Options.Value.PublicApiKey;
+                    return _authOptions.Value.PublicApiKey;
                 case ClientTypes.Internal:
-                    return _oauth2Options.Value.InternalApiKey;
+                    return _authOptions.Value.InternalApiKey;
                 default:
                     return null;
             }
         }
 
-        public string GetAuthenticationEndpoint()
+        public ClientTypes GetClientTypeFromApiKey(string apiKey)
         {
-            return _oauth2Options.Value.TokenEndpoint;
+            switch (apiKey)
+            {
+                case var _ when apiKey == _authOptions.Value.PublicApiKey:
+                    return ClientTypes.Public;
+                case var _ when apiKey == _authOptions.Value.InternalApiKey:
+                    return ClientTypes.Internal;
+                default:
+                    return ClientTypes.None;
+            }
         }
 
-        public OAuth2Client GetOAuthClientOptions(string apiKey)
+        public AuthHandlerType GetAuthHandlerTypeFromUserCapacity(UserCapacity userCapacity)
         {
-            if (IsApiKeyTrusted(apiKey))
+            var authHandlerTypeFromOptions = "";
+
+            switch (userCapacity)
             {
-                var result = new OAuth2Client
-                {
-                    TokenEndpoint = _oauth2Options.Value.TokenEndpoint,
-                    AuthorizeEndpoint = _oauth2Options.Value.AuthorizeEndpoint,
-                    MaxAge = _oauth2Options.Value.MaxAge,
-                    Scope = _oauth2Options.Value.Scope,
-                };
-
-                if (_oauth2Options.Value.InternalApiKey == apiKey)
-                {
-                    var internalClientSecret = _oauth2Options.Value.InternalClientSecret;
-
-                    result.RedirectUri = _oauth2Options.Value.InternalRedirectUri;
-                    result.ClientId = _oauth2Options.Value.InternalClientId;
-                    result.ClientSecret = internalClientSecret;
-                    result.ApiKey = _oauth2Options.Value.InternalApiKey;
-                    result.Whr = _oauth2Options.Value.WhrInternal;
-                }
-
-                if (_oauth2Options.Value.PublicApiKey == apiKey)
-                {
-                    var publicClientSecret = _oauth2Options.Value.PublicClientSecret;
-
-                    result.RedirectUri = _oauth2Options.Value.PublicRedirectUri;
-                    result.ClientId = _oauth2Options.Value.PublicClientId;
-                    result.ClientSecret = publicClientSecret;
-                    result.ApiKey = _oauth2Options.Value.PublicApiKey;
-                    result.Whr = _oauth2Options.Value.WhrPublic;
-                }
-
-                return result;
+                case UserCapacity.CITIZEN:
+                    authHandlerTypeFromOptions = _authOptions.Value.CitizenAuthentication;
+                    break;
+                case UserCapacity.COMPANY:
+                    authHandlerTypeFromOptions = _authOptions.Value.CompanyAuthentication;
+                    break;
+                case UserCapacity.EMPLOYEE:
+                    authHandlerTypeFromOptions = _authOptions.Value.EmployeeAuthentication;
+                    break;
+                default:
+                    authHandlerTypeFromOptions = _authOptions.Value.UnknownAuthentication;
+                    break;
             }
 
-            throw new Exception("Invalid api-key.");
+            return GetAuthHandlerType(authHandlerTypeFromOptions);
+        }
+
+        public AuthHandlerType GetAuthHandlerTypeFromAuthMethod(AuthenticationMethod authMethod)
+        {
+            var authHandlerTypeFromOptions = "";
+
+            switch (authMethod)
+            {
+                case AuthenticationMethod.MitIdCitizen:
+                    authHandlerTypeFromOptions = _authOptions.Value.CitizenAuthentication;
+                    break;
+                case AuthenticationMethod.MitIdErhverv:
+                    authHandlerTypeFromOptions = _authOptions.Value.CompanyAuthentication;
+                    break;
+                case AuthenticationMethod.AdfsEmployee:
+                    authHandlerTypeFromOptions = _authOptions.Value.EmployeeAuthentication;
+                    break;
+                default:
+                    authHandlerTypeFromOptions = _authOptions.Value.UnknownAuthentication;
+                    break;
+            }
+
+            return GetAuthHandlerType(authHandlerTypeFromOptions);
+        }
+
+        
+
+        private AuthHandlerType GetAuthHandlerType(string authHandlerTypeString)
+        {
+            switch (authHandlerTypeString)
+            {
+                case var _ when authHandlerTypeString.Equals(AuthenticationOptions.AuthenticationMethods.CodeFlow, StringComparison.InvariantCultureIgnoreCase):
+                    return AuthHandlerType.CodeFlow;
+                case var _ when authHandlerTypeString.Equals(AuthenticationOptions.AuthenticationMethods.NemLogin, StringComparison.InvariantCultureIgnoreCase):
+                    return AuthHandlerType.NemLogin;
+                case var _ when authHandlerTypeString.Equals(AuthenticationOptions.AuthenticationMethods.EntraId, StringComparison.InvariantCultureIgnoreCase):
+                    return AuthHandlerType.EntraId;
+                default:
+                    throw new NotImplementedException(
+                        $"Cannot find authentication type with name {authHandlerTypeString}");
+            }
         }
     }
 }

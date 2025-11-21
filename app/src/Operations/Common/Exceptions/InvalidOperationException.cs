@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BallerupKommune.Operations.Common.Exceptions
+namespace Agora.Operations.Common.Exceptions
 {
     public class InvalidOperationException : Exception
     {

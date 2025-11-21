@@ -1,12 +1,12 @@
-﻿using BallerupKommune.Models.Models;
-using BallerupKommune.Operations.Common.Exceptions;
-using BallerupKommune.Operations.Common.Interfaces.DAOs;
+﻿using Agora.Models.Models;
+using Agora.Operations.Common.Exceptions;
+using Agora.Operations.Common.Interfaces.DAOs;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
-using BallerupKommune.Models.Common;
+using Agora.Models.Common;
 
-namespace BallerupKommune.Operations.Models.GlobalContents.Queries.GetLatestGlobalContent
+namespace Agora.Operations.Models.GlobalContents.Queries.GetLatestGlobalContent
 {
     public class GetLatestGlobalContentQuery : IRequest<GlobalContent>
     {

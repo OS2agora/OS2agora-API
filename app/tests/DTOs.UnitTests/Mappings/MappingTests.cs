@@ -1,15 +1,15 @@
 using AutoMapper;
-using BallerupKommune.DTOs.Mappings;
-using BallerupKommune.DTOs.Models;
-using BallerupKommune.DTOs.Models.Multipart;
-using BallerupKommune.Models.Models;
-using BallerupKommune.Models.Models.Multiparts;
+using Agora.DTOs.Mappings;
+using Agora.DTOs.Models;
+using Agora.DTOs.Models.Multipart;
+using Agora.Models.Models;
+using Agora.Models.Models.Multiparts;
 using NUnit.Framework;
 using System;
 using System.Runtime.Serialization;
-using BallerupKommune.DTOs.Common;
+using Agora.DTOs.Common;
 
-namespace BallerupKommune.DTOs.UnitTests.Mappings
+namespace Agora.DTOs.UnitTests.Mappings
 {
     public class MappingTests
     {
@@ -30,14 +30,17 @@ namespace BallerupKommune.DTOs.UnitTests.Mappings
         [Test]
         public void ShouldHaveValidConfiguration()
         {
-            _configuration.AssertConfigurationIsValid();
+                _configuration.AssertConfigurationIsValid();
         }
 
         [Test]
-        [TestCase(typeof(CommentDto), typeof(Comment))]
+        [TestCase(typeof(CityAreaDto), typeof(CityArea))]
         [TestCase(typeof(CommentDeclineInfoDto), typeof(CommentDeclineInfo))]
+        [TestCase(typeof(CommentDto), typeof(Comment))]
         [TestCase(typeof(CommentStatusDto), typeof(CommentStatus))]
         [TestCase(typeof(CommentTypeDto), typeof(CommentType))]
+        [TestCase(typeof(CompanyDto), typeof(Company))]
+        [TestCase(typeof(CompanyHearingRoleDto), typeof(CompanyHearingRole))]
         [TestCase(typeof(ConsentDto), typeof(Consent))]
         [TestCase(typeof(ContentDto), typeof(Content))]
         [TestCase(typeof(ContentTypeDto), typeof(ContentType))]
@@ -45,6 +48,7 @@ namespace BallerupKommune.DTOs.UnitTests.Mappings
         [TestCase(typeof(FieldTemplateDto), typeof(FieldTemplate))]
         [TestCase(typeof(FieldTypeDto), typeof(FieldType))]
         [TestCase(typeof(FieldTypeSpecificationDto), typeof(FieldTypeSpecification))]
+        [TestCase(typeof(FileOperationDto), typeof(FileOperation))]
         [TestCase(typeof(GlobalContentDto), typeof(GlobalContent))]
         [TestCase(typeof(GlobalContentTypeDto), typeof(GlobalContentType))]
         [TestCase(typeof(HearingDto), typeof(Hearing))]
@@ -52,17 +56,25 @@ namespace BallerupKommune.DTOs.UnitTests.Mappings
         [TestCase(typeof(HearingStatusDto), typeof(HearingStatusDto))]
         [TestCase(typeof(HearingTemplateDto), typeof(HearingTemplate))]
         [TestCase(typeof(HearingTypeDto), typeof(HearingType))]
+        [TestCase(typeof(InvitationGroupDto), typeof(InvitationGroup))]
+        [TestCase(typeof(InvitationGroupMappingDto), typeof(InvitationGroupMapping))]
+        [TestCase(typeof(InvitationKeyDto), typeof(InvitationKey))]
+        [TestCase(typeof(InvitationSourceDto), typeof(InvitationSource))]
+        [TestCase(typeof(InvitationSourceMappingDto), typeof(InvitationSourceMapping))]
         [TestCase(typeof(KleHierarchyDto), typeof(KleHierarchy))]
         [TestCase(typeof(KleMappingDto), typeof(KleMapping))]
+        [TestCase(typeof(MultiPartFieldDto), typeof(MultiPartField))]
+        [TestCase(typeof(NotificationDto), typeof(Notification))]
+        [TestCase(typeof(NotificationContentDto), typeof(NotificationContent))]
+        [TestCase(typeof(NotificationContentSpecificationDto), typeof(NotificationContentSpecification))]
+        [TestCase(typeof(NotificationContentTypeDto), typeof(NotificationContentType))]
+        [TestCase(typeof(NotificationTypeDto), typeof(NotificationType))]
+        [TestCase(typeof(NotificationQueueDto), typeof(NotificationQueue))]
         [TestCase(typeof(SubjectAreaDto), typeof(SubjectArea))]
         [TestCase(typeof(UserCapacityDto), typeof(UserCapacity))]
         [TestCase(typeof(UserDto), typeof(User))]
         [TestCase(typeof(UserHearingRoleDto), typeof(UserHearingRole))]
         [TestCase(typeof(ValidationRuleDto), typeof(ValidationRule))]
-        [TestCase(typeof(MultiPartFieldDto), typeof(MultiPartField))]
-        [TestCase(typeof(FileOperationDto), typeof(FileOperation))]
-        [TestCase(typeof(CompanyDto), typeof(Company))]
-        [TestCase(typeof(CompanyHearingRoleDto), typeof(CompanyHearingRole))]
         public void ShouldSupportMappingFromSourceToDestination(Type source, Type destination)
         {
             var sourceInstance = GetInstanceOf(source);

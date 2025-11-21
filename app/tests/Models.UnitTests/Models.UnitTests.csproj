@@ -2,8 +2,8 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-        <AssemblyName>BallerupKommune.Models.UnitTests</AssemblyName>
-        <RootNamespace>BallerupKommune.Models.UnitTests</RootNamespace>
+        <AssemblyName>Agora.Models.UnitTests</AssemblyName>
+        <RootNamespace>Agora.Models.UnitTests</RootNamespace>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
@@ -14,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\TestUtilities\TestUtilities.csproj" />
+      <ProjectReference Include="..\TestUtilities\TestUtilities.csproj" />
     </ItemGroup>
 
 </Project>

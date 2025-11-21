@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
-using BallerupKommune.Api;
-using BallerupKommune.DAOs.Identity;
-using BallerupKommune.DAOs.Persistence;
-using BallerupKommune.Operations.Common.Enums;
-using BallerupKommune.Operations.Common.Interfaces;
+using Agora.Api;
+using Agora.DAOs.Identity;
+using Agora.DAOs.Persistence;
+using Agora.Operations.Common.Enums;
+using Agora.Operations.Common.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
@@ -16,10 +16,10 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using InvalidOperationException = BallerupKommune.Operations.Common.Exceptions.InvalidOperationException;
+using InvalidOperationException = Agora.Operations.Common.Exceptions.InvalidOperationException;
 
 
-namespace BallerupKommune.Operations.IntegrationTests
+namespace Agora.Operations.IntegrationTests
 {
     [SetUpFixture]
     public class TestSetup
@@ -54,7 +54,7 @@ namespace BallerupKommune.Operations.IntegrationTests
 
             services.AddSingleton(Mock.Of<IWebHostEnvironment>(w =>
                 w.EnvironmentName == "Development" &&
-                w.ApplicationName == "BallerupKommune.Api"));
+                w.ApplicationName == "Agora.Api"));
 
             startup.ConfigureServices(services);
 
